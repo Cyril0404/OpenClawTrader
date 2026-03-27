@@ -52,3 +52,4 @@ Icon?
 # Environment
 .env
 .env.local
+stock_data.json
