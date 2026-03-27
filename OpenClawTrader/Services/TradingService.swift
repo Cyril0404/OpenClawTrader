@@ -33,23 +33,15 @@ class TradingService: ObservableObject {
     // MARK: - Mock Data
 
     private func loadMockData() {
-        portfolio = PortfolioSummary.preview
+        // 使用真实A股持仓数据（2026-03-27收盘）
+        portfolio = PortfolioSummary.fromRealStocks
         tradingStyle = TradingStyle.preview
         riskAssessment = RiskAssessment.preview
         suggestions = TradingSuggestion.previewList
         performance = PerformanceReport.preview
 
-        trades = [
-            Trade(id: "trade_001", symbol: "AAPL", name: "Apple Inc.", type: .buy, shares: 50, price: 175.20, commission: 1.0,
-                  timestamp: Date().addingTimeInterval(-86400), reason: "看好科技板块"),
-            Trade(id: "trade_002", symbol: "NVDA", name: "NVIDIA Corp.", type: .buy, shares: 20, price: 850.00, commission: 1.0,
-                  timestamp: Date().addingTimeInterval(-172800), reason: "AI 概念持续火热"),
-            Trade(id: "trade_003", symbol: "MSFT", name: "Microsoft Corp.", type: .sell, shares: 30, price: 410.50, commission: 1.0,
-                  timestamp: Date().addingTimeInterval(-259200), reason: "获利了结"),
-            Trade(id: "trade_004", symbol: "GOOGL", name: "Alphabet Inc.", type: .buy, shares: 25, price: 148.00, commission: 1.0,
-                  timestamp: Date().addingTimeInterval(-345600), reason: "低估")
-        ]
-
+        // 使用真实交易记录
+        trades = Trade.previewList
         orders = Order.previewList
     }
 

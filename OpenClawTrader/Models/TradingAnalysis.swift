@@ -123,26 +123,27 @@ struct TradingSuggestion: Identifiable, Codable {
         var displayName: String { rawValue }
     }
 
+    // ===== 真实A股AI建议（基于神冢持仓2026-03-27）=====
     static let preview = TradingSuggestion(
         id: "sug_001",
-        title: "仓位过于集中",
-        description: "建议将 AAPL 持仓降低 20%，分散到其他科技股以降低风险",
+        title: "芯源微今日涨幅4.63%，注意获利了结",
+        description: "芯源微今日涨幅较大（+4.63%），处于相对高位，建议设置短期止盈位在180元附近，锁定部分收益",
         priority: .high,
-        category: .positionMgmt,
-        potentialImpact: "可降低 15% 的集中风险",
+        category: .stopLoss,
+        potentialImpact: "可锁定收益，控制在高位回撤风险",
         timestamp: Date(),
         isRead: false
     )
 
     static let previewList: [TradingSuggestion] = [
-        TradingSuggestion(id: "sug_001", title: "仓位过于集中", description: "建议将 AAPL 持仓降低 20%，分散到其他科技股", priority: .high,
-                          category: .positionMgmt, potentialImpact: "可降低 15% 集中风险", timestamp: Date(), isRead: false),
-        TradingSuggestion(id: "sug_002", title: "持仓周期偏短", description: "您的平均持仓周期为 5 天，可尝试延长至 14 天", priority: .medium,
-                          category: .habit, potentialImpact: "可降低交易成本 30%", timestamp: Date().addingTimeInterval(-3600), isRead: false),
-        TradingSuggestion(id: "sug_003", title: "建议设置止损", description: "NVDA 当前仓位建议设置 8% 止损位", priority: .high,
-                          category: .stopLoss, potentialImpact: "可限制最大亏损", timestamp: Date().addingTimeInterval(-7200), isRead: true),
-        TradingSuggestion(id: "sug_004", title: "考虑分批建仓", description: "GOOGL 可考虑分 3 批建仓，降低择时风险", priority: .medium,
-                          category: .timing, potentialImpact: "可降低 10% 买入成本", timestamp: Date().addingTimeInterval(-86400), isRead: true)
+        TradingSuggestion(id: "sug_001", title: "芯源微今日涨幅4.63%，注意获利了结", description: "芯源微今日涨幅较大（+4.63%），处于相对高位，建议设置短期止盈位在180元附近", priority: .high,
+                          category: .stopLoss, potentialImpact: "可锁定收益，控制高位回撤风险", timestamp: Date(), isRead: false),
+        TradingSuggestion(id: "sug_002", title: "兆易创新小幅回调，可适当加仓", description: "兆易创新今日小跌（-1.27%），若看好存储芯片周期反转逻辑，可在250元附近适度加仓", priority: .medium,
+                          category: .timing, potentialImpact: "可降低持仓成本，提高潜在收益", timestamp: Date().addingTimeInterval(-3600), isRead: false),
+        TradingSuggestion(id: "sug_003", title: "长芯博创换手率偏高（7.16%）", description: "长芯博创今日换手率达7.16%，属高位活跃状态，建议关注明日开盘走势，如高开低走需警惕", priority: .high,
+                          category: .stopLoss, potentialImpact: "可规避高换手后的回调风险", timestamp: Date().addingTimeInterval(-7200), isRead: true),
+        TradingSuggestion(id: "sug_004", title: "持仓集中度较高", description: "当前3只持仓均属硬科技赛道，建议适当配置1-2只消费或中字头标的，降低赛道集中风险", priority: .medium,
+                          category: .diversification, potentialImpact: "可降低组合波动，提升风险调整收益", timestamp: Date().addingTimeInterval(-86400), isRead: true)
     ]
 }
 
@@ -171,4 +172,14 @@ struct Trade: Identifiable, Codable {
     var totalAmount: Double {
         Double(shares) * price + commission
     }
+
+    // ===== 真实A股交易记录 =====
+    static let previewList: [Trade] = [
+        Trade(id: "trade_001", symbol: "300548", name: "长芯博创", type: .buy, shares: 1000, price: 138.50, commission: 15.0,
+              timestamp: Date().addingTimeInterval(-86400 * 5), reason: "光通信赛道景气度高，长芯博创为FAU国内龙头"),
+        Trade(id: "trade_002", symbol: "688037", name: "芯源微", type: .buy, shares: 500, price: 152.00, commission: 8.0,
+              timestamp: Date().addingTimeInterval(-86400 * 3), reason: "半导体设备国产替代逻辑持续兑现"),
+        Trade(id: "trade_003", symbol: "603986", name: "兆易创新", type: .buy, shares: 800, price: 245.00, commission: 12.0,
+              timestamp: Date().addingTimeInterval(-86400 * 2), reason: "存储芯片周期反转明确，Q2业绩预期向好"),
+    ]
 }
