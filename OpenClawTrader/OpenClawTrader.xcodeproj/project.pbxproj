@@ -1,0 +1,542 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0562DD444DD3309755AD89B4 /* SuggestionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F244FEED1D454E2E190F66 /* SuggestionDetailView.swift */; };
+		10A6AA14180236DB2BF5CA82 /* OpenClawTraderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1DBEDF5B704126656E6811 /* OpenClawTraderApp.swift */; };
+		25D24491AC83315861B1596C /* NotificationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96105F714C7E33D4B99140D /* NotificationListView.swift */; };
+		2C609CA765BF2FD276FBBC69 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF7B0E1FD6E3CED2B227174 /* Components.swift */; };
+		2D36B00E2D45B615E488E714 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9617123DF49FA5C1F9FAADF0 /* StorageService.swift */; };
+		3E6F8A9F6338028548581545 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2097A9560F69CB723294B945 /* Extensions.swift */; };
+		3FC1B13917593D9A1FB7CD6B /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7438843DC19C034C8FBFE950 /* Notification.swift */; };
+		41B5DE5C28C5AB4A9AFF118F /* PerformanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8DC6D1929E67F08CFC04EE /* PerformanceView.swift */; };
+		432FC4066C553EB5A024C622 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E00EB8D16CE4917169EDF6 /* HistoryView.swift */; };
+		46B91EC1D0AE23E1046A0574 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0533E2DFF9477C0E99F3B1 /* APIClient.swift */; };
+		4D6655FCE2489B1414F2DA57 /* ModelListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F894F7A67B9E69E61EF0A1C7 /* ModelListView.swift */; };
+		4F9E4BE7E6BCEF3F212B7EA6 /* TradingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59707AD00A7922121183961E /* TradingService.swift */; };
+		68B7872D5878540AA64ABF99 /* Holding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845BF882A533382EB7200D72 /* Holding.swift */; };
+		6B84C0278EDF273495513757 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24EA8EF027ADC48467F45B2 /* Typography.swift */; };
+		6C09E06A5489C645F7BA12AB /* TradingAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BFAA901553C9AA3D1C53414 /* TradingAnalysis.swift */; };
+		7311091C4C1B435DEF693C40 /* WorkflowListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C489F495BD85D108F8E144 /* WorkflowListView.swift */; };
+		7586F641DACC4B4C24A6E6B5 /* ImportHoldingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7BA403239EB994EE177CB8 /* ImportHoldingView.swift */; };
+		797BEDB09BE33A8DA3CCF40C /* OpenClawService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */; };
+		82F816E0FF2A69C7D98855E6 /* HoldingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB219B66D734587AE0E05340 /* HoldingListView.swift */; };
+		88479A220EC1F72A038CE962 /* AIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABA54C95BF454A92353E2D5 /* AIModel.swift */; };
+		8A6A72502E24805CADA1F477 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59EF687BEDAF49227658B079 /* Assets.xcassets */; };
+		8E805B884948CDE373FA114D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75ED50754E06FA721AB2B615 /* ContentView.swift */; };
+		9A3CBAC53781F8ED5C1BFFA5 /* Agent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA07CE1ED7FDDBB8550B2E8 /* Agent.swift */; };
+		BB2A35C95DFFA9271807B9F9 /* AgentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5764E713B958898AF2652A /* AgentListView.swift */; };
+		C286EF2C9EFB35A1292166E1 /* WorkspaceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEED9A917710DA7C277EA58A /* WorkspaceListView.swift */; };
+		D28E60641AA06EC4C9AE1C5B /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50327FFABD3C23EC0E0BE91A /* DashboardView.swift */; };
+		D9226F154447F7A691E5DDE2 /* OpenClawConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */; };
+		D992DEE5449D209174CD43D2 /* PortfolioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31D65D46D040893469CD081 /* PortfolioView.swift */; };
+		DA1E1C0901F2F9D8B2157B9C /* AgentChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A5DA03A03F50F3E26D0236 /* AgentChatView.swift */; };
+		DBE1A16D1CE99C1AAFD6249C /* SuggestionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7ECE04BD9F65C8542811FC /* SuggestionListView.swift */; };
+		DE852C70B10FB6CA49387E7D /* Performance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BE5A5654D1A61006E0BD942 /* Performance.swift */; };
+		EBB57CF8DDEBDFE01EE95AC2 /* WorkflowMonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E324C15CC580A705C031BB3 /* WorkflowMonitorView.swift */; };
+		F17DA1579551EF1DDFAF28AF /* Workflow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92B1DE06EAE865AE1C1F4ABF /* Workflow.swift */; };
+		F4B65C21CDE2413BCABF082C /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D6E391B2487639BB07BB94 /* Colors.swift */; };
+		F6AC29741B3ABA52017CD2CF /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB307292488DF178CE7B707F /* Workspace.swift */; };
+		FA93EE535ABFA2B29C90764B /* HoldingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F5BA1A8555C1B7C2A0A351 /* HoldingDetailView.swift */; };
+		FFD8B8AC1A5C35334A8273CC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18215A86D4E9893048DDDBAF /* ProfileView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		030E92ADDDB83BC2904134FC /* OpenClawTrader.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OpenClawTrader.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		07F5BA1A8555C1B7C2A0A351 /* HoldingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldingDetailView.swift; sourceTree = "<group>"; };
+		0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawConnectView.swift; sourceTree = "<group>"; };
+		0D5764E713B958898AF2652A /* AgentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentListView.swift; sourceTree = "<group>"; };
+		0D8DC6D1929E67F08CFC04EE /* PerformanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceView.swift; sourceTree = "<group>"; };
+		18215A86D4E9893048DDDBAF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		2097A9560F69CB723294B945 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		270B7D67656C759A5EDA1FF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2B0533E2DFF9477C0E99F3B1 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		4EF7B0E1FD6E3CED2B227174 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		50327FFABD3C23EC0E0BE91A /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		59707AD00A7922121183961E /* TradingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingService.swift; sourceTree = "<group>"; };
+		59EF687BEDAF49227658B079 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5BE5A5654D1A61006E0BD942 /* Performance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Performance.swift; sourceTree = "<group>"; };
+		5C7BA403239EB994EE177CB8 /* ImportHoldingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportHoldingView.swift; sourceTree = "<group>"; };
+		69A5DA03A03F50F3E26D0236 /* AgentChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentChatView.swift; sourceTree = "<group>"; };
+		6ABA54C95BF454A92353E2D5 /* AIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModel.swift; sourceTree = "<group>"; };
+		7438843DC19C034C8FBFE950 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
+		75ED50754E06FA721AB2B615 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7BFAA901553C9AA3D1C53414 /* TradingAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingAnalysis.swift; sourceTree = "<group>"; };
+		7E324C15CC580A705C031BB3 /* WorkflowMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowMonitorView.swift; sourceTree = "<group>"; };
+		845BF882A533382EB7200D72 /* Holding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Holding.swift; sourceTree = "<group>"; };
+		8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawService.swift; sourceTree = "<group>"; };
+		92B1DE06EAE865AE1C1F4ABF /* Workflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workflow.swift; sourceTree = "<group>"; };
+		9617123DF49FA5C1F9FAADF0 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+		A4E00EB8D16CE4917169EDF6 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		BD7ECE04BD9F65C8542811FC /* SuggestionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionListView.swift; sourceTree = "<group>"; };
+		C6D6E391B2487639BB07BB94 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		CEED9A917710DA7C277EA58A /* WorkspaceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceListView.swift; sourceTree = "<group>"; };
+		D24EA8EF027ADC48467F45B2 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		D31D65D46D040893469CD081 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
+		D96105F714C7E33D4B99140D /* NotificationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationListView.swift; sourceTree = "<group>"; };
+		E0C489F495BD85D108F8E144 /* WorkflowListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowListView.swift; sourceTree = "<group>"; };
+		EB219B66D734587AE0E05340 /* HoldingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldingListView.swift; sourceTree = "<group>"; };
+		EF1DBEDF5B704126656E6811 /* OpenClawTraderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawTraderApp.swift; sourceTree = "<group>"; };
+		F0F244FEED1D454E2E190F66 /* SuggestionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionDetailView.swift; sourceTree = "<group>"; };
+		F894F7A67B9E69E61EF0A1C7 /* ModelListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelListView.swift; sourceTree = "<group>"; };
+		FB307292488DF178CE7B707F /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
+		FFA07CE1ED7FDDBB8550B2E8 /* Agent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Agent.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		211395FF1FACF175272C137B /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				59EF687BEDAF49227658B079 /* Assets.xcassets */,
+				270B7D67656C759A5EDA1FF7 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		350D2306B0839314F91B937F /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				C6D6E391B2487639BB07BB94 /* Colors.swift */,
+				4EF7B0E1FD6E3CED2B227174 /* Components.swift */,
+				D24EA8EF027ADC48467F45B2 /* Typography.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		41AF63F603C5C4D7D6CEAF5A /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				A4E00EB8D16CE4917169EDF6 /* HistoryView.swift */,
+				0D8DC6D1929E67F08CFC04EE /* PerformanceView.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		43FD86956D4885722EE678F8 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */,
+				18215A86D4E9893048DDDBAF /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		508010DD33689FF9793BBEE5 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				75ED50754E06FA721AB2B615 /* ContentView.swift */,
+				EF1DBEDF5B704126656E6811 /* OpenClawTraderApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		806774AF7CC2D633949E48C5 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				862EED82055DE989EA8762BC /* Console */,
+				41AF63F603C5C4D7D6CEAF5A /* Data */,
+				BDDC9A2E18147C7B7151EA5C /* Notifications */,
+				43FD86956D4885722EE678F8 /* Profile */,
+				A365CFA82AB56AE5FF8F9E62 /* Trading */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		84BEEBB58C0D39426D532947 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2B0533E2DFF9477C0E99F3B1 /* APIClient.swift */,
+				8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */,
+				9617123DF49FA5C1F9FAADF0 /* StorageService.swift */,
+				59707AD00A7922121183961E /* TradingService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		862EED82055DE989EA8762BC /* Console */ = {
+			isa = PBXGroup;
+			children = (
+				69A5DA03A03F50F3E26D0236 /* AgentChatView.swift */,
+				0D5764E713B958898AF2652A /* AgentListView.swift */,
+				50327FFABD3C23EC0E0BE91A /* DashboardView.swift */,
+				F894F7A67B9E69E61EF0A1C7 /* ModelListView.swift */,
+				E0C489F495BD85D108F8E144 /* WorkflowListView.swift */,
+				7E324C15CC580A705C031BB3 /* WorkflowMonitorView.swift */,
+				CEED9A917710DA7C277EA58A /* WorkspaceListView.swift */,
+			);
+			path = Console;
+			sourceTree = "<group>";
+		};
+		9C99188CA73409238AB4C8D2 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				2097A9560F69CB723294B945 /* Extensions.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		A365CFA82AB56AE5FF8F9E62 /* Trading */ = {
+			isa = PBXGroup;
+			children = (
+				07F5BA1A8555C1B7C2A0A351 /* HoldingDetailView.swift */,
+				EB219B66D734587AE0E05340 /* HoldingListView.swift */,
+				5C7BA403239EB994EE177CB8 /* ImportHoldingView.swift */,
+				D31D65D46D040893469CD081 /* PortfolioView.swift */,
+				F0F244FEED1D454E2E190F66 /* SuggestionDetailView.swift */,
+				BD7ECE04BD9F65C8542811FC /* SuggestionListView.swift */,
+			);
+			path = Trading;
+			sourceTree = "<group>";
+		};
+		AF69AFB1F310C15DC10D9D8D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				FFA07CE1ED7FDDBB8550B2E8 /* Agent.swift */,
+				6ABA54C95BF454A92353E2D5 /* AIModel.swift */,
+				845BF882A533382EB7200D72 /* Holding.swift */,
+				7438843DC19C034C8FBFE950 /* Notification.swift */,
+				5BE5A5654D1A61006E0BD942 /* Performance.swift */,
+				7BFAA901553C9AA3D1C53414 /* TradingAnalysis.swift */,
+				92B1DE06EAE865AE1C1F4ABF /* Workflow.swift */,
+				FB307292488DF178CE7B707F /* Workspace.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		BDDC9A2E18147C7B7151EA5C /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				D96105F714C7E33D4B99140D /* NotificationListView.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		CB8BA208E120A2F72BA78F1B = {
+			isa = PBXGroup;
+			children = (
+				508010DD33689FF9793BBEE5 /* App */,
+				350D2306B0839314F91B937F /* Design */,
+				806774AF7CC2D633949E48C5 /* Features */,
+				AF69AFB1F310C15DC10D9D8D /* Models */,
+				211395FF1FACF175272C137B /* Resources */,
+				84BEEBB58C0D39426D532947 /* Services */,
+				9C99188CA73409238AB4C8D2 /* Utils */,
+				FC990E78A502D04D8E763417 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FC990E78A502D04D8E763417 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				030E92ADDDB83BC2904134FC /* OpenClawTrader.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DEFE3FAAE7A7B894B593EA5B /* OpenClawTrader */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1536C80BA3CFAE8C1A708413 /* Build configuration list for PBXNativeTarget "OpenClawTrader" */;
+			buildPhases = (
+				5DFB475C1027E166BE7E6A07 /* Sources */,
+				F9864ADFED31F7261F1890B2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenClawTrader;
+			packageProductDependencies = (
+			);
+			productName = OpenClawTrader;
+			productReference = 030E92ADDDB83BC2904134FC /* OpenClawTrader.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C68400D9346182B093E23A4F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					DEFE3FAAE7A7B894B593EA5B = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 038AA87DD2A482845D78609A /* Build configuration list for PBXProject "OpenClawTrader" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = CB8BA208E120A2F72BA78F1B;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FC990E78A502D04D8E763417 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DEFE3FAAE7A7B894B593EA5B /* OpenClawTrader */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F9864ADFED31F7261F1890B2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A6A72502E24805CADA1F477 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5DFB475C1027E166BE7E6A07 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				88479A220EC1F72A038CE962 /* AIModel.swift in Sources */,
+				46B91EC1D0AE23E1046A0574 /* APIClient.swift in Sources */,
+				9A3CBAC53781F8ED5C1BFFA5 /* Agent.swift in Sources */,
+				DA1E1C0901F2F9D8B2157B9C /* AgentChatView.swift in Sources */,
+				BB2A35C95DFFA9271807B9F9 /* AgentListView.swift in Sources */,
+				F4B65C21CDE2413BCABF082C /* Colors.swift in Sources */,
+				2C609CA765BF2FD276FBBC69 /* Components.swift in Sources */,
+				8E805B884948CDE373FA114D /* ContentView.swift in Sources */,
+				D28E60641AA06EC4C9AE1C5B /* DashboardView.swift in Sources */,
+				3E6F8A9F6338028548581545 /* Extensions.swift in Sources */,
+				432FC4066C553EB5A024C622 /* HistoryView.swift in Sources */,
+				68B7872D5878540AA64ABF99 /* Holding.swift in Sources */,
+				FA93EE535ABFA2B29C90764B /* HoldingDetailView.swift in Sources */,
+				82F816E0FF2A69C7D98855E6 /* HoldingListView.swift in Sources */,
+				7586F641DACC4B4C24A6E6B5 /* ImportHoldingView.swift in Sources */,
+				4D6655FCE2489B1414F2DA57 /* ModelListView.swift in Sources */,
+				3FC1B13917593D9A1FB7CD6B /* Notification.swift in Sources */,
+				25D24491AC83315861B1596C /* NotificationListView.swift in Sources */,
+				D9226F154447F7A691E5DDE2 /* OpenClawConnectView.swift in Sources */,
+				797BEDB09BE33A8DA3CCF40C /* OpenClawService.swift in Sources */,
+				10A6AA14180236DB2BF5CA82 /* OpenClawTraderApp.swift in Sources */,
+				DE852C70B10FB6CA49387E7D /* Performance.swift in Sources */,
+				41B5DE5C28C5AB4A9AFF118F /* PerformanceView.swift in Sources */,
+				D992DEE5449D209174CD43D2 /* PortfolioView.swift in Sources */,
+				FFD8B8AC1A5C35334A8273CC /* ProfileView.swift in Sources */,
+				2D36B00E2D45B615E488E714 /* StorageService.swift in Sources */,
+				0562DD444DD3309755AD89B4 /* SuggestionDetailView.swift in Sources */,
+				DBE1A16D1CE99C1AAFD6249C /* SuggestionListView.swift in Sources */,
+				6C09E06A5489C645F7BA12AB /* TradingAnalysis.swift in Sources */,
+				4F9E4BE7E6BCEF3F212B7EA6 /* TradingService.swift in Sources */,
+				6B84C0278EDF273495513757 /* Typography.swift in Sources */,
+				F17DA1579551EF1DDFAF28AF /* Workflow.swift in Sources */,
+				7311091C4C1B435DEF693C40 /* WorkflowListView.swift in Sources */,
+				EBB57CF8DDEBDFE01EE95AC2 /* WorkflowMonitorView.swift in Sources */,
+				F6AC29741B3ABA52017CD2CF /* Workspace.swift in Sources */,
+				C286EF2C9EFB35A1292166E1 /* WorkspaceListView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0CD030F388CF41B99766E2E5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		3C7AE070C9FC937EACCDFD4E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.openclaw.trader;
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3CAA865477D4E86EC74937F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		567A7CFC348BB3201669C894 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.openclaw.trader;
+				SDKROOT = iphoneos;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		038AA87DD2A482845D78609A /* Build configuration list for PBXProject "OpenClawTrader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CAA865477D4E86EC74937F6 /* Debug */,
+				0CD030F388CF41B99766E2E5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1536C80BA3CFAE8C1A708413 /* Build configuration list for PBXNativeTarget "OpenClawTrader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C7AE070C9FC937EACCDFD4E /* Debug */,
+				567A7CFC348BB3201669C894 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C68400D9346182B093E23A4F /* Project object */;
+}

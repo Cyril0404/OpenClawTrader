@@ -114,7 +114,7 @@ struct TradingSuggestion: Identifiable, Codable {
     }
 
     enum Category: String, Codable {
-        case仓位 = "仓位管理"
+        case 仓位 = "仓位管理"
         case 止损 = "止损策略"
         case 分散 = "分散投资"
         case 时机 = "交易时机"

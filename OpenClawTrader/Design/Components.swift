@@ -428,3 +428,123 @@ struct NavigationBar: View {
         .padding(.vertical, AppSpacing.sm)
     }
 }
+
+// ============================================
+// MARK: - Style Tag
+// ============================================
+
+struct StyleTag: View {
+    @Environment(\.appColors) private var colors
+    let name: String
+    let isActive: Bool
+
+    var body: some View {
+        Text(name)
+            .font(AppFonts.smallMedium())
+            .foregroundColor(isActive ? colors.background : colors.textSecondary)
+            .padding(.horizontal, AppSpacing.sm)
+            .padding(.vertical, AppSpacing.xxs)
+            .background(isActive ? colors.accent : colors.backgroundTertiary)
+            .cornerRadius(AppRadius.full)
+    }
+}
+
+// ============================================
+// MARK: - Risk Bar
+// ============================================
+
+struct RiskBar: View {
+    @Environment(\.appColors) private var colors
+    let label: String
+    let value: Double
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+            HStack {
+                Text(label)
+                    .font(AppFonts.caption())
+                    .foregroundColor(colors.textSecondary)
+                Spacer()
+                Text("\(Int(value * 100))%")
+                    .font(AppFonts.monoCaption())
+                    .foregroundColor(color)
+            }
+
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(colors.backgroundTertiary)
+                        .frame(height: 6)
+                        .cornerRadius(3)
+
+                    Rectangle()
+                        .fill(color)
+                        .frame(width: geometry.size.width * value, height: 6)
+                        .cornerRadius(3)
+                }
+            }
+            .frame(height: 6)
+        }
+    }
+}
+
+// ============================================
+// MARK: - Suggestion Card
+// ============================================
+
+struct SuggestionCard: View {
+    @Environment(\.appColors) private var colors
+    let suggestion: TradingSuggestion
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            HStack {
+                StatusBadge(
+                    text: suggestion.category.rawValue,
+                    color: priorityColor(suggestion.priority)
+                )
+                Spacer()
+                Text(formatTime(suggestion.timestamp))
+                    .font(AppFonts.caption())
+                    .foregroundColor(colors.textTertiary)
+            }
+
+            Text(suggestion.title)
+                .font(AppFonts.body())
+                .fontWeight(.medium)
+                .foregroundColor(colors.textPrimary)
+
+            Text(suggestion.description)
+                .font(AppFonts.caption())
+                .foregroundColor(colors.textSecondary)
+                .lineLimit(2)
+
+            HStack {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 12))
+                    .foregroundColor(colors.accent)
+                Text(suggestion.potentialImpact)
+                    .font(AppFonts.small())
+                    .foregroundColor(colors.accent)
+            }
+        }
+        .padding(AppSpacing.md)
+        .background(colors.backgroundSecondary)
+        .cornerRadius(AppRadius.medium)
+    }
+
+    private func priorityColor(_ priority: TradingSuggestion.Priority) -> Color {
+        switch priority {
+        case .high: return AppColors.error
+        case .medium: return AppColors.warning
+        case .low: return Color(hex: "8A8A8A")
+        }
+    }
+
+    private func formatTime(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+}
