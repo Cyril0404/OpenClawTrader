@@ -77,6 +77,26 @@ struct PortfolioSummary: Codable {
     var totalProfitLossPercent: Double
     var holdings: [Holding]
 
+    var todayPL: Double { dayChange }
+    var totalPL: Double { totalProfitLoss }
+
+    var formattedTotalValue: String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencySymbol = "¥"
+        return formatter.string(from: NSNumber(value: totalValue)) ?? "¥\(Int(totalValue))"
+    }
+
+    var formattedTodayPL: String {
+        let sign = dayChange >= 0 ? "+" : ""
+        return "\(sign)¥\(Int(abs(dayChange)))"
+    }
+
+    var formattedTotalPL: String {
+        let sign = totalProfitLoss >= 0 ? "+" : ""
+        return "\(sign)¥\(Int(abs(totalProfitLoss)))"
+    }
+
     static let preview = PortfolioSummary(
         totalValue: 1284560.00,
         totalCost: 1150000.00,

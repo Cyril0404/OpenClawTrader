@@ -15,16 +15,11 @@ struct SimpleChatView: View {
     @Environment(\.appColors) private var colors
     @StateObject private var service = OpenClawService.shared
     @State private var inputText = ""
-    @State private var messages: [ChatMessage] = []
+    @State private var messages: [SimpleChatMessage] = []
     @FocusState private var isInputFocused: Bool
 
-    struct ChatMessage: Identifiable {
-        let id = UUID()
-        let role: String // "user" or "assistant"
-        let content: String
-        let timestamp: Date
-    }
 
+    // SimpleChatMessage moved to top-level
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -38,7 +33,7 @@ struct SimpleChatView: View {
                             emptyState
                         } else {
                             ForEach(messages) { message in
-                                MessageBubble(message: message)
+                                ChatMessageBubble(message: message)
                                     .id(message.id)
                             }
                         }
@@ -138,13 +133,13 @@ struct SimpleChatView: View {
         guard !text.isEmpty else { return }
 
         // Add user message
-        let userMsg = ChatMessage(role: "user", content: text, timestamp: Date())
+        let userMsg = SimpleChatMessage(role: "user", content: text, timestamp: Date())
         messages.append(userMsg)
         inputText = ""
 
         // Simulate AI response (placeholder)
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let reply = ChatMessage(
+            let reply = SimpleChatMessage(
                 role: "assistant",
                 content: "收到你的消息：\(text)\n\n正在处理中，请稍候...",
                 timestamp: Date()
@@ -154,13 +149,25 @@ struct SimpleChatView: View {
     }
 }
 
+
+// ============================================
+// MARK: - Chat Message Model
+// ============================================
+
+struct SimpleChatMessage: Identifiable {
+    let id = UUID()
+    let role: String // "user" or "assistant"
+    let content: String
+    let timestamp: Date
+}
+
 // ============================================
 // MARK: - Message Bubble
 // ============================================
 
-struct MessageBubble: View {
+struct ChatMessageBubble: View {
     @Environment(\.appColors) private var colors
-    let message: SimpleChatView.ChatMessage
+    let message: SimpleChatMessage
 
     private var isUser: Bool { message.role == "user" }
 

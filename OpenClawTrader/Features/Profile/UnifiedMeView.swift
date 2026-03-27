@@ -105,7 +105,7 @@ struct UnifiedMeView: View {
 
     // MARK: - Portfolio Summary
 
-    private func portfolioSummarySection(portfolio: Portfolio) -> some View {
+    private func portfolioSummarySection(portfolio: PortfolioSummary) -> some View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
             SectionHeader(title: "持仓概览")
 
@@ -137,7 +137,7 @@ struct UnifiedMeView: View {
             }
 
             VStack(spacing: AppSpacing.xs) {
-                ForEach(Array(Suggestion.previewList.prefix(2))) { suggestion in
+                ForEach(Array(TradingSuggestion.previewList.prefix(2))) { suggestion in
                     SuggestionRow(suggestion: suggestion)
                 }
             }
@@ -295,7 +295,7 @@ struct StatCard: View {
     }
 }
 
-struct SuggestionRow: View {
+struct SuggestionRowCard: View {
     @Environment(\.appColors) private var colors
     let suggestion: TradingSuggestion
 

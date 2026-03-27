@@ -44,6 +44,8 @@
 		F6AC29741B3ABA52017CD2CF /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB307292488DF178CE7B707F /* Workspace.swift */; };
 		FA93EE535ABFA2B29C90764B /* HoldingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F5BA1A8555C1B7C2A0A351 /* HoldingDetailView.swift */; };
 		FFD8B8AC1A5C35334A8273CC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18215A86D4E9893048DDDBAF /* ProfileView.swift */; };
+	7B8C9D1E2F3A4B5C6D7E8F90 /* SimpleChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A7B8C1E2D3F4A5B6C7D8E9F /* SimpleChatView.swift */; };
+	8C9D0E2F3A4B5C6D7E8F90A1 /* UnifiedMeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B8C9D2E3F4A5B6C7D8E9F0A /* UnifiedMeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +88,8 @@
 		F894F7A67B9E69E61EF0A1C7 /* ModelListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelListView.swift; sourceTree = "<group>"; };
 		FB307292488DF178CE7B707F /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
 		FFA07CE1ED7FDDBB8550B2E8 /* Agent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Agent.swift; sourceTree = "<group>"; };
+	4A7B8C1E2D3F4A5B6C7D8E9F /* SimpleChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleChatView.swift; sourceTree = "<group>"; };
+	5B8C9D2E3F4A5B6C7D8E9F0A /* UnifiedMeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedMeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -121,7 +125,9 @@
 			isa = PBXGroup;
 			children = (
 				0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */,
+				5B8C9D2E3F4A5B6C7D8E9F0A /* UnifiedMeView.swift */,
 				18215A86D4E9893048DDDBAF /* ProfileView.swift */,
+				5B8C9D2E3F4A5B6C7D8E9F0A /* UnifiedMeView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -143,6 +149,8 @@
 				BDDC9A2E18147C7B7151EA5C /* Notifications */,
 				43FD86956D4885722EE678F8 /* Profile */,
 				A365CFA82AB56AE5FF8F9E62 /* Trading */,
+				9E5F1A2B3C4D5E6F7A8B9C0D /* Chat */,
+				9E5F1A2B3C4D5E6F7A8B9C0D /* Chat */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -236,6 +244,30 @@
 				030E92ADDDB83BC2904134FC /* OpenClawTrader.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9E5F1A2B3C4D5E6F7A8B9C0D /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				4A7B8C1E2D3F4A5B6C7D8E9F /* SimpleChatView.swift */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		9E5F1A2B3C4D5E6F7A8B9C0D /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				4A7B8C1E2D3F4A5B6C7D8E9F /* SimpleChatView.swift */,
+			);
+			path = Chat;
+			sourceTree = "<group>";
+		};
+		9E5F1A2B3C4D5E6F7A8B9C0D /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				4A7B8C1E2D3F4A5B6C7D8E9F /* SimpleChatView.swift */,
+			);
+			path = Chat;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -344,6 +376,8 @@
 				EBB57CF8DDEBDFE01EE95AC2 /* WorkflowMonitorView.swift in Sources */,
 				F6AC29741B3ABA52017CD2CF /* Workspace.swift in Sources */,
 				C286EF2C9EFB35A1292166E1 /* WorkspaceListView.swift in Sources */,
+				7B8C9D1E2F3A4B5C6D7E8F90 /* SimpleChatView.swift in Sources */,
+				8C9D0E2F3A4B5C6D7E8F90A1 /* UnifiedMeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
