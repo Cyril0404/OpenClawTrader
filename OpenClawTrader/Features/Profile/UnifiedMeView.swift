@@ -257,6 +257,13 @@ struct UnifiedMeView: View {
 
                 ListItem(icon: "bell", title: "通知设置", subtitle: nil)
                 AppDivider()
+                NavigationLink(destination: AgentListView()) {
+                    ListItem(icon: "person.2", title: "Agent 管理", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
                 ListItem(icon: "cpu", title: "API Key 设置", subtitle: nil, showArrow: true)
                 AppDivider()
                 ListItem(icon: "questionmark.circle", title: "帮助与反馈", subtitle: nil)

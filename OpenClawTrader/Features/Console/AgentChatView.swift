@@ -28,23 +28,35 @@ struct AgentChatView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack(spacing: AppSpacing.sm) {
-                Circle()
-                    .fill(agent.status == .running ? AppColors.success : colors.textTertiary)
-                    .frame(width: 8, height: 8)
+            HStack(spacing: AppSpacing.md) {
+                // 左侧留空
+                Spacer()
+                    .frame(width: 44)
 
-                VStack(alignment: .leading, spacing: 2) {
+                // Agent 名称 + 状态指示器（居中）
+                HStack(spacing: AppSpacing.xs) {
+                    Circle()
+                        .fill(agent.status == .running ? AppColors.success : colors.textTertiary)
+                        .frame(width: 8, height: 8)
+
                     Text(agent.name)
                         .font(AppFonts.title3())
                         .foregroundColor(colors.textPrimary)
-
-                    Text(agent.status == .running ? "运行中" : "空闲")
-                        .font(AppFonts.caption())
-                        .foregroundColor(colors.textSecondary)
+                        .lineLimit(1)
                 }
 
                 Spacer()
 
+                // 状态标签
+                Text(agent.status == .running ? "运行中" : "空闲")
+                    .font(AppFonts.smallMedium())
+                    .foregroundColor(colors.textPrimary)
+                    .padding(.horizontal, AppSpacing.xs)
+                    .padding(.vertical, 4)
+                    .background(agent.status == .running ? AppColors.success.opacity(0.2) : colors.accentMuted)
+                    .cornerRadius(AppRadius.full)
+
+                // 菜单
                 Menu {
                     Button(action: { service.startAgent(agent) }) {
                         Label("启动", systemImage: "play")
@@ -58,11 +70,12 @@ struct AgentChatView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(colors.textSecondary)
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundColor(colors.textPrimary)
                 }
             }
-            .padding(AppSpacing.md)
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.vertical, AppSpacing.sm)
             .background(colors.backgroundSecondary)
 
             // Messages

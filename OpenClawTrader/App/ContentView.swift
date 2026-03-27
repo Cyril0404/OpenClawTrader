@@ -40,8 +40,7 @@ struct ContentView: View {
                 selectedTab = 2
             }
         }
-        .padding(.top, AppSpacing.xs)
-        .padding(.bottom, 20)
+        .padding(.bottom, 16)
         .background(colors.backgroundSecondary)
     }
 }
@@ -88,16 +87,17 @@ struct TabItem: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            VStack(spacing: 2) {
                 Image(systemName: icon)
-                    .font(.system(size: 22, weight: .medium))
+                    .font(.system(size: 20, weight: .medium))
                     .foregroundColor(isSelected ? colors.textPrimary : colors.textTertiary)
                 Text(title)
-                    .font(.system(size: 10, weight: isSelected ? .medium : .regular))
+                    .font(.system(size: 9, weight: isSelected ? .medium : .regular))
                     .foregroundColor(isSelected ? colors.textPrimary : colors.textTertiary)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 50)
+            .frame(height: 44)
+            .offset(y: 4)
         }
     }
 }

@@ -20,12 +20,19 @@ class OpenClawService: ObservableObject {
     @Published var models: [AIModel] = []
     @Published var agents: [Agent] = []
     @Published var workflows: [Workflow] = []
+    @Published var mainAgent: Agent?
 
     @Published var isLoading = false
     @Published var error: String?
 
     private init() {
         loadMockData()
+        setupMainAgent()
+    }
+
+    private func setupMainAgent() {
+        // 设置主Agent：优先选择运行中的Agent，否则选择第一个Agent
+        mainAgent = agents.first { $0.status == .running } ?? agents.first
     }
 
     // MARK: - Mock Data
@@ -164,5 +171,103 @@ class OpenClawService: ObservableObject {
         workflows[index].status = .active
         workflows[index].lastRunAt = Date()
         workflows[index].totalRuns += 1
+    }
+
+    // MARK: - Chat Operations
+
+    @Published var conversations: [String: [Conversation.Message]] = [:] // agentId -> messages
+
+    /// 发送消息给指定 Agent
+    /// - Parameters:
+    ///   - content: 消息内容
+    ///   - agentId: Agent ID
+    ///   - completion: 回调，返回 AI 回复
+    func sendMessage(content: String, to agentId: String, completion: @escaping (Result<String, Error>) -> Void) {
+        // 添加用户消息到会话历史
+        let userMessage = Conversation.Message(
+            id: UUID().uuidString,
+            role: .user,
+            content: content,
+            timestamp: Date()
+        )
+
+        if conversations[agentId] == nil {
+            conversations[agentId] = []
+        }
+        conversations[agentId]?.append(userMessage)
+
+        // 调用 OpenClaw API
+        Task {
+            do {
+                let request = ChatRequest(
+                    agentId: agentId,
+                    messages: conversations[agentId] ?? []
+                )
+                let response: ChatResponse = try await APIClient.shared.request(
+                    "chat",
+                    method: .post,
+                    body: request
+                )
+
+                // 添加 AI 回复到会话历史
+                let assistantMessage = Conversation.Message(
+                    id: UUID().uuidString,
+                    role: .assistant,
+                    content: response.message,
+                    timestamp: Date()
+                )
+                conversations[agentId]?.append(assistantMessage)
+
+                await MainActor.run {
+                    completion(.success(response.message))
+                }
+            } catch {
+                await MainActor.run {
+                    // API 调用失败时，返回模拟回复（开发阶段）
+                    let mockReply = self.getMockReply(for: content, agentId: agentId)
+                    let assistantMessage = Conversation.Message(
+                        id: UUID().uuidString,
+                        role: .assistant,
+                        content: mockReply,
+                        timestamp: Date()
+                    )
+                    conversations[agentId]?.append(assistantMessage)
+                    completion(.success(mockReply))
+                }
+            }
+        }
+    }
+
+    /// 获取当前 Agent 的会话历史
+    func getConversation(for agentId: String) -> [Conversation.Message] {
+        return conversations[agentId] ?? []
+    }
+
+    /// 获取模拟回复（开发阶段使用）
+    private func getMockReply(for content: String, agentId: String) -> String {
+        guard let agent = agents.first(where: { $0.id == agentId }) else {
+            return "你好，有什么可以帮你的吗？"
+        }
+
+        if content.contains("分析") || content.contains("股票") {
+            return "我来帮你分析一下。从当前市场情况来看，建议关注以下几点..."
+        } else if content.contains("建议") || content.contains("推荐") {
+            return "根据你的持仓情况，我有以下建议：\n1. 适当分散仓位\n2. 关注大盘走势\n3. 设置止损点"
+        } else if content.contains("你好") || content.contains("hi") || content.contains("hello") {
+            return "你好！我是 \(agent.name)，很高兴为你服务。有什么可以帮你的吗？"
+        } else {
+            return "收到你的消息：\(content)\n\n正在处理中，请稍候..."
+        }
+    }
+
+    // MARK: - Chat Request/Response
+
+    struct ChatRequest: Encodable {
+        let agentId: String
+        let messages: [Conversation.Message]
+    }
+
+    struct ChatResponse: Decodable {
+        let message: String
     }
 }
