@@ -1,5 +1,12 @@
 import Foundation
 
+//
+//  APIClient.swift
+//  OpenClawTrader
+//
+//  功能：HTTP网络请求客户端，统一处理API调用
+//
+
 // ============================================
 // MARK: - API Client
 // ============================================

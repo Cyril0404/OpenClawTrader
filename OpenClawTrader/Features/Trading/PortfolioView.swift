@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  PortfolioView.swift
+//  OpenClawTrader
+//
+//  功能：交易主页面，展示持仓概览、风险评估、AI建议
+//
+
 // ============================================
 // MARK: - Trading Dashboard View
 // ============================================
@@ -216,7 +223,7 @@ struct TradingDashboardView: View {
                 }
             }
 
-            VStack(spacing: 0) {
+            LazyVStack(spacing: 0) {
                 ForEach(holdings.prefix(3)) { holding in
                     NavigationLink(destination: HoldingDetailView(holding: holding)) {
                         HoldingRow(holding: holding)
@@ -247,7 +254,7 @@ struct TradingDashboardView: View {
                 }
             }
 
-            VStack(spacing: AppSpacing.sm) {
+            LazyVStack(spacing: AppSpacing.sm) {
                 ForEach(suggestions.prefix(2)) { suggestion in
                     NavigationLink(destination: SuggestionDetailView(suggestion: suggestion)) {
                         SuggestionCard(suggestion: suggestion)

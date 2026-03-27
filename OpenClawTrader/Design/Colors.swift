@@ -1,5 +1,13 @@
 import SwiftUI
 
+//
+//  Colors.swift
+//  OpenClawTrader
+//
+//  功能：色彩系统，支持日/夜模式自适应
+//  包含：ThemeManager、AdaptiveColors、环境变量注入
+//
+
 // ============================================
 // MARK: - Theme Manager
 // ============================================

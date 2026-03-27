@@ -1,5 +1,12 @@
 import Foundation
 
+//
+//  StorageService.swift
+//  OpenClawTrader
+//
+//  功能：本地存储服务，管理UserDefaults和Keychain
+//
+
 // ============================================
 // MARK: - Storage Service
 // ============================================
@@ -65,11 +72,14 @@ class StorageService {
 
     // MARK: - Watchlist
 
+    /// 自选股列表
     var watchlist: [String] {
         get { userDefaults.stringArray(forKey: Keys.watchlist) ?? [] }
         set { userDefaults.set(newValue, forKey: Keys.watchlist) }
     }
 
+    /// 添加股票到自选列表
+    /// - Parameter symbol: 股票代码
     func addToWatchlist(_ symbol: String) {
         var list = watchlist
         if !list.contains(symbol) {
@@ -78,18 +88,25 @@ class StorageService {
         }
     }
 
+    /// 从自选列表移除股票
+    /// - Parameter symbol: 股票代码
     func removeFromWatchlist(_ symbol: String) {
         watchlist.removeAll { $0 == symbol }
     }
 
     // MARK: - Connection
 
+    /// 保存 OpenClaw 连接信息
+    /// - Parameters:
+    ///   - baseURL: API 基础地址
+    ///   - apiKey: API 密钥
     func saveConnection(baseURL: String, apiKey: String) {
         self.apiBaseURL = baseURL
         self.apiKey = apiKey
         self.isConnected = true
     }
 
+    /// 断开 OpenClaw 连接
     func disconnect() {
         apiBaseURL = ""
         apiKey = ""

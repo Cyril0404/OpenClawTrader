@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  HoldingListView.swift
+//  OpenClawTrader
+//
+//  功能：持仓明细列表，支持搜索和排序
+//
+
 // ============================================
 // MARK: - Holding List View
 // ============================================
@@ -76,7 +83,7 @@ struct HoldingListView: View {
                 }
 
                 ScrollView {
-                    VStack(spacing: AppSpacing.sm) {
+                    LazyVStack(spacing: AppSpacing.sm) {
                         ForEach(filteredHoldings) { holding in
                             NavigationLink(destination: HoldingDetailView(holding: holding)) {
                                 HoldingRow(holding: holding)

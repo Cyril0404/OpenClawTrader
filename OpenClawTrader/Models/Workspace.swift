@@ -1,5 +1,12 @@
 import Foundation
 
+//
+//  Workspace.swift
+//  OpenClawTrader
+//
+//  功能：Workspace数据模型
+//
+
 // ============================================
 // MARK: - Workspace
 // ============================================

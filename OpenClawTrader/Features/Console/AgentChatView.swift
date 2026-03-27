@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  AgentChatView.swift
+//  OpenClawTrader
+//
+//  功能：Agent对话页面，支持与Agent交互
+//
+
 // ============================================
 // MARK: - Agent Chat View
 // ============================================

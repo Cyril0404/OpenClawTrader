@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  SuggestionDetailView.swift
+//  OpenClawTrader
+//
+//  功能：AI建议详情页面，支持采纳/忽略操作
+//
+
 // ============================================
 // MARK: - Suggestion Detail View
 // ============================================

@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  DashboardView.swift
+//  OpenClawTrader
+//
+//  功能：OpenClaw控制台概览页面，Workspace状态总览
+//
+
 // ============================================
 // MARK: - Console Dashboard View
 // ============================================
@@ -125,7 +132,7 @@ struct ConsoleDashboardView: View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
             SectionHeader(title: "模型")
 
-            VStack(spacing: 0) {
+            LazyVStack(spacing: 0) {
                 ForEach(service.models.prefix(3)) { model in
                     ModelRowView(model: model) {
                         // Model tap
@@ -155,7 +162,7 @@ struct ConsoleDashboardView: View {
                 }
             }
 
-            VStack(spacing: 0) {
+            LazyVStack(spacing: 0) {
                 ForEach(service.agents.prefix(3)) { agent in
                     ListItem(
                         icon: "cpu",
@@ -187,7 +194,7 @@ struct ConsoleDashboardView: View {
                 }
             }
 
-            VStack(spacing: 0) {
+            LazyVStack(spacing: 0) {
                 ForEach(service.workflows.filter { $0.status == .active }.prefix(2)) { workflow in
                     WorkflowRowView(workflow: workflow)
 

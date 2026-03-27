@@ -1,4 +1,4 @@
-# OpenClaw Trader - Git提交规范 v1.0
+# OpenClaw Trader - Git提交规范 v1.1
 
 ## 1. 提交粒度要求
 - 单次提交只做一件事，禁止一次提交包含多个不相关的修改
@@ -78,13 +78,38 @@ refactor(Network): 重构APIClient模块
 - 优化缓存策略
 ```
 
-## 4. 禁止行为
+## 4. 分支管理规范
+### 4.1 分支命名
+```
+<类型>/<简短描述>
+examples:
+- feature/holding-import
+- fix/workflow-status-bug
+- refactor/colors-module
+```
+
+### 4.2 主要分支
+- `main`: 主分支，保持稳定，可直接部署
+- `develop`: 开发分支，集成所有功能分支
+- `feature/*`: 功能分支
+- `fix/*`: 修复分支
+- `refactor/*`: 重构分支
+
+## 5. PR 合并流程
+1. **创建 PR**：从功能分支合并到 main/develop
+2. **CI 检查**：必须通过 SwiftLint、编译、测试
+3. **Code Review**：至少 1 人 approve
+4. **合并**：squash merge 保持提交历史整洁
+5. **删除分支**：合并后自动删除功能分支
+
+## 6. 禁止行为
 - ❌ 禁止提交无法编译的代码
 - ❌ 禁止提交注释掉的代码
 - ❌ 禁止无意义的提交信息（比如`update`、`fix`、`修改`等）
 - ❌ 禁止提交超大文件（图片、资源超过10MB需要单独说明）
-- ❌ 禁止在master分支直接提交，所有代码必须通过PR合并
+- ❌ 禁止在main/master分支直接提交，所有代码必须通过PR合并
+- ❌ 禁止在PR中混入不相关的修改
 
 ---
-*规范版本: v1.0*
+*规范版本: v1.1*
 *最后更新: 2026-03-27*

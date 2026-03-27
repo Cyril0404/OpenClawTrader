@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  OpenClawTraderApp.swift
+//  OpenClawTrader
+//
+//  功能：App入口文件，配置主题管理和根视图
+//
+
 // ============================================
 // MARK: - App Entry Point
 // ============================================

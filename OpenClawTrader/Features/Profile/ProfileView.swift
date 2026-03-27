@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  ProfileView.swift
+//  OpenClawTrader
+//
+//  功能：个人中心页面，包含账户管理、OpenClaw管理入口
+//
+
 // ============================================
 // MARK: - Profile View
 // ============================================

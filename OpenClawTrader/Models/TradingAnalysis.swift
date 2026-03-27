@@ -1,5 +1,12 @@
 import Foundation
 
+//
+//  TradingAnalysis.swift
+//  OpenClawTrader
+//
+//  功能：交易分析数据模型，包含风格和风险评估
+//
+
 // ============================================
 // MARK: - Trading Style
 // ============================================

@@ -1,5 +1,12 @@
 import Foundation
 
+//
+//  Performance.swift
+//  OpenClawTrader
+//
+//  功能：收益表现数据模型，包含各类收益率统计
+//
+
 // ============================================
 // MARK: - Performance Report
 // ============================================

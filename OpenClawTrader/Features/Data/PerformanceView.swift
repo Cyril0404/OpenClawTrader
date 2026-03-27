@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  PerformanceView.swift
+//  OpenClawTrader
+//
+//  功能：数据看板页面，展示收益报表、胜率统计、关键指标
+//
+
 // ============================================
 // MARK: - Data Dashboard View
 // ============================================

@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  Extensions.swift
+//  OpenClawTrader
+//
+//  功能：SwiftUI扩展，提供通用视图修饰符
+//
+
 // ============================================
 // MARK: - View Extensions
 // ============================================

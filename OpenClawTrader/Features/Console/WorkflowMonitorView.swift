@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  WorkflowMonitorView.swift
+//  OpenClawTrader
+//
+//  功能：工作流监控页面，展示实时日志流和步骤详情
+//
+
 // ============================================
 // MARK: - Workflow Monitor View
 // ============================================

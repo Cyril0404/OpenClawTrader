@@ -1,5 +1,12 @@
 import Foundation
 
+//
+//  TradingService.swift
+//  OpenClawTrader
+//
+//  功能：交易服务，管理持仓、交易分析、AI建议
+//
+
 // ============================================
 // MARK: - Trading Service
 // ============================================
@@ -45,6 +52,13 @@ class TradingService: ObservableObject {
 
     // MARK: - Holdings
 
+    /// 导入持仓
+    /// - Parameters:
+    ///   - symbol: 股票代码
+    ///   - shares: 持股数量
+    ///   - averageCost: 平均成本
+    ///   - currentPrice: 当前价格
+    ///   - name: 股票名称
     func importHolding(symbol: String, shares: Int, averageCost: Double, currentPrice: Double, name: String) {
         let holding = Holding(
             id: "holding_\(UUID().uuidString.prefix(8))",
@@ -65,6 +79,8 @@ class TradingService: ObservableObject {
         }
     }
 
+    /// 更新持仓信息
+    /// - Parameter holding: 更新后的持仓数据
     func updateHolding(_ holding: Holding) {
         guard var p = portfolio,
               let index = p.holdings.firstIndex(where: { $0.id == holding.id }) else { return }
@@ -73,6 +89,8 @@ class TradingService: ObservableObject {
         portfolio = p
     }
 
+    /// 删除持仓
+    /// - Parameter holding: 要删除的持仓
     func deleteHolding(_ holding: Holding) {
         guard var p = portfolio else { return }
         p.holdings.removeAll { $0.id == holding.id }
@@ -89,17 +107,22 @@ class TradingService: ObservableObject {
 
     // MARK: - Suggestions
 
+    /// 标记建议为已读
+    /// - Parameter suggestion: 要标记的建议
     func markSuggestionRead(_ suggestion: TradingSuggestion) {
         guard let index = suggestions.firstIndex(where: { $0.id == suggestion.id }) else { return }
         suggestions[index].isRead = true
     }
 
+    /// 忽略（删除）交易建议
+    /// - Parameter suggestion: 要忽略的建议
     func dismissSuggestion(_ suggestion: TradingSuggestion) {
         suggestions.removeAll { $0.id == suggestion.id }
     }
 
     // MARK: - Analysis Refresh
 
+    /// 刷新交易分析数据
     func refreshAnalysis() async {
         isLoading = true
         try? await Task.sleep(nanoseconds: 1_500_000_000)

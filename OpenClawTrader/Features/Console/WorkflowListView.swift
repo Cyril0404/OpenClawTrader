@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  WorkflowListView.swift
+//  OpenClawTrader
+//
+//  功能：工作流列表，支持状态筛选
+//
+
 // ============================================
 // MARK: - Workflow List View
 // ============================================
@@ -52,7 +59,7 @@ struct WorkflowListView: View {
 
                 // Workflows List
                 ScrollView {
-                    VStack(spacing: AppSpacing.sm) {
+                    LazyVStack(spacing: AppSpacing.sm) {
                         if filteredWorkflows.isEmpty {
                             EmptyState(
                                 icon: "arrow.triangle.branch",

@@ -1,5 +1,12 @@
 import Foundation
 
+//
+//  Notification.swift
+//  OpenClawTrader
+//
+//  功能：通知数据模型，支持多类型通知
+//
+
 // ============================================
 // MARK: - App Notification
 // ============================================

@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  HistoryView.swift
+//  OpenClawTrader
+//
+//  功能：历史交易记录列表，支持买卖筛选
+//
+
 // ============================================
 // MARK: - History View
 // ============================================
@@ -35,7 +42,7 @@ struct HistoryView: View {
                 }
 
                 ScrollView {
-                    VStack(spacing: AppSpacing.sm) {
+                    LazyVStack(spacing: AppSpacing.sm) {
                         if filteredTrades.isEmpty {
                             EmptyState(
                                 icon: "clock.arrow.circlepath",

@@ -1,5 +1,13 @@
 import SwiftUI
 
+//
+//  Components.swift
+//  OpenClawTrader
+//
+//  功能：通用UI组件库
+//  包含：PrimaryButton、SecondaryButton、ListItem、SearchBar、EmptyState等
+//
+
 // ============================================
 // MARK: - Primary Button
 // ============================================

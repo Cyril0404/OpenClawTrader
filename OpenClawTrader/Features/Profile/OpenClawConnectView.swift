@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  OpenClawConnectView.swift
+//  OpenClawTrader
+//
+//  功能：OpenClaw连接配置页面，输入API地址和密钥
+//
+
 // ============================================
 // MARK: - OpenClaw Connect View
 // ============================================

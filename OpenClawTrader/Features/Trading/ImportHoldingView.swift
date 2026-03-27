@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  ImportHoldingView.swift
+//  OpenClawTrader
+//
+//  功能：持仓导入页面，支持手动输入和截图识别
+//
+
 // ============================================
 // MARK: - Import Holding View
 // ============================================

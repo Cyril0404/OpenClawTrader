@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  WorkspaceListView.swift
+//  OpenClawTrader
+//
+//  功能：工作空间选择器，支持切换和创建
+//
+
 // ============================================
 // MARK: - Workspace Picker View
 // ============================================

@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  SuggestionListView.swift
+//  OpenClawTrader
+//
+//  功能：AI建议列表，支持优先级筛选
+//
+
 // ============================================
 // MARK: - Suggestion List View
 // ============================================
@@ -35,7 +42,7 @@ struct SuggestionListView: View {
                 }
 
                 ScrollView {
-                    VStack(spacing: AppSpacing.sm) {
+                    LazyVStack(spacing: AppSpacing.sm) {
                         ForEach(filteredSuggestions) { suggestion in
                             NavigationLink(destination: SuggestionDetailView(suggestion: suggestion)) {
                                 SuggestionRow(suggestion: suggestion)

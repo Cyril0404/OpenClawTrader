@@ -1,5 +1,13 @@
 import SwiftUI
 
+//
+//  ContentView.swift
+//  OpenClawTrader
+//
+//  功能：主容器视图，包含底部TabBar导航
+//  底部Tab：消息、交易、我的
+//
+
 // ============================================
 // MARK: - Content View (Tab Container)
 // ============================================

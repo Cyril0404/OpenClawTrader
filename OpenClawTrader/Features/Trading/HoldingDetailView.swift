@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  HoldingDetailView.swift
+//  OpenClawTrader
+//
+//  功能：持仓详情页面，展示持仓信息和盈亏分析
+//
+
 // ============================================
 // MARK: - Holding Detail View
 // ============================================

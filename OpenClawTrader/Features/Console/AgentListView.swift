@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  AgentListView.swift
+//  OpenClawTrader
+//
+//  功能：Agent管理列表，支持创建和状态监控
+//
+
 // ============================================
 // MARK: - Agent List View
 // ============================================
@@ -45,7 +52,7 @@ struct AgentListView: View {
                                     action: { showingCreateSheet = true }
                                 )
                             } else {
-                                VStack(spacing: 0) {
+                                LazyVStack(spacing: 0) {
                                     ForEach(filteredAgents) { agent in
                                         NavigationLink(destination: AgentChatView(agent: agent)) {
                                             AgentRow(agent: agent)

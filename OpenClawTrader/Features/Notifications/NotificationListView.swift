@@ -1,5 +1,12 @@
 import SwiftUI
 
+//
+//  NotificationListView.swift
+//  OpenClawTrader
+//
+//  功能：消息通知列表，支持多类型筛选
+//
+
 // ============================================
 // MARK: - Notification List View
 // ============================================
@@ -56,7 +63,7 @@ struct NotificationListView: View {
 
                 // Notifications List
                 ScrollView {
-                    VStack(spacing: AppSpacing.sm) {
+                    LazyVStack(spacing: AppSpacing.sm) {
                         if filteredNotifications.isEmpty {
                             EmptyState(
                                 icon: "bell.slash",
