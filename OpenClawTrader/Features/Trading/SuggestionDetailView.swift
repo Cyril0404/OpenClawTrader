@@ -118,11 +118,11 @@ struct SuggestionDetailView: View {
 
     private func iconForCategory(_ category: TradingSuggestion.Category) -> String {
         switch category {
-        case .仓位: return "chart.pie"
-        case .止损: return "flag"
-        case .分散: return "square.grid.2x2"
-        case .时机: return "clock"
-        case .习惯: return "person"
+        case .positionMgmt: return "chart.pie"
+        case .stopLoss: return "flag"
+        case .diversification: return "square.grid.2x2"
+        case .timing: return "clock"
+        case .habit: return "person"
         }
     }
 }

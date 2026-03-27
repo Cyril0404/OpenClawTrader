@@ -113,12 +113,14 @@ struct TradingSuggestion: Identifiable, Codable {
         }
     }
 
-    enum Category: String, Codable {
-        case 仓位 = "仓位管理"
-        case 止损 = "止损策略"
-        case 分散 = "分散投资"
-        case 时机 = "交易时机"
-        case 习惯 = "交易习惯"
+    enum Category: String, Codable, CaseIterable {
+        case positionMgmt = "仓位管理"
+        case stopLoss = "止损策略"
+        case diversification = "分散投资"
+        case timing = "交易时机"
+        case habit = "交易习惯"
+
+        var displayName: String { rawValue }
     }
 
     static let preview = TradingSuggestion(
@@ -126,7 +128,7 @@ struct TradingSuggestion: Identifiable, Codable {
         title: "仓位过于集中",
         description: "建议将 AAPL 持仓降低 20%，分散到其他科技股以降低风险",
         priority: .high,
-        category: .仓位,
+        category: .positionMgmt,
         potentialImpact: "可降低 15% 的集中风险",
         timestamp: Date(),
         isRead: false
@@ -134,13 +136,13 @@ struct TradingSuggestion: Identifiable, Codable {
 
     static let previewList: [TradingSuggestion] = [
         TradingSuggestion(id: "sug_001", title: "仓位过于集中", description: "建议将 AAPL 持仓降低 20%，分散到其他科技股", priority: .high,
-                          category: .仓位, potentialImpact: "可降低 15% 集中风险", timestamp: Date(), isRead: false),
+                          category: .positionMgmt, potentialImpact: "可降低 15% 集中风险", timestamp: Date(), isRead: false),
         TradingSuggestion(id: "sug_002", title: "持仓周期偏短", description: "您的平均持仓周期为 5 天，可尝试延长至 14 天", priority: .medium,
-                          category: .习惯, potentialImpact: "可降低交易成本 30%", timestamp: Date().addingTimeInterval(-3600), isRead: false),
+                          category: .habit, potentialImpact: "可降低交易成本 30%", timestamp: Date().addingTimeInterval(-3600), isRead: false),
         TradingSuggestion(id: "sug_003", title: "建议设置止损", description: "NVDA 当前仓位建议设置 8% 止损位", priority: .high,
-                          category: .止损, potentialImpact: "可限制最大亏损", timestamp: Date().addingTimeInterval(-7200), isRead: true),
+                          category: .stopLoss, potentialImpact: "可限制最大亏损", timestamp: Date().addingTimeInterval(-7200), isRead: true),
         TradingSuggestion(id: "sug_004", title: "考虑分批建仓", description: "GOOGL 可考虑分 3 批建仓，降低择时风险", priority: .medium,
-                          category: .时机, potentialImpact: "可降低 10% 买入成本", timestamp: Date().addingTimeInterval(-86400), isRead: true)
+                          category: .timing, potentialImpact: "可降低 10% 买入成本", timestamp: Date().addingTimeInterval(-86400), isRead: true)
     ]
 }
 
