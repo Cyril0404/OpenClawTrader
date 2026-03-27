@@ -1,0 +1,54 @@
+# Xcode
+*.xcuserstate
+*.xcsettings
+*.xcworkspace
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods
+Podfile.lock
+Pods/
+*.xcworkspace
+
+# Swift Package Manager
+.swiftpm/
+Packages/
+Package.resolved
+
+# Archives
+*.zip
+*.tar
+*.gz
+
+# Build products
+build/
+*.o
+*.a
+*.framework
+*.dylib
+
+# Misc
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Environment
+.env
+.env.local
