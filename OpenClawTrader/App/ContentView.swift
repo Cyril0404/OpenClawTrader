@@ -4,8 +4,10 @@ import SwiftUI
 //  ContentView.swift
 //  OpenClawTrader
 //
-//  功能：主容器视图，包含底部TabBar导航
-//  底部Tab：消息、交易、我的
+//  Tab结构（2026-03-27 重构）：
+//  聊天 — 极简AI对话
+//  行情 — 股票行情
+//  我的 — 持仓+消息+AI建议+设置（全部合并）
 //
 
 // ============================================
@@ -18,10 +20,7 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab Content
             TabContent(selectedTab: selectedTab)
-
-            // Custom Tab Bar
             customTabBar
         }
         .background(colors.background)
@@ -31,10 +30,10 @@ struct ContentView: View {
 
     private var customTabBar: some View {
         HStack(spacing: 0) {
-            TabItem(icon: "bell", title: "消息", isSelected: selectedTab == 0) {
+            TabItem(icon: "bubble.left.and.bubble.right", title: "聊天", isSelected: selectedTab == 0) {
                 selectedTab = 0
             }
-            TabItem(icon: "chart.line.uptrend.xyaxis", title: "交易", isSelected: selectedTab == 1) {
+            TabItem(icon: "chart.line.uptrend.xyaxis", title: "行情", isSelected: selectedTab == 1) {
                 selectedTab = 1
             }
             TabItem(icon: "person", title: "我的", isSelected: selectedTab == 2) {
@@ -59,7 +58,7 @@ struct TabContent: View {
             switch selectedTab {
             case 0:
                 NavigationStack {
-                    NotificationListView()
+                    SimpleChatView()
                 }
             case 1:
                 NavigationStack {
@@ -67,10 +66,10 @@ struct TabContent: View {
                 }
             case 2:
                 NavigationStack {
-                    ProfileView()
+                    UnifiedMeView()
                 }
             default:
-                NotificationListView()
+                SimpleChatView()
             }
         }
     }
@@ -93,7 +92,6 @@ struct TabItem: View {
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .medium))
                     .foregroundColor(isSelected ? colors.textPrimary : colors.textTertiary)
-
                 Text(title)
                     .font(.system(size: 10, weight: isSelected ? .medium : .regular))
                     .foregroundColor(isSelected ? colors.textPrimary : colors.textTertiary)
