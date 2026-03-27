@@ -267,11 +267,12 @@ Loading:     白色圆点呼吸灯 / 8pt 直径
 ### 9.1 底部导航结构
 ```
 ┌─────────────────────┬─────────────────────┬─────────────────────┐
-│        消息          │         交易          │         我的         │
-│       bell          │  chart.line.uptrend   │       person        │
-│   (通知中心)          │   (持仓/Ai建议)       │    (设置/账户)       │
+│        行情          │        AI助手        │         我的         │
+│  chart.line.uptrend  │bubble.left.and.bubble.right│     person        │
+│   (市场/自选行情)     │   (默认打开主Agent对话)│    (设置/账户)       │
 └─────────────────────┴─────────────────────┴─────────────────────┘
 ```
+- 默认选中第2个Tab（AI助手），打开App直接进入聊天界面
 - TabBar 高度: 50pt + 底部安全区
 - TabBar 背景: Background Secondary
 - 图标: 22pt SF Symbols
