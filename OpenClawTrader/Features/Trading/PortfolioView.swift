@@ -16,6 +16,8 @@ struct TradingDashboardView: View {
     @StateObject private var service = TradingService.shared
     @State private var searchText = ""
     @State private var showingImportSheet = false
+    @State private var showingImportOrderSheet = false
+    @State private var showImportMenu = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,8 +29,17 @@ struct TradingDashboardView: View {
 
                 Spacer()
 
-                IconButton(icon: "plus.circle") {
-                    showingImportSheet = true
+                Menu {
+                    Button(action: { showingImportSheet = true }) {
+                        Label("导入持仓", systemImage: "chart.bar.doc.parallel")
+                    }
+                    Button(action: { showingImportOrderSheet = true }) {
+                        Label("导入委托", systemImage: "doc.text")
+                    }
+                } label: {
+                    IconButton(icon: "plus.circle") {
+                        showImportMenu = true
+                    }
                 }
             }
             .padding(.horizontal, AppSpacing.md)
@@ -43,6 +54,9 @@ struct TradingDashboardView: View {
                         // Portfolio Summary
                         portfolioSummaryCard(portfolio: portfolio)
 
+                        // Holdings (持仓明细) - 移到交易风格上方
+                        holdingsSection(holdings: portfolio.holdings)
+
                         // Trading Style
                         if let style = service.tradingStyle {
                             tradingStyleCard(style: style)
@@ -53,8 +67,10 @@ struct TradingDashboardView: View {
                             riskAssessmentCard(risk: risk)
                         }
 
-                        // Holdings
-                        holdingsSection(holdings: portfolio.holdings)
+                        // Active Orders (活跃委托)
+                        if !service.activeOrders.isEmpty {
+                            activeOrdersSection(orders: service.activeOrders)
+                        }
 
                         // AI Suggestions
                         suggestionsSection(suggestions: service.suggestions)
@@ -66,6 +82,9 @@ struct TradingDashboardView: View {
         .background(colors.background)
         .sheet(isPresented: $showingImportSheet) {
             ImportHoldingView()
+        }
+        .sheet(isPresented: $showingImportOrderSheet) {
+            ImportOrderView()
         }
     }
 
@@ -80,7 +99,10 @@ struct TradingDashboardView: View {
 
                 Spacer()
 
-                StatusBadge(text: "实盘", color: AppColors.info)
+                // 持仓股数
+                Text("\(portfolio.stockCount) 只")
+                    .font(AppFonts.small())
+                    .foregroundColor(colors.textSecondary)
             }
 
             Text(formatCurrency(portfolio.totalValue))
@@ -206,6 +228,37 @@ struct TradingDashboardView: View {
         .padding(AppSpacing.md)
         .background(colors.backgroundSecondary)
         .cornerRadius(AppRadius.medium)
+        .padding(.horizontal, AppSpacing.md)
+    }
+
+    // MARK: - Active Orders Section
+
+    private func activeOrdersSection(orders: [Order]) -> some View {
+        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+            HStack {
+                SectionHeader(title: "活跃委托")
+                Spacer()
+                NavigationLink(destination: OrderListView()) {
+                    Text("查看全部")
+                        .font(AppFonts.caption())
+                        .foregroundColor(colors.textSecondary)
+                }
+            }
+
+            LazyVStack(spacing: 0) {
+                ForEach(orders.prefix(3)) { order in
+                    OrderRow(order: order) {
+                        service.cancelOrder(order)
+                    }
+
+                    if order.id != orders.prefix(3).last?.id {
+                        AppDivider()
+                    }
+                }
+            }
+            .background(colors.backgroundSecondary)
+            .cornerRadius(AppRadius.medium)
+        }
         .padding(.horizontal, AppSpacing.md)
     }
 

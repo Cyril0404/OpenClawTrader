@@ -106,4 +106,84 @@ struct PortfolioSummary: Codable {
         totalProfitLossPercent: 11.70,
         holdings: Holding.previewList
     )
+
+    var stockCount: Int {
+        holdings.count
+    }
+}
+
+// ============================================
+// MARK: - Order (委托单)
+// ============================================
+
+struct Order: Identifiable, Codable {
+    let id: String
+    var symbol: String
+    var name: String
+    var type: OrderType
+    var side: OrderSide
+    var shares: Int
+    var price: Double
+    var status: OrderStatus
+    var timestamp: Date
+    var filledShares: Int
+    var avgFillPrice: Double
+
+    enum OrderType: String, Codable {
+        case limit = "限价"
+        case market = "市价"
+        case stop = "止损"
+        case stopLimit = "止损限价"
+    }
+
+    enum OrderSide: String, Codable {
+        case buy = "买入"
+        case sell = "卖出"
+    }
+
+    enum OrderStatus: String, Codable {
+        case pending = "pending"      // 待成交
+        case partiallyFilled = "partial" // 部分成交
+        case filled = "filled"      // 已成交
+        case cancelled = "cancelled" // 已取消
+        case rejected = "rejected"   // 已拒绝
+
+        var displayName: String {
+            switch self {
+            case .pending: return "待成交"
+            case .partiallyFilled: return "部分成交"
+            case .filled: return "已成交"
+            case .cancelled: return "已取消"
+            case .rejected: return "已拒绝"
+            }
+        }
+    }
+
+    var totalAmount: Double {
+        Double(shares) * price
+    }
+
+    var isActive: Bool {
+        status == .pending || status == .partiallyFilled
+    }
+
+    static let preview = Order(
+        id: "order_001",
+        symbol: "AAPL",
+        name: "Apple Inc.",
+        type: .limit,
+        side: .buy,
+        shares: 50,
+        price: 180.00,
+        status: .pending,
+        timestamp: Date(),
+        filledShares: 0,
+        avgFillPrice: 0
+    )
+
+    static let previewList: [Order] = [
+        Order(id: "order_001", symbol: "AAPL", name: "Apple Inc.", type: .limit, side: .buy, shares: 50, price: 180.00, status: .pending, timestamp: Date(), filledShares: 0, avgFillPrice: 0),
+        Order(id: "order_002", symbol: "TSLA", name: "Tesla Inc.", type: .limit, side: .sell, shares: 20, price: 250.00, status: .partiallyFilled, timestamp: Date().addingTimeInterval(-3600), filledShares: 10, avgFillPrice: 248.50),
+        Order(id: "order_003", symbol: "NVDA", name: "NVIDIA Corp.", type: .market, side: .buy, shares: 30, price: 875.00, status: .filled, timestamp: Date().addingTimeInterval(-86400), filledShares: 30, avgFillPrice: 873.20)
+    ]
 }

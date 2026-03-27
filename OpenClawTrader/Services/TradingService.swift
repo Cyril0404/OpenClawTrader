@@ -20,6 +20,7 @@ class TradingService: ObservableObject {
     @Published var riskAssessment: RiskAssessment?
     @Published var suggestions: [TradingSuggestion] = []
     @Published var trades: [Trade] = []
+    @Published var orders: [Order] = []
     @Published var performance: PerformanceReport?
 
     @Published var isLoading = false
@@ -48,6 +49,8 @@ class TradingService: ObservableObject {
             Trade(id: "trade_004", symbol: "GOOGL", name: "Alphabet Inc.", type: .buy, shares: 25, price: 148.00, commission: 1.0,
                   timestamp: Date().addingTimeInterval(-345600), reason: "低估")
         ]
+
+        orders = Order.previewList
     }
 
     // MARK: - Holdings
@@ -129,5 +132,100 @@ class TradingService: ObservableObject {
         tradingStyle = TradingStyle.preview
         riskAssessment = RiskAssessment.preview
         isLoading = false
+    }
+
+    // MARK: - Orders (委托单)
+
+    /// 导入委托单
+    func importOrder(symbol: String, name: String, type: Order.OrderType, side: Order.OrderSide, shares: Int, price: Double) {
+        let order = Order(
+            id: "order_\(UUID().uuidString.prefix(8))",
+            symbol: symbol.uppercased(),
+            name: name,
+            type: type,
+            side: side,
+            shares: shares,
+            price: price,
+            status: .pending,
+            timestamp: Date(),
+            filledShares: 0,
+            avgFillPrice: 0
+        )
+        orders.append(order)
+    }
+
+    /// 取消委托单
+    func cancelOrder(_ order: Order) {
+        guard let index = orders.firstIndex(where: { $0.id == order.id }) else { return }
+        orders[index].status = .cancelled
+    }
+
+    /// 获取活跃委托单（待成交和部分成交）
+    var activeOrders: [Order] {
+        orders.filter { $0.isActive }
+    }
+
+    /// 获取已成交委托单
+    var filledOrders: [Order] {
+        orders.filter { $0.status == .filled }
+    }
+
+    /// AI 分析交易风格（结合成交和委托单）
+    func analyzeTradingStyle() -> TradingStyle {
+        // 结合成交记录和委托单分析交易风格
+        // 待成交的委托单反映了用户的交易意图
+        // 已成交的委托单反映了用户的交易执行
+
+        let activeBuyOrders = activeOrders.filter { $0.side == .buy }
+        let activeSellOrders = activeOrders.filter { $0.side == .sell }
+
+        // 分析买入倾向（反映趋势跟踪或价值投资）
+        let buyPressure = Double(activeBuyOrders.count) / max(1, Double(orders.count))
+
+        // 分析限价单使用（反映谨慎程度）
+        let limitOrderRatio = Double(orders.filter { $0.type == .limit }.count) / max(1, Double(orders.count))
+
+        // 分析持仓周期偏好（基于成交记录）
+        let avgHoldingDays = calculateAverageHoldingPeriod()
+
+        // 判断主要风格
+        var primaryStyle: TradingStyle.StyleType = .swingTrader
+        if avgHoldingDays < 1 {
+            primaryStyle = .dayTrader
+        } else if avgHoldingDays < 5 {
+            primaryStyle = .trendFollower
+        } else if avgHoldingDays < 30 {
+            primaryStyle = .swingTrader
+        } else {
+            primaryStyle = .valueInvestor
+        }
+
+        // 判断持仓周期
+        var holdingPeriod: TradingStyle.HoldingPeriod = .short
+        if avgHoldingDays < 1 {
+            holdingPeriod = .veryShort
+        } else if avgHoldingDays < 5 {
+            holdingPeriod = .short
+        } else if avgHoldingDays < 30 {
+            holdingPeriod = .medium
+        } else if avgHoldingDays < 90 {
+            holdingPeriod = .long
+        } else {
+            holdingPeriod = .veryLong
+        }
+
+        return TradingStyle(
+            primaryStyle: primaryStyle,
+            secondaryStyle: buyPressure > 0.6 ? .trendFollower : (buyPressure < 0.4 ? .reversalTrader : nil),
+            holdingPeriodPreference: holdingPeriod,
+            riskTolerance: limitOrderRatio > 0.7 ? .conservative : (limitOrderRatio > 0.4 ? .moderate : .aggressive),
+            confidence: 0.75
+        )
+    }
+
+    private func calculateAverageHoldingPeriod() -> Double {
+        // 计算平均持仓天数（简化版本）
+        guard !trades.isEmpty else { return 5.0 }
+        return 5.0 // 默认5天
     }
 }

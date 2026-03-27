@@ -97,7 +97,7 @@ struct TabItem: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 44)
-            .offset(y: 4)
+            .offset(y: 24)
         }
     }
 }

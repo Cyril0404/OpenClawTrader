@@ -215,35 +215,32 @@ struct ThemePickerSheet: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(ThemeMode.allCases, id: \.self) { mode in
-                    Button {
-                        themeManager.mode = mode
-                    } label: {
-                        HStack {
-                            Text(mode.rawValue)
-                                .foregroundColor(colors.textPrimary)
+            VStack(spacing: 0) {
+                List {
+                    ForEach(ThemeMode.allCases, id: \.self) { mode in
+                        Button {
+                            themeManager.mode = mode
+                            dismiss()
+                        } label: {
+                            HStack {
+                                Text(mode.rawValue)
+                                    .foregroundColor(colors.textPrimary)
 
-                            Spacer()
+                                Spacer()
 
-                            if themeManager.mode == mode {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(colors.textSecondary)
+                                if themeManager.mode == mode {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(colors.textSecondary)
+                                }
                             }
                         }
                     }
                 }
+                .listStyle(.plain)
             }
             .navigationTitle("外观")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") {
-                        dismiss()
-                    }
-                }
-            }
         }
-        .presentationDetents([.height(200)])
+        .presentationDetents([.medium])
     }
 }

@@ -5,7 +5,7 @@ import SwiftUI
 //  OpenClawTrader
 //
 //  功能：合并后的「我的」页面
-//  包含：个人账户 + 消息通知 + 持仓概览 + AI建议 + 快捷设置
+//  包含：个人账户 + OpenClaw连接管理 + 消息通知 + 持仓 + 设置
 //
 
 // ============================================
@@ -15,6 +15,7 @@ import SwiftUI
 struct UnifiedMeView: View {
     @Environment(\.appColors) private var colors
     @StateObject private var tradingService = TradingService.shared
+    @StateObject private var service = OpenClawService.shared
     @State private var notifications: [AppNotification] = AppNotification.previewList
     @State private var selectedFilter: NotificationFilter = .all
     @State private var showingThemePicker = false
@@ -41,21 +42,16 @@ struct UnifiedMeView: View {
                 // 1. Profile Header
                 profileHeader
 
-                // 2. 快捷统计（持仓概览）
-                if let portfolio = tradingService.portfolio {
-                    portfolioSummarySection(portfolio: portfolio)
-                }
+                // 2. OpenClaw 连接管理（单独版块）
+                openClawSection
 
-                // 3. AI 投资建议
-                suggestionsSection
-
-                // 4. 消息通知
+                // 3. 消息通知
                 notificationsSection
 
-                // 5. 持仓列表
+                // 4. 持仓列表
                 holdingsSection
 
-                // 6. 设置
+                // 5. 设置
                 settingsSection
             }
             .padding(.horizontal, AppSpacing.md)
@@ -90,59 +86,92 @@ struct UnifiedMeView: View {
             }
 
             Spacer()
-
-            Circle()
-                .fill(AppColors.success)
-                .frame(width: 8, height: 8)
-            Text("OpenClaw 已连接")
-                .font(AppFonts.small())
-                .foregroundColor(colors.textSecondary)
         }
         .padding(AppSpacing.md)
         .background(colors.backgroundSecondary)
         .cornerRadius(AppRadius.medium)
     }
 
-    // MARK: - Portfolio Summary
+    // MARK: - OpenClaw Section
 
-    private func portfolioSummarySection(portfolio: PortfolioSummary) -> some View {
+    private var openClawSection: some View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            SectionHeader(title: "持仓概览")
+            SectionHeader(title: "OpenClaw 连接")
 
-            VStack(spacing: AppSpacing.sm) {
-                HStack {
-                    StatCard(title: "总市值", value: portfolio.formattedTotalValue, color: colors.textPrimary)
-                    StatCard(title: "今日盈亏", value: portfolio.formattedTodayPL, color: portfolio.todayPL >= 0 ? AppColors.success : AppColors.error)
+            VStack(spacing: 0) {
+                // 当前连接的 Workspace
+                HStack(spacing: AppSpacing.sm) {
+                    Circle()
+                        .fill(AppColors.success)
+                        .frame(width: 8, height: 8)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(service.currentWorkspace?.name ?? "未选择")
+                            .font(AppFonts.body())
+                            .foregroundColor(colors.textPrimary)
+                        Text("OpenClaw 已连接")
+                            .font(AppFonts.caption())
+                            .foregroundColor(colors.textSecondary)
+                    }
+
+                    Spacer()
+
+                    Button(action: {}) {
+                        Text("断开")
+                            .font(AppFonts.caption())
+                            .foregroundColor(AppColors.error)
+                    }
                 }
-                HStack {
-                    StatCard(title: "持仓收益", value: portfolio.formattedTotalPL, color: portfolio.totalPL >= 0 ? AppColors.success : AppColors.error)
-                    StatCard(title: "持仓数量", value: "\(portfolio.holdings.count)只", color: colors.textSecondary)
-                }
-            }
-        }
-    }
+                .padding(AppSpacing.md)
 
-    // MARK: - Suggestions
+                AppDivider()
 
-    private var suggestionsSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            HStack {
-                SectionHeader(title: "AI 投资建议")
-                Spacer()
-                NavigationLink(destination: SuggestionListView()) {
-                    Text("查看全部")
-                        .font(AppFonts.caption())
-                        .foregroundColor(colors.accent)
-                }
-            }
+                // 其他可连接的 Workspace
+                ForEach(service.workspaces.filter { !$0.isActive }) { workspace in
+                    HStack(spacing: AppSpacing.sm) {
+                        Circle()
+                            .fill(colors.textTertiary)
+                            .frame(width: 8, height: 8)
 
-            VStack(spacing: AppSpacing.xs) {
-                ForEach(Array(TradingSuggestion.previewList.prefix(2))) { suggestion in
-                    SuggestionRow(suggestion: suggestion)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(workspace.name)
+                                .font(AppFonts.body())
+                                .foregroundColor(colors.textPrimary)
+                            Text("\(workspace.agentCount) Agents · \(workspace.workflowCount) 工作流")
+                                .font(AppFonts.caption())
+                                .foregroundColor(colors.textSecondary)
+                        }
+
+                        Spacer()
+
+                        Button(action: { service.switchWorkspace(workspace) }) {
+                            Text("连接")
+                                .font(AppFonts.caption())
+                                .foregroundColor(colors.accent)
+                        }
+                    }
+                    .padding(AppSpacing.md)
+
+                    if workspace.id != service.workspaces.filter({ !$0.isActive }).last?.id {
+                        AppDivider()
+                    }
                 }
             }
             .background(colors.backgroundSecondary)
             .cornerRadius(AppRadius.medium)
+
+            // 添加更多 OpenClaw
+            Button(action: {}) {
+                HStack {
+                    Image(systemName: "plus.circle")
+                        .font(.system(size: 16))
+                    Text("添加 OpenClaw")
+                        .font(AppFonts.caption())
+                }
+                .foregroundColor(colors.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppSpacing.sm)
+            }
         }
     }
 
@@ -269,6 +298,24 @@ struct UnifiedMeView: View {
                 ListItem(icon: "questionmark.circle", title: "帮助与反馈", subtitle: nil)
                 AppDivider()
                 ListItem(icon: "info.circle", title: "关于", subtitle: "v1.0.0")
+
+                AppDivider()
+
+                // 退出登录和注销用户 - 放在最底下
+                Button(action: {}) {
+                    HStack {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                            .font(.system(size: 16))
+                            .foregroundColor(AppColors.error)
+                            .frame(width: 24)
+                        Text("退出登录")
+                            .font(AppFonts.body())
+                            .foregroundColor(AppColors.error)
+                        Spacer()
+                    }
+                    .padding(AppSpacing.md)
+                }
+                .buttonStyle(.plain)
             }
             .background(colors.backgroundSecondary)
             .cornerRadius(AppRadius.medium)
@@ -279,57 +326,6 @@ struct UnifiedMeView: View {
 // ============================================
 // MARK: - Supporting Views
 // ============================================
-
-struct StatCard: View {
-    @Environment(\.appColors) private var colors
-    let title: String
-    let value: String
-    let color: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(AppFonts.caption())
-                .foregroundColor(colors.textSecondary)
-            Text(value)
-                .font(AppFonts.title3())
-                .foregroundColor(color)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(AppSpacing.md)
-        .background(colors.backgroundSecondary)
-        .cornerRadius(AppRadius.small)
-    }
-}
-
-struct SuggestionRowCard: View {
-    @Environment(\.appColors) private var colors
-    let suggestion: TradingSuggestion
-
-    var body: some View {
-        HStack(spacing: AppSpacing.sm) {
-            Circle()
-                .fill(Color(hex: suggestion.priority.color))
-                .frame(width: 6, height: 6)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(suggestion.title)
-                    .font(AppFonts.body())
-                    .foregroundColor(colors.textPrimary)
-                Text(suggestion.potentialImpact)
-                    .font(AppFonts.caption())
-                    .foregroundColor(colors.textSecondary)
-            }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundColor(colors.textTertiary)
-        }
-        .padding(AppSpacing.md)
-    }
-}
 
 struct UnifiedNotificationRow: View {
     @Environment(\.appColors) private var colors
