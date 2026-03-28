@@ -4,7 +4,7 @@ import Foundation
 //  APIClient.swift
 //  OpenClawTrader
 //
-//  功能：HTTP网络请求客户端，统一处理API调用
+//  功能：OpenClaw API 网络请求客户端
 //
 
 // ============================================
@@ -14,24 +14,36 @@ import Foundation
 actor APIClient {
     static let shared = APIClient()
 
-    private var baseURL: String = "https://api.openclaw.example.com/v1"
-    private var apiKey: String?
+    private var baseURL: String = ""
+    private var apiKey: String = ""
 
     private init() {}
 
+    // MARK: - Config
+
     func configure(baseURL: String, apiKey: String) {
-        self.baseURL = baseURL
+        // 移除末尾的 /
+        self.baseURL = baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
         self.apiKey = apiKey
+    }
+
+    func clear() {
+        baseURL = ""
+        apiKey = ""
+    }
+
+    func isConfigured() -> Bool {
+        !baseURL.isEmpty && !apiKey.isEmpty
     }
 
     // MARK: - Generic Request
 
     func request<T: Decodable>(_ endpoint: String, method: HTTPMethod = .get, body: Encodable? = nil) async throws -> T {
-        guard let apiKey = apiKey else {
+        guard !baseURL.isEmpty, !apiKey.isEmpty else {
             throw APIError.notConfigured
         }
 
-        guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
+        guard let url = URL(string: "\(baseURL)\(endpoint)") else {
             throw APIError.invalidURL
         }
 
@@ -41,7 +53,9 @@ actor APIClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         if let body = body {
-            request.httpBody = try JSONEncoder().encode(body)
+            let encoder = JSONEncoder()
+            encoder.keyEncodingStrategy = .convertToSnakeCase
+            request.httpBody = try encoder.encode(body)
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -55,9 +69,30 @@ actor APIClient {
         }
 
         let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(T.self, from: data)
     }
+
+    // MARK: - API Methods
+
+    /// 测试连接状态
+    func testConnection() async throws -> StatusResponse {
+        return try await request("/v1/status", method: .get)
+    }
+
+    /// 发送聊天消息
+    func sendChatMessage(_ message: String, agentId: String? = nil) async throws -> ChatResponse {
+        let body = ChatRequest(message: message, agentId: agentId)
+        return try await request("/v1/chat", method: .post, body: body)
+    }
+
+    /// 获取 Workspace 列表
+    func getWorkspaces() async throws -> [WorkspaceResponse] {
+        return try await request("/v1/workspaces", method: .get)
+    }
+
+    // MARK: - HTTP Method
 
     enum HTTPMethod: String {
         case get = "GET"
@@ -66,6 +101,8 @@ actor APIClient {
         case patch = "PATCH"
         case delete = "DELETE"
     }
+
+    // MARK: - API Error
 
     enum APIError: Error, LocalizedError {
         case notConfigured
@@ -83,5 +120,55 @@ actor APIClient {
             case .decodingError(let error): return "解码错误: \(error.localizedDescription)"
             }
         }
+    }
+}
+
+// ============================================
+// MARK: - API Models
+// ============================================
+
+struct StatusResponse: Codable {
+    let status: String?
+    let version: String?
+    let message: String?
+}
+
+struct ChatRequest: Encodable {
+    let message: String
+    let agentId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case message
+        case agentId = "agent_id"
+    }
+}
+
+struct ChatResponse: Decodable {
+    let id: String?
+    let message: String?
+    let agentId: String?
+    let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case message
+        case agentId = "agent_id"
+        case createdAt = "created_at"
+    }
+}
+
+struct WorkspaceResponse: Codable {
+    let id: String
+    let name: String
+    let description: String?
+    let createdAt: String?
+    let isActive: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case description
+        case createdAt = "created_at"
+        case isActive = "is_active"
     }
 }

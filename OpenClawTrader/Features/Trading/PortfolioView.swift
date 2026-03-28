@@ -14,14 +14,9 @@ import SwiftUI
 struct TradingDashboardView: View {
     @Environment(\.appColors) private var colors
     @StateObject private var service = TradingService.shared
-    @State private var searchText = ""
     @State private var showingImportSheet = false
     @State private var showingImportOrderSheet = false
     @State private var showImportMenu = false
-    @State private var showingStockSearch = false
-    @State private var isSearchFocused = false
-    @State private var selectedStock: Stock?
-    @State private var showingQuickAdd = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -51,40 +46,6 @@ struct TradingDashboardView: View {
 
             ScrollView {
                 VStack(spacing: AppSpacing.lg) {
-                    // 搜索栏 - 内联下拉搜索
-                    VStack(spacing: 0) {
-                        // 搜索输入框
-                        HStack(spacing: AppSpacing.sm) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundColor(colors.textTertiary)
-
-                            TextField("搜索股票代码或名称", text: $searchText)
-                                .font(AppFonts.body())
-                                .foregroundColor(colors.textPrimary)
-                                .autocapitalization(.none)
-                                .autocorrectionDisabled()
-                                .onTapGesture {
-                                    isSearchFocused = true
-                                }
-
-                            if !searchText.isEmpty {
-                                Button(action: { searchText = "" }) {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(colors.textTertiary)
-                                }
-                            }
-                        }
-                        .padding(AppSpacing.sm)
-                        .background(colors.backgroundSecondary)
-                        .cornerRadius(AppRadius.small)
-
-                        // 搜索结果下拉
-                        if isSearchFocused && !searchText.isEmpty {
-                            searchResultsDropdown
-                        }
-                    }
-                    .padding(.horizontal, AppSpacing.md)
-
                     if let portfolio = service.portfolio {
                         // Portfolio Summary
                         portfolioSummaryCard(portfolio: portfolio)
@@ -121,78 +82,6 @@ struct TradingDashboardView: View {
         .sheet(isPresented: $showingImportOrderSheet) {
             ImportOrderView()
         }
-        .sheet(isPresented: $showingQuickAdd) {
-            if let stock = selectedStock {
-                QuickAddHoldingView(stock: stock)
-            }
-        }
-    }
-
-    // MARK: - Search Results Dropdown
-
-    private var searchResultsDropdown: some View {
-        let filteredStocks = Stock.realStocks.filter {
-            searchText.isEmpty ||
-            $0.symbol.localizedCaseInsensitiveContains(searchText) ||
-            $0.name.localizedCaseInsensitiveContains(searchText)
-        }
-
-        return VStack(spacing: 0) {
-            ForEach(Array(filteredStocks.prefix(5))) { stock in
-                Button(action: {
-                    selectedStock = stock
-                    showingQuickAdd = true
-                    isSearchFocused = false
-                }) {
-                    HStack(spacing: AppSpacing.sm) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text(stock.symbol)
-                                    .font(AppFonts.body())
-                                    .foregroundColor(colors.textPrimary)
-                                Text(stock.name)
-                                    .font(AppFonts.caption())
-                                    .foregroundColor(colors.textSecondary)
-                            }
-
-                            Text("¥\(String(format: "%.2f", stock.currentPrice))")
-                                .font(AppFonts.caption())
-                                .foregroundColor(colors.textTertiary)
-                        }
-
-                        Spacer()
-
-                        HStack(spacing: 4) {
-                            Image(systemName: stock.dayChangePercent >= 0 ? "arrow.up.right" : "arrow.down.right")
-                                .font(.system(size: 10, weight: .semibold))
-                            Text("\(String(format: "%.2f", stock.dayChangePercent))%")
-                                .font(AppFonts.monoCaption())
-                        }
-                        .foregroundColor(stock.dayChangePercent >= 0 ? AppColors.success : AppColors.error)
-
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 20))
-                            .foregroundColor(colors.accent)
-                    }
-                    .padding(AppSpacing.sm)
-                }
-                .buttonStyle(.plain)
-
-                if stock.id != filteredStocks.prefix(5).last?.id {
-                    Divider()
-                }
-            }
-
-            if filteredStocks.isEmpty {
-                Text("未找到相关股票")
-                    .font(AppFonts.caption())
-                    .foregroundColor(colors.textTertiary)
-                    .padding(AppSpacing.md)
-            }
-        }
-        .background(colors.backgroundSecondary)
-        .cornerRadius(AppRadius.small)
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - Portfolio Summary Card

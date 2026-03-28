@@ -245,14 +245,18 @@ struct OpenClawConnectView: View {
         testResult = nil
         errorMessage = nil
 
-        // Simulate test
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            isTesting = false
-            // Simulate success/failure
-            if apiKey.hasPrefix("sk-") {
-                testResult = .success
-            } else {
-                testResult = .failure("无效的 API Key")
+        Task {
+            do {
+                let status = try await OpenClawService.testConnection(baseURL: baseURL, apiKey: apiKey)
+                await MainActor.run {
+                    isTesting = false
+                    testResult = .success
+                }
+            } catch {
+                await MainActor.run {
+                    isTesting = false
+                    testResult = .failure(error.localizedDescription)
+                }
             }
         }
     }
@@ -261,15 +265,32 @@ struct OpenClawConnectView: View {
         isLoading = true
         errorMessage = nil
 
-        // Simulate connection
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            isLoading = false
+        Task {
+            do {
+                // 先测试连接
+                _ = try await OpenClawService.testConnection(baseURL: baseURL, apiKey: apiKey)
 
-            if rememberSettings {
-                StorageService.shared.saveConnection(baseURL: baseURL, apiKey: apiKey)
+                await MainActor.run {
+                    isLoading = false
+
+                    // 保存配置
+                    if rememberSettings {
+                        StorageService.shared.saveConnection(baseURL: baseURL, apiKey: apiKey)
+                    }
+
+                    // 连接成功后调用 OpenClawService 的 connect
+                    Task {
+                        await OpenClawService.shared.connect()
+                    }
+
+                    dismiss()
+                }
+            } catch {
+                await MainActor.run {
+                    isLoading = false
+                    errorMessage = error.localizedDescription
+                }
             }
-
-            dismiss()
         }
     }
 }

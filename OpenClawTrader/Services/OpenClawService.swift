@@ -24,22 +24,104 @@ class OpenClawService: ObservableObject {
 
     @Published var isLoading = false
     @Published var error: String?
+    @Published var isConnected = false
 
     private init() {
-        loadMockData()
-        setupMainAgent()
+        // 如果有保存的配置，则加载
+        if !StorageService.shared.apiBaseURL.isEmpty {
+            Task {
+                await connect()
+            }
+        }
     }
 
     private func setupMainAgent() {
-        // 设置主Agent：优先选择运行中的Agent，否则选择第一个Agent
         mainAgent = agents.first { $0.status == .running } ?? agents.first
     }
 
-    // MARK: - Mock Data
+    // MARK: - Connection
+
+    /// 连接到 OpenClaw API
+    func connect() async {
+        isLoading = true
+        error = nil
+
+        // 配置 APIClient
+        let baseURL = StorageService.shared.apiBaseURL
+        let apiKey = StorageService.shared.apiKey
+        await APIClient.shared.configure(baseURL: baseURL, apiKey: apiKey)
+
+        do {
+            // 测试连接
+            let status: StatusResponse = try await APIClient.shared.testConnection()
+            print("OpenClaw Status: \(status.status ?? "unknown")")
+
+            // 加载数据
+            await loadFromAPI()
+
+            isConnected = true
+            StorageService.shared.isConnected = true
+        } catch {
+            self.error = error.localizedDescription
+            isConnected = false
+        }
+
+        isLoading = false
+    }
+
+    /// 断开连接
+    func disconnect() {
+        Task {
+            await APIClient.shared.clear()
+        }
+        isConnected = false
+        reset()
+    }
+
+    /// 从 API 加载数据
+    func loadFromAPI() async {
+        do {
+            // 获取 workspaces
+            let workspaceResponses: [WorkspaceResponse] = try await APIClient.shared.getWorkspaces()
+
+            // 转换为本地 Workspace 模型
+            workspaces = workspaceResponses.map { response in
+                Workspace(
+                    id: response.id,
+                    name: response.name,
+                    description: response.description ?? "",
+                    createdAt: ISO8601DateFormatter().date(from: response.createdAt ?? "") ?? Date(),
+                    isActive: response.isActive ?? false,
+                    agentCount: 0,
+                    workflowCount: 0,
+                    tokenUsage: Workspace.TokenUsage(total: 0, usedToday: 0, limit: 0)
+                )
+            }
+
+            // 设置当前 workspace
+            currentWorkspace = workspaces.first { $0.isActive } ?? workspaces.first
+
+            // 暂时用 mock 数据，因为 API 可能没有返回这些
+            models = AIModel.previewList
+            agents = Agent.previewList
+            workflows = Workflow.previewList
+
+            setupMainAgent()
+        } catch {
+            self.error = "加载数据失败: \(error.localizedDescription)"
+            // 加载失败时使用 mock 数据
+            loadMockData()
+        }
+    }
+
+    /// 测试连接（用于 OpenClawConnectView）
+    static func testConnection(baseURL: String, apiKey: String) async throws -> StatusResponse {
+        await APIClient.shared.configure(baseURL: baseURL, apiKey: apiKey)
+        return try await APIClient.shared.testConnection()
+    }
 
     // MARK: - Reset
 
-    /// 重置服务状态（退出登录时调用）
     func reset() {
         workspaces = []
         currentWorkspace = nil
@@ -214,31 +296,24 @@ class OpenClawService: ObservableObject {
         // 调用 OpenClaw API
         Task {
             do {
-                let request = ChatRequest(
-                    agentId: agentId,
-                    messages: conversations[agentId] ?? []
-                )
-                let response: ChatResponse = try await APIClient.shared.request(
-                    "chat",
-                    method: .post,
-                    body: request
-                )
+                let response = try await APIClient.shared.sendChatMessage(content, agentId: agentId)
 
                 // 添加 AI 回复到会话历史
+                let replyContent = response.message ?? "收到消息"
                 let assistantMessage = Conversation.Message(
-                    id: UUID().uuidString,
+                    id: response.id ?? UUID().uuidString,
                     role: .assistant,
-                    content: response.message,
+                    content: replyContent,
                     timestamp: Date()
                 )
                 conversations[agentId]?.append(assistantMessage)
 
                 await MainActor.run {
-                    completion(.success(response.message))
+                    completion(.success(replyContent))
                 }
             } catch {
                 await MainActor.run {
-                    // API 调用失败时，返回模拟回复（开发阶段）
+                    // API 调用失败时，返回模拟回复
                     let mockReply = self.getMockReply(for: content, agentId: agentId)
                     let assistantMessage = Conversation.Message(
                         id: UUID().uuidString,
@@ -273,16 +348,5 @@ class OpenClawService: ObservableObject {
         } else {
             return "收到你的消息：\(content)\n\n正在处理中，请稍候..."
         }
-    }
-
-    // MARK: - Chat Request/Response
-
-    struct ChatRequest: Encodable {
-        let agentId: String
-        let messages: [Conversation.Message]
-    }
-
-    struct ChatResponse: Decodable {
-        let message: String
     }
 }
