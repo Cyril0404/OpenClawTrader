@@ -144,49 +144,39 @@ struct MobilePairingView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Steps
-            VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                Text("自主安装步骤")
+            // Simple 2 steps
+            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                Text("自主安装")
                     .font(AppFonts.title2())
                     .foregroundColor(colors.textPrimary)
 
-                InstallStepRow(number: 1, title: "安装 clawpilot", description: "运行安装命令")
-                InstallStepRow(number: 2, title: "检查 Gateway 配置", description: "确认本地服务已启用")
-                InstallStepRow(number: 3, title: "启动 Gateway", description: "确保服务运行在端口 18789")
-                InstallStepRow(number: 4, title: "生成配对码", description: "在桌面端获取配对码")
+                // Step 1: 安装 clawpilot
+                InstallStepRow(number: 1, title: "安装 clawpilot", description: "")
+
+                // Copy install command
+                Button(action: {
+                    copyInstallCommand()
+                }) {
+                    HStack {
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                        Text(copied ? "已复制" : "复制安装命令")
+                    }
+                    .foregroundColor(colors.accent)
+                    .frame(maxWidth: .infinity)
+                    .padding(AppSpacing.sm)
+                    .background(colors.backgroundTertiary)
+                    .cornerRadius(AppRadius.small)
+                }
+
+                // Step 2: 配对
+                InstallStepRow(number: 2, title: "配对", description: "")
             }
             .padding(AppSpacing.md)
             .background(colors.backgroundSecondary)
             .cornerRadius(AppRadius.medium)
 
-            // Copy install command
-            Button(action: {
-                copyInstallCommand()
-            }) {
-                HStack {
-                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                    Text(copied ? "已复制" : "复制安装命令")
-                }
-                .foregroundColor(colors.accent)
-                .frame(maxWidth: .infinity)
-                .padding(AppSpacing.md)
-                .background(colors.backgroundSecondary)
-                .cornerRadius(AppRadius.small)
-            }
-
-            // Continue to generate code
-            Button(action: {
-                currentStep = .generateCode
-                generateCode()
-            }) {
-                Text("完成安装步骤后，点击此处生成配对码")
-                    .font(AppFonts.body())
-                    .foregroundColor(colors.background)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(colors.accent)
-                    .cornerRadius(AppRadius.small)
-            }
+            // QR scan and manual input
+            pairingMethodsView
         }
     }
 
