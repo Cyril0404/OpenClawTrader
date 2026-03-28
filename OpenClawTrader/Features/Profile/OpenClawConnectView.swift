@@ -23,30 +23,14 @@ struct OpenClawConnectView: View {
     @State private var copied = false
     @State private var isVerifying = false
     @State private var errorMessage: String?
-    @State private var serverStatus: ServerStatus = .checking
     @State private var showUnbindConfirm = false
-    @State private var refreshTrigger = false
-
-    enum ServerStatus {
-        case checking
-        case online
-        case offline
-    }
-
-    // 是否已配对 - 依赖 refreshTrigger 强制刷新
-    private var isPaired: Bool {
-        refreshTrigger  // 依赖这个来触发刷新
-        return pairingService.isPaired
-    }
+    @State private var isPaired = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: AppSpacing.xl) {
                 // Header
                 headerSection
-
-                // 服务器状态
-                serverStatusSection
 
                 if isPaired {
                     pairedSection
@@ -72,9 +56,7 @@ struct OpenClawConnectView: View {
         .navigationTitle("添加 OpenClaw")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            Task {
-                await checkServerStatus()
-            }
+            isPaired = pairingService.isPaired
         }
         .sheet(isPresented: $showScanner) {
             QRScannerView { code in
@@ -104,7 +86,7 @@ struct OpenClawConnectView: View {
             Button("取消", role: .cancel) {}
             Button("解除配对", role: .destructive) {
                 pairingService.unbind()
-                refreshTrigger.toggle()  // 强制刷新 UI
+                isPaired = false
             }
         } message: {
             Text("确定要解除与 OpenClaw 桌面端的配对连接吗？")
@@ -148,50 +130,6 @@ struct OpenClawConnectView: View {
         }
     }
 
-    // MARK: - Server Status Section
-
-    private var serverStatusSection: some View {
-        HStack(spacing: AppSpacing.sm) {
-            switch serverStatus {
-            case .checking:
-                ProgressView()
-                    .scaleEffect(0.8)
-                Text("检查服务器连接...")
-                    .font(AppFonts.caption())
-                    .foregroundColor(colors.textSecondary)
-
-            case .online:
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                    .font(.system(size: 14))
-                Text("服务器已连接")
-                    .font(AppFonts.caption())
-                    .foregroundColor(.green)
-
-            case .offline:
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.red)
-                    .font(.system(size: 14))
-                Text("服务器连接失败")
-                    .font(AppFonts.caption())
-                    .foregroundColor(.red)
-            }
-        }
-        .padding(AppSpacing.sm)
-        .frame(maxWidth: .infinity)
-        .background(colors.backgroundSecondary)
-        .cornerRadius(AppRadius.small)
-        .task {
-            await checkServerStatus()
-        }
-    }
-
-    private func checkServerStatus() async {
-        serverStatus = .checking
-        let isOnline = await pairingService.checkServerStatus()
-        serverStatus = isOnline ? .online : .offline
-    }
-
     // MARK: - Method One Section
 
     private let clawredInstallCommand = """
@@ -216,16 +154,17 @@ https://github.com/Cyril0404/ClawRed
                 .foregroundColor(colors.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 代码块 - 单行显示
-            Text(clawredInstallCommand)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(Color(hex: "00FF00"))
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .padding(AppSpacing.sm)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.black.opacity(0.85))
-                .cornerRadius(AppRadius.small)
+            // 代码块 - 可滚动显示
+            ScrollView {
+                Text(clawredInstallCommand)
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(Color(hex: "00FF00"))
+                    .lineSpacing(3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(maxHeight: 200)
+            .background(Color.black)
+            .cornerRadius(AppRadius.small)
 
             // 复制按钮
             Button(action: {
@@ -262,26 +201,73 @@ https://github.com/Cyril0404/ClawRed
                     .font(AppFonts.body())
                     .foregroundColor(colors.textPrimary)
 
-                // Step 1: 安装 clawpilot
-                InstallStepRow(number: 1, title: "安装 clawpilot", description: "")
+                // Step 1: 安装 clawred
+                HStack(alignment: .top, spacing: AppSpacing.md) {
+                    Text("1")
+                        .font(AppFonts.caption())
+                        .fontWeight(.bold)
+                        .foregroundColor(colors.background)
+                        .frame(width: 24, height: 24)
+                        .background(colors.accent)
+                        .clipShape(Circle())
 
-                // Copy install command
-                Button(action: {
-                    copyInstallCommand()
-                }) {
-                    HStack {
-                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                        Text(copied ? "已复制" : "复制安装命令")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("安装 clawred")
+                            .font(AppFonts.body())
+                            .foregroundColor(colors.textPrimary)
+
+                        Text("复制下方命令，粘贴到终端运行")
+                            .font(AppFonts.caption())
+                            .foregroundColor(colors.textSecondary)
+
+                        ScrollView {
+                            Text("curl -fsSL https://raw.githubusercontent.com/Cyril0404/ClawRed/main/install.sh | bash")
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundColor(Color(hex: "00FF00"))
+                                .lineSpacing(3)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .frame(maxHeight: 60)
+                        .background(Color.black)
+                        .cornerRadius(AppRadius.small)
+
+                        Button(action: {
+                            copyInstallCommand()
+                        }) {
+                            HStack {
+                                Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                                Text(copied ? "已复制" : "复制命令")
+                            }
+                            .font(AppFonts.caption())
+                            .foregroundColor(colors.accent)
+                            .frame(maxWidth: .infinity)
+                            .padding(AppSpacing.sm)
+                            .background(colors.backgroundTertiary)
+                            .cornerRadius(AppRadius.small)
+                        }
                     }
-                    .foregroundColor(colors.accent)
-                    .frame(maxWidth: .infinity)
-                    .padding(AppSpacing.sm)
-                    .background(colors.backgroundTertiary)
-                    .cornerRadius(AppRadius.small)
                 }
 
                 // Step 2: 配对
-                InstallStepRow(number: 2, title: "配对", description: "")
+                HStack(alignment: .top, spacing: AppSpacing.md) {
+                    Text("2")
+                        .font(AppFonts.caption())
+                        .fontWeight(.bold)
+                        .foregroundColor(colors.background)
+                        .frame(width: 24, height: 24)
+                        .background(colors.accent)
+                        .clipShape(Circle())
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("配对")
+                            .font(AppFonts.body())
+                            .foregroundColor(colors.textPrimary)
+
+                        Text("运行命令后，桌面端会显示6位配对码")
+                            .font(AppFonts.caption())
+                            .foregroundColor(colors.textSecondary)
+                    }
+                }
             }
             .padding(AppSpacing.md)
             .background(colors.backgroundSecondary)
@@ -412,7 +398,7 @@ https://github.com/Cyril0404/ClawRed
     // MARK: - Helper Methods
 
     private func copyInstallCommand() {
-        let command = "curl -sSL https://openclaw.example.com/install.sh | sh"
+        let command = "curl -fsSL https://raw.githubusercontent.com/Cyril0404/ClawRed/main/install.sh | bash"
         UIPasteboard.general.string = command
         copied = true
 
@@ -469,7 +455,7 @@ https://github.com/Cyril0404/ClawRed
                     if let token = response.gatewayToken {
                         pairingService.savePairingKey(token)
                     }
-                    // isPaired 是 computed property，会自动响应 pairingService.isPaired 变化
+                    isPaired = true
                 } else {
                     errorMessage = response.error ?? "配对码无效"
                 }
