@@ -74,6 +74,7 @@ class OpenClawService: ObservableObject {
         Task {
             await APIClient.shared.clear()
         }
+        StorageService.shared.disconnect()
         isConnected = false
         reset()
     }

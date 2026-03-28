@@ -162,24 +162,26 @@ struct UnifiedMeView: View {
                 // 当前连接的 Workspace
                 HStack(spacing: AppSpacing.sm) {
                     Circle()
-                        .fill(AppColors.success)
+                        .fill(service.isConnected ? AppColors.success : colors.textTertiary)
                         .frame(width: 8, height: 8)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(service.currentWorkspace?.name ?? "未选择")
                             .font(AppFonts.body())
                             .foregroundColor(colors.textPrimary)
-                        Text("OpenClaw 已连接")
+                        Text(service.isConnected ? "OpenClaw 已连接" : "OpenClaw 未连接")
                             .font(AppFonts.caption())
-                            .foregroundColor(colors.textSecondary)
+                            .foregroundColor(service.isConnected ? colors.textSecondary : AppColors.error)
                     }
 
                     Spacer()
 
-                    Button(action: {}) {
-                        Text("断开")
-                            .font(AppFonts.caption())
-                            .foregroundColor(AppColors.error)
+                    if service.isConnected {
+                        Button(action: { service.disconnect() }) {
+                            Text("断开")
+                                .font(AppFonts.caption())
+                                .foregroundColor(AppColors.error)
+                        }
                     }
                 }
                 .padding(AppSpacing.md)
