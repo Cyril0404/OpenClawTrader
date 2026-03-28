@@ -17,13 +17,30 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.appColors) private var colors
     @State private var selectedTab = 0
+    @State private var isLoggedIn = true
 
     var body: some View {
-        VStack(spacing: 0) {
-            TabContent(selectedTab: selectedTab)
-            customTabBar
+        Group {
+            if isLoggedIn {
+                mainContent
+            } else {
+                LoginView(onLoginSuccess: {
+                    isLoggedIn = true
+                })
+            }
         }
         .background(colors.background)
+    }
+
+    // MARK: - Main Content
+
+    private var mainContent: some View {
+        VStack(spacing: 0) {
+            TabContent(selectedTab: selectedTab, onLogout: {
+                isLoggedIn = false
+            })
+            customTabBar
+        }
     }
 
     // MARK: - Custom Tab Bar
@@ -51,6 +68,7 @@ struct ContentView: View {
 
 struct TabContent: View {
     let selectedTab: Int
+    let onLogout: () -> Void
 
     var body: some View {
         Group {
@@ -65,7 +83,7 @@ struct TabContent: View {
                 }
             case 2:
                 NavigationStack {
-                    UnifiedMeView()
+                    UnifiedMeView(onLogout: onLogout)
                 }
             default:
                 SimpleChatView()

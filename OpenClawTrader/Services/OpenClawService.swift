@@ -37,6 +37,21 @@ class OpenClawService: ObservableObject {
 
     // MARK: - Mock Data
 
+    // MARK: - Reset
+
+    /// 重置服务状态（退出登录时调用）
+    func reset() {
+        workspaces = []
+        currentWorkspace = nil
+        models = []
+        agents = []
+        workflows = []
+        mainAgent = nil
+        error = nil
+    }
+
+    // MARK: - Mock Data
+
     private func loadMockData() {
         workspaces = [
             Workspace(id: "ws_001", name: "Production", description: "生产环境", createdAt: Date(), isActive: true,

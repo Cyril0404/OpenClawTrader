@@ -19,6 +19,10 @@ struct UnifiedMeView: View {
     @State private var notifications: [AppNotification] = AppNotification.previewList
     @State private var selectedFilter: NotificationFilter = .all
     @State private var showingThemePicker = false
+    @State private var showingLogoutAlert = false
+    @State private var showingDeleteAccountAlert = false
+    @State private var showingOpenClawConnect = false
+    let onLogout: () -> Void
 
     enum NotificationFilter: String, CaseIterable {
         case all = "全部"
@@ -48,10 +52,7 @@ struct UnifiedMeView: View {
                 // 3. 消息通知
                 notificationsSection
 
-                // 4. 持仓列表
-                holdingsSection
-
-                // 5. 设置
+                // 4. 设置
                 settingsSection
             }
             .padding(.horizontal, AppSpacing.md)
@@ -61,6 +62,42 @@ struct UnifiedMeView: View {
         .sheet(isPresented: $showingThemePicker) {
             ThemePickerSheet()
         }
+        .sheet(isPresented: $showingOpenClawConnect) {
+            OpenClawConnectView()
+        }
+        .alert("退出登录", isPresented: $showingLogoutAlert) {
+            Button("取消", role: .cancel) {}
+            Button("确认退出", role: .destructive) {
+                performLogout()
+            }
+        } message: {
+            Text("确定要退出当前账号吗？")
+        }
+        .alert("注销账号", isPresented: $showingDeleteAccountAlert) {
+            Button("取消", role: .cancel) {}
+            Button("确认注销", role: .destructive) {
+                performDeleteAccount()
+            }
+        } message: {
+            Text("注销后将删除所有账号数据，此操作不可恢复。确定要注销账号吗？")
+        }
+    }
+
+    // MARK: - Actions
+
+    /// 退出登录
+    private func performLogout() {
+        StorageService.shared.disconnect()
+        OpenClawService.shared.reset()
+        onLogout()
+    }
+
+    /// 注销账号
+    private func performDeleteAccount() {
+        StorageService.shared.deleteAccount()
+        OpenClawService.shared.reset()
+        TradingService.shared.reset()
+        onLogout()
     }
 
     // MARK: - Profile Header
@@ -161,7 +198,7 @@ struct UnifiedMeView: View {
             .cornerRadius(AppRadius.medium)
 
             // 添加更多 OpenClaw
-            Button(action: {}) {
+            Button(action: { showingOpenClawConnect = true }) {
                 HStack {
                     Image(systemName: "plus.circle")
                         .font(.system(size: 16))
@@ -230,44 +267,6 @@ struct UnifiedMeView: View {
         }
     }
 
-    // MARK: - Holdings
-
-    private var holdingsSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            HStack {
-                SectionHeader(title: "持仓列表")
-                Spacer()
-                NavigationLink(destination: HoldingListView()) {
-                    Text("查看全部")
-                        .font(AppFonts.caption())
-                        .foregroundColor(colors.accent)
-                }
-            }
-
-            if let portfolio = tradingService.portfolio, !portfolio.holdings.isEmpty {
-                VStack(spacing: 0) {
-                    ForEach(Array(portfolio.holdings.prefix(3))) { holding in
-                        HoldingRow(holding: holding)
-                        if holding.id != portfolio.holdings.prefix(3).last?.id {
-                            AppDivider()
-                        }
-                    }
-                }
-                .background(colors.backgroundSecondary)
-                .cornerRadius(AppRadius.medium)
-            } else {
-                EmptyState(
-                    icon: "chart.bar",
-                    title: "暂无持仓",
-                    subtitle: "导入持仓数据以开始使用"
-                )
-                .padding(AppSpacing.lg)
-                .background(colors.backgroundSecondary)
-                .cornerRadius(AppRadius.medium)
-            }
-        }
-    }
-
     // MARK: - Settings
 
     private var settingsSection: some View {
@@ -286,29 +285,39 @@ struct UnifiedMeView: View {
 
                 ListItem(icon: "bell", title: "通知设置", subtitle: nil)
                 AppDivider()
-                NavigationLink(destination: AgentListView()) {
-                    ListItem(icon: "person.2", title: "Agent 管理", subtitle: nil, showArrow: true)
-                }
-                .buttonStyle(.plain)
 
-                AppDivider()
-
-                ListItem(icon: "cpu", title: "API Key 设置", subtitle: nil, showArrow: true)
-                AppDivider()
                 ListItem(icon: "questionmark.circle", title: "帮助与反馈", subtitle: nil)
                 AppDivider()
                 ListItem(icon: "info.circle", title: "关于", subtitle: "v1.0.0")
 
                 AppDivider()
 
-                // 退出登录和注销用户 - 放在最底下
-                Button(action: {}) {
+                // 退出登录
+                Button(action: { showingLogoutAlert = true }) {
                     HStack {
                         Image(systemName: "rectangle.portrait.and.arrow.right")
                             .font(.system(size: 16))
                             .foregroundColor(AppColors.error)
                             .frame(width: 24)
                         Text("退出登录")
+                            .font(AppFonts.body())
+                            .foregroundColor(AppColors.error)
+                        Spacer()
+                    }
+                    .padding(AppSpacing.md)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                // 注销账号
+                Button(action: { showingDeleteAccountAlert = true }) {
+                    HStack {
+                        Image(systemName: "person.crop.circle.badge.minus")
+                            .font(.system(size: 16))
+                            .foregroundColor(AppColors.error)
+                            .frame(width: 24)
+                        Text("注销账号")
                             .font(AppFonts.body())
                             .foregroundColor(AppColors.error)
                         Spacer()

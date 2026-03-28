@@ -220,4 +220,18 @@ class TradingService: ObservableObject {
         guard !trades.isEmpty else { return 5.0 }
         return 5.0 // 默认5天
     }
+
+    // MARK: - Reset
+
+    /// 重置所有交易数据（注销账号时调用）
+    func reset() {
+        portfolio = nil
+        tradingStyle = nil
+        riskAssessment = nil
+        suggestions = []
+        trades = []
+        orders = []
+        performance = nil
+        error = nil
+    }
 }

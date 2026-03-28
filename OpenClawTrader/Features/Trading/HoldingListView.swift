@@ -110,11 +110,16 @@ struct HoldingRow: View {
     var body: some View {
         HStack(spacing: AppSpacing.sm) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(holding.symbol)
-                    .font(AppFonts.title3())
-                    .foregroundColor(colors.textPrimary)
+                HStack(spacing: 6) {
+                    Text(holding.symbol)
+                        .font(AppFonts.title3())
+                        .foregroundColor(colors.textPrimary)
+                    Text(holding.name)
+                        .font(AppFonts.body())
+                        .foregroundColor(colors.textSecondary)
+                }
 
-                Text("\(holding.shares) 股 @ \(String(format: "%.2f", holding.averageCost))")
+                Text("¥\(String(format: "%.2f", holding.currentPrice))")
                     .font(AppFonts.caption())
                     .foregroundColor(colors.textSecondary)
             }

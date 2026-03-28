@@ -113,4 +113,12 @@ class StorageService {
         isConnected = false
         selectedWorkspaceId = nil
     }
+
+    /// 注销账号 - 清除所有数据
+    func deleteAccount() {
+        // 清除所有 UserDefaults 数据
+        let domain = Bundle.main.bundleIdentifier!
+        userDefaults.removePersistentDomain(forName: domain)
+        userDefaults.synchronize()
+    }
 }

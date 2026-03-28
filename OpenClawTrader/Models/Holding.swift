@@ -94,6 +94,7 @@ struct PortfolioSummary: Codable {
 
     var todayPL: Double { dayChange }
     var totalPL: Double { totalProfitLoss }
+    var stockCount: Int { holdings.count }
 
     var formattedTotalValue: String {
         let formatter = NumberFormatter()
