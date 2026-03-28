@@ -46,6 +46,9 @@ struct OpenClawConnectView: View {
                     // Mobile Pairing Button
                     mobilePairingButton
 
+                    // Skills Control Button
+                    skillsControlButton
+
                     Spacer(minLength: AppSpacing.lg)
 
                     // Connect Button
@@ -200,6 +203,27 @@ struct OpenClawConnectView: View {
                 Image(systemName: "iphone.and.arrow.forward")
                     .font(.system(size: 16))
                 Text("移动端配对")
+                    .font(AppFonts.body())
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundColor(colors.textTertiary)
+            }
+            .foregroundColor(colors.textSecondary)
+            .padding(AppSpacing.md)
+            .background(colors.backgroundSecondary)
+            .cornerRadius(AppRadius.small)
+        }
+    }
+
+    // MARK: - Skills Control Button
+
+    private var skillsControlButton: some View {
+        NavigationLink(destination: SkillsView()) {
+            HStack {
+                Image(systemName: "gearshape.2")
+                    .font(.system(size: 16))
+                Text("技能控制")
                     .font(AppFonts.body())
                 Spacer()
                 Image(systemName: "chevron.right")

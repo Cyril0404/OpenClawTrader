@@ -25,17 +25,20 @@
 		6A4CCFCD5F5369DAC4E29BC5 /* SimpleChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE3D8AAC37271CB21604A96 /* SimpleChatView.swift */; };
 		6B84C0278EDF273495513757 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24EA8EF027ADC48467F45B2 /* Typography.swift */; };
 		6C09E06A5489C645F7BA12AB /* TradingAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BFAA901553C9AA3D1C53414 /* TradingAnalysis.swift */; };
+		71C902131737158C416FE58D /* SkillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0672CF3F81BC2DB25F04B95 /* SkillsView.swift */; };
 		7311091C4C1B435DEF693C40 /* WorkflowListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C489F495BD85D108F8E144 /* WorkflowListView.swift */; };
 		7586F641DACC4B4C24A6E6B5 /* ImportHoldingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7BA403239EB994EE177CB8 /* ImportHoldingView.swift */; };
 		797BEDB09BE33A8DA3CCF40C /* OpenClawService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */; };
 		82F816E0FF2A69C7D98855E6 /* HoldingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB219B66D734587AE0E05340 /* HoldingListView.swift */; };
 		88479A220EC1F72A038CE962 /* AIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABA54C95BF454A92353E2D5 /* AIModel.swift */; };
 		8A6A72502E24805CADA1F477 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59EF687BEDAF49227658B079 /* Assets.xcassets */; };
+		8D05D216CA6746312DDC06DD /* SkillsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6947F164981A37464F52D902 /* SkillsService.swift */; };
 		8E805B884948CDE373FA114D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75ED50754E06FA721AB2B615 /* ContentView.swift */; };
 		8EAC547FAC15C3D86D8E25ED /* PairingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39444681EDBB8C11626B8E28 /* PairingService.swift */; };
 		98F2E65A4403EF52565DE3B7 /* ImportOrderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6F5E8442C0873551CAF8E24 /* ImportOrderView.swift */; };
 		9A3CBAC53781F8ED5C1BFFA5 /* Agent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA07CE1ED7FDDBB8550B2E8 /* Agent.swift */; };
 		9EB795EA2BEFBA271E3248BA /* stock_data.json in Resources */ = {isa = PBXBuildFile; fileRef = A3CDD4D82B0697A7565D1BDE /* stock_data.json */; };
+		A4AA24BD2483CD0627373E96 /* Skill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05625BC66DAA67469387086D /* Skill.swift */; };
 		A4E7AD1E867AED0112C9AC92 /* UnifiedMeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3810620B0AF11B3C7C72DDBF /* UnifiedMeView.swift */; };
 		BB2A35C95DFFA9271807B9F9 /* AgentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5764E713B958898AF2652A /* AgentListView.swift */; };
 		C286EF2C9EFB35A1292166E1 /* WorkspaceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEED9A917710DA7C277EA58A /* WorkspaceListView.swift */; };
@@ -55,6 +58,7 @@
 
 /* Begin PBXFileReference section */
 		030E92ADDDB83BC2904134FC /* OpenClawTrader.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = OpenClawTrader.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		05625BC66DAA67469387086D /* Skill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skill.swift; sourceTree = "<group>"; };
 		07F5BA1A8555C1B7C2A0A351 /* HoldingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldingDetailView.swift; sourceTree = "<group>"; };
 		0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawConnectView.swift; sourceTree = "<group>"; };
 		0D5764E713B958898AF2652A /* AgentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentListView.swift; sourceTree = "<group>"; };
@@ -72,6 +76,7 @@
 		5BE5A5654D1A61006E0BD942 /* Performance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Performance.swift; sourceTree = "<group>"; };
 		5C7BA403239EB994EE177CB8 /* ImportHoldingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportHoldingView.swift; sourceTree = "<group>"; };
 		5D2174C976957819231E60CA /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		6947F164981A37464F52D902 /* SkillsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsService.swift; sourceTree = "<group>"; };
 		69A5DA03A03F50F3E26D0236 /* AgentChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentChatView.swift; sourceTree = "<group>"; };
 		6ABA54C95BF454A92353E2D5 /* AIModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModel.swift; sourceTree = "<group>"; };
 		7438843DC19C034C8FBFE950 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
@@ -91,6 +96,7 @@
 		D24EA8EF027ADC48467F45B2 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
 		D31D65D46D040893469CD081 /* PortfolioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioView.swift; sourceTree = "<group>"; };
 		D96105F714C7E33D4B99140D /* NotificationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationListView.swift; sourceTree = "<group>"; };
+		E0672CF3F81BC2DB25F04B95 /* SkillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsView.swift; sourceTree = "<group>"; };
 		E0C489F495BD85D108F8E144 /* WorkflowListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowListView.swift; sourceTree = "<group>"; };
 		E6F5E8442C0873551CAF8E24 /* ImportOrderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportOrderView.swift; sourceTree = "<group>"; };
 		E9059A28189FC9F55A242FDE /* MobilePairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilePairingView.swift; sourceTree = "<group>"; };
@@ -147,6 +153,7 @@
 				E9059A28189FC9F55A242FDE /* MobilePairingView.swift */,
 				0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */,
 				18215A86D4E9893048DDDBAF /* ProfileView.swift */,
+				E0672CF3F81BC2DB25F04B95 /* SkillsView.swift */,
 				3810620B0AF11B3C7C72DDBF /* UnifiedMeView.swift */,
 			);
 			path = Profile;
@@ -180,6 +187,7 @@
 				2B0533E2DFF9477C0E99F3B1 /* APIClient.swift */,
 				8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */,
 				39444681EDBB8C11626B8E28 /* PairingService.swift */,
+				6947F164981A37464F52D902 /* SkillsService.swift */,
 				9617123DF49FA5C1F9FAADF0 /* StorageService.swift */,
 				59707AD00A7922121183961E /* TradingService.swift */,
 			);
@@ -230,6 +238,7 @@
 				845BF882A533382EB7200D72 /* Holding.swift */,
 				7438843DC19C034C8FBFE950 /* Notification.swift */,
 				5BE5A5654D1A61006E0BD942 /* Performance.swift */,
+				05625BC66DAA67469387086D /* Skill.swift */,
 				7BFAA901553C9AA3D1C53414 /* TradingAnalysis.swift */,
 				92B1DE06EAE865AE1C1F4ABF /* Workflow.swift */,
 				FB307292488DF178CE7B707F /* Workspace.swift */,
@@ -368,6 +377,9 @@
 				D992DEE5449D209174CD43D2 /* PortfolioView.swift in Sources */,
 				FFD8B8AC1A5C35334A8273CC /* ProfileView.swift in Sources */,
 				6A4CCFCD5F5369DAC4E29BC5 /* SimpleChatView.swift in Sources */,
+				A4AA24BD2483CD0627373E96 /* Skill.swift in Sources */,
+				8D05D216CA6746312DDC06DD /* SkillsService.swift in Sources */,
+				71C902131737158C416FE58D /* SkillsView.swift in Sources */,
 				2D36B00E2D45B615E488E714 /* StorageService.swift in Sources */,
 				0562DD444DD3309755AD89B4 /* SuggestionDetailView.swift in Sources */,
 				DBE1A16D1CE99C1AAFD6249C /* SuggestionListView.swift in Sources */,
