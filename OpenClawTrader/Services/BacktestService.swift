@@ -189,9 +189,9 @@ class BacktestService: ObservableObject {
     }
 
     private func calculateRSI(prices: [Double], period: Int = 6) -> [Double] {
-        var result: [Double] = Array(repeating: 0, count: period)
+        guard prices.count > period else { return [] }
 
-        guard prices.count > period else { return result }
+        var result: [Double] = Array(repeating: 0, count: prices.count)
 
         var gains: [Double] = []
         var losses: [Double] = []
@@ -205,12 +205,14 @@ class BacktestService: ObservableObject {
         var avgGain = gains[0..<period].reduce(0, +) / Double(period)
         var avgLoss = losses[0..<period].reduce(0, +) / Double(period)
 
-        for i in period..<gains.count {
-            avgGain = (avgGain * Double(period - 1) + gains[i]) / Double(period)
-            avgLoss = (avgLoss * Double(period - 1) + losses[i]) / Double(period)
+        for i in period..<prices.count {
+            if i < gains.count {
+                avgGain = (avgGain * Double(period - 1) + gains[i]) / Double(period)
+                avgLoss = (avgLoss * Double(period - 1) + losses[i]) / Double(period)
+            }
 
             let rs = avgLoss == 0 ? 100 : avgGain / avgLoss
-            result.append(100 - (100 / (1 + rs)))
+            result[i] = 100 - (100 / (1 + rs))
         }
 
         return result
@@ -221,10 +223,12 @@ class BacktestService: ObservableObject {
         let ema12 = calculateEMA(prices: closes, period: 12)
         let ema26 = calculateEMA(prices: closes, period: 26)
 
-        var result: [Double] = Array(repeating: 0, count: 26)
+        var result: [Double] = []
         for i in 26..<closes.count {
-            let dif = ema12[i - 26 + 12] - ema26[i]
-            result.append(dif)
+            let ema12Index = i - 26 + 11  // offset because EMA12 starts from index 11
+            let ema12Val = ema12Index < ema12.count ? ema12[ema12Index] : 0
+            let ema26Val = ema26[i - 26]
+            result.append(ema12Val - ema26Val)
         }
         return result
     }
