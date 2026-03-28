@@ -76,6 +76,11 @@ struct MobilePairingView: View {
     private var selectMethodSection: some View {
         VStack(spacing: AppSpacing.xl) {
             // Method 1: Let OpenClaw help install
+            Text("复制下方安装命令，发送给 OpenClaw 桌面端执行")
+                .font(AppFonts.caption())
+                .foregroundColor(colors.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
             Button(action: {
                 copyInstallCommand()
                 currentStep = .generateCode
