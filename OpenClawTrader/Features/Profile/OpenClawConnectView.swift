@@ -335,10 +335,23 @@ https://github.com/Cyril0404/ClawRed
     }
 
     private func handleScannedCode(_ code: String) {
+        // 尝试解析为 URL 格式
         if let parsed = pairingService.parsePairingURL(code) {
             manualCode = parsed.code
             verifyCode(parsed.code)
+            return
         }
+
+        // 如果不是 URL 格式，检查是否是纯配对码（6位）
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if trimmed.count == 6 && trimmed.allSatisfy({ $0.isLetter || $0.isNumber }) {
+            manualCode = trimmed
+            verifyCode(trimmed)
+            return
+        }
+
+        // 格式错误
+        errorMessage = "二维码格式不正确，请扫描正确的配对二维码"
     }
 
     private func handleManualCode(_ code: String) {
