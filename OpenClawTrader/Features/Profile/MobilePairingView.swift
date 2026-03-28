@@ -75,24 +75,11 @@ struct MobilePairingView: View {
 
     private var selectMethodSection: some View {
         VStack(spacing: AppSpacing.xl) {
-            // Header
-            VStack(spacing: AppSpacing.md) {
-                Image(systemName: "link.circle.fill")
-                    .font(.system(size: 72, weight: .light))
-                    .foregroundColor(colors.accent)
-
-                Text("移动端配对")
-                    .font(AppFonts.title1())
-                    .foregroundColor(colors.textPrimary)
-
-                Text("将 iOS App 与桌面端 Gateway 配对")
-                    .font(AppFonts.body())
-                    .foregroundColor(colors.textSecondary)
-            }
-
             // Method 1: Let OpenClaw help install
             Button(action: {
                 copyInstallCommand()
+                currentStep = .generateCode
+                generateCode()
             }) {
                 HStack {
                     VStack(alignment: .leading, spacing: AppSpacing.xs) {
@@ -104,13 +91,8 @@ struct MobilePairingView: View {
                             .foregroundColor(colors.textPrimary)
                     }
                     Spacer()
-                    if copied {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(AppColors.success)
-                    } else {
-                        Image(systemName: "doc.on.doc")
-                            .foregroundColor(colors.textSecondary)
-                    }
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(colors.textTertiary)
                 }
                 .padding(AppSpacing.md)
                 .background(colors.backgroundSecondary)
@@ -137,22 +119,6 @@ struct MobilePairingView: View {
                 .padding(AppSpacing.md)
                 .background(colors.backgroundSecondary)
                 .cornerRadius(AppRadius.medium)
-            }
-
-            // Proceed to pairing
-            Button(action: {
-                currentStep = .generateCode
-                generateCode()
-            }) {
-                HStack {
-                    Text("已有配对码？直接生成配对")
-                        .font(AppFonts.body())
-                        .foregroundColor(colors.textSecondary)
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(colors.textTertiary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(AppSpacing.md)
             }
         }
     }
