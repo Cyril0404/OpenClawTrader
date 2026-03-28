@@ -43,6 +43,9 @@ struct OpenClawConnectView: View {
                     // Test Connection Button
                     testButton
 
+                    // Mobile Pairing Button
+                    mobilePairingButton
+
                     Spacer(minLength: AppSpacing.lg)
 
                     // Connect Button
@@ -55,6 +58,11 @@ struct OpenClawConnectView: View {
         .background(colors.background)
         .navigationTitle("连接 OpenClaw")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: String.self) { destination in
+            if destination == "mobilePairing" {
+                MobilePairingView()
+            }
+        }
         .onAppear {
             // Load saved settings
             baseURL = StorageService.shared.apiBaseURL
@@ -182,6 +190,27 @@ struct OpenClawConnectView: View {
             .cornerRadius(AppRadius.small)
         }
         .disabled(apiKey.isEmpty || isTesting)
+    }
+
+    // MARK: - Mobile Pairing Button
+
+    private var mobilePairingButton: some View {
+        NavigationLink(destination: MobilePairingView()) {
+            HStack {
+                Image(systemName: "iphone.and.arrow.forward")
+                    .font(.system(size: 16))
+                Text("移动端配对")
+                    .font(AppFonts.body())
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundColor(colors.textTertiary)
+            }
+            .foregroundColor(colors.textSecondary)
+            .padding(AppSpacing.md)
+            .background(colors.backgroundSecondary)
+            .cornerRadius(AppRadius.small)
+        }
     }
 
     // MARK: - Connect Button
