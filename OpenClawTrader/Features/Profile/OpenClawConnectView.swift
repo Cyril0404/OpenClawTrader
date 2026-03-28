@@ -22,7 +22,6 @@ struct OpenClawConnectView: View {
     @State private var manualCode = ""
     @State private var copied = false
     @State private var isPaired = false
-    @State private var isExpanded = false
 
     var body: some View {
         ScrollView {
@@ -113,22 +112,16 @@ https://github.com/Cyril0404/ClawRed
                 .foregroundColor(colors.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 代码块 - 默认单行，展开后显示全部
-            VStack(alignment: .leading, spacing: 0) {
-                Text(clawredInstallCommand)
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundColor(Color(hex: "00FF00"))
-                    .lineLimit(isExpanded ? nil : 1)
-                    .padding(AppSpacing.sm)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.black.opacity(0.85))
-                    .cornerRadius(AppRadius.small)
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isExpanded.toggle()
-                        }
-                    }
-            }
+            // 代码块 - 单行显示
+            Text(clawredInstallCommand)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(Color(hex: "00FF00"))
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .padding(AppSpacing.sm)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.black.opacity(0.85))
+                .cornerRadius(AppRadius.small)
 
             // 复制按钮
             Button(action: {
@@ -327,6 +320,10 @@ https://github.com/Cyril0404/ClawRed
     private func verifyCode(_ code: String) {
         Task {
             if let response = await pairingService.verifyPairingCode(code), response.success {
+                // 保存 token
+                if let token = response.gatewayToken {
+                    pairingService.savePairingKey(token)
+                }
                 isPaired = true
             }
         }
