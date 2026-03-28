@@ -24,12 +24,22 @@ struct OpenClawConnectView: View {
     @State private var isPaired = false
     @State private var isVerifying = false
     @State private var errorMessage: String?
+    @State private var serverStatus: ServerStatus = .checking
+
+    enum ServerStatus {
+        case checking
+        case online
+        case offline
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: AppSpacing.xl) {
                 // Header
                 headerSection
+
+                // 服务器状态
+                serverStatusSection
 
                 if isPaired {
                     pairedSection
@@ -115,6 +125,50 @@ struct OpenClawConnectView: View {
                 .font(AppFonts.body())
                 .foregroundColor(colors.textSecondary)
         }
+    }
+
+    // MARK: - Server Status Section
+
+    private var serverStatusSection: some View {
+        HStack(spacing: AppSpacing.sm) {
+            switch serverStatus {
+            case .checking:
+                ProgressView()
+                    .scaleEffect(0.8)
+                Text("检查服务器连接...")
+                    .font(AppFonts.caption())
+                    .foregroundColor(colors.textSecondary)
+
+            case .online:
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                    .font(.system(size: 14))
+                Text("服务器已连接")
+                    .font(AppFonts.caption())
+                    .foregroundColor(.green)
+
+            case .offline:
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.red)
+                    .font(.system(size: 14))
+                Text("服务器连接失败")
+                    .font(AppFonts.caption())
+                    .foregroundColor(.red)
+            }
+        }
+        .padding(AppSpacing.sm)
+        .frame(maxWidth: .infinity)
+        .background(colors.backgroundSecondary)
+        .cornerRadius(AppRadius.small)
+        .task {
+            await checkServerStatus()
+        }
+    }
+
+    private func checkServerStatus() async {
+        serverStatus = .checking
+        let isOnline = await pairingService.checkServerStatus()
+        serverStatus = isOnline ? .online : .offline
     }
 
     // MARK: - Method One Section
@@ -350,8 +404,8 @@ https://github.com/Cyril0404/ClawRed
             return
         }
 
-        // 格式错误
-        errorMessage = "二维码格式不正确，请扫描正确的配对二维码"
+        // 格式错误 - 显示原始内容帮助调试
+        errorMessage = "二维码格式不正确\n原始内容: \(String(code.prefix(50)))\n请确保扫描的是 OpenClaw 生成的配对二维码"
     }
 
     private func handleManualCode(_ code: String) {

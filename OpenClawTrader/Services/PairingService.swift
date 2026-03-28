@@ -5,7 +5,7 @@ import Security
 //  PairingService.swift
 //  OpenClawTrader
 //
-//  功能：移动端配对服务，管理与桌面端 Gateway 的配对
+//  功能：移动端配对服务，对接云端中继服务
 //
 
 // ============================================
@@ -17,204 +17,218 @@ class PairingService: ObservableObject {
     static let shared = PairingService()
 
     @Published var pairingStatus: PairingStatus = .idle
-    @Published var currentCode: String?
-    @Published var qrCodeData: String?
-    @Published var pairedDevices: [PairedDevice] = []
     @Published var errorMessage: String?
 
-    private let gatewayBaseURL = "http://localhost:18789"
+    // 云端中继服务器地址
+    private let relayAPI = "http://150.158.119.114:3001/api"
+    private let relayWS = "ws://150.158.119.114:3001"
+
+    private let keychainAccount = "openclaw_pairing_key"
 
     enum PairingStatus: Equatable {
         case idle
-        case generating
-        case ready
         case scanning
         case verifying
-        case paired
+        case connected
         case error(String)
 
         static func == (lhs: PairingStatus, rhs: PairingStatus) -> Bool {
             switch (lhs, rhs) {
             case (.idle, .idle): return true
-            case (.generating, .generating): return true
-            case (.ready, .ready): return true
             case (.scanning, .scanning): return true
             case (.verifying, .verifying): return true
-            case (.paired, .paired): return true
+            case (.connected, .connected): return true
             case (.error(let lhsMsg), .error(let rhsMsg)): return lhsMsg == rhsMsg
             default: return false
             }
         }
     }
 
-    struct PairedDevice: Identifiable, Codable {
-        let id: String
-        let name: String
-        let gatewayId: String
-        let connectedAt: Date
-        var isConnected: Bool
+    struct PairingInfo {
+        let code: String
+        let token: String
+        let gatewayId: String?
     }
 
-    struct PairingCodeResponse: Codable {
+    struct GenerateResponse: Codable {
         let code: String
         let expiresAt: String
-        let gatewayId: String
+        let serverUrl: String
+        let token: String
     }
 
-    struct PairingVerifyRequest: Encodable {
-        let code: String
-        let deviceId: String
-        let deviceName: String
-        let deviceType: String
-    }
-
-    struct PairingVerifyResponse: Codable {
+    struct VerifyResponse: Codable {
         let success: Bool
         let gatewayToken: String?
+        let gatewayId: String?
         let error: String?
     }
 
-    private init() {
-        loadPairedDevices()
+    private init() {}
+
+    // MARK: - Public API
+
+    /// 是否已配对
+    var isPaired: Bool {
+        getPairingKey() != nil
     }
 
-    // MARK: - Generate Pairing Code
+    /// 获取配对信息
+    var gatewayId: String? {
+        getPairingKey()
+    }
 
-    /// 生成配对码
-    func generatePairingCode() async {
-        pairingStatus = .generating
-        errorMessage = nil
-
-        do {
-            guard let url = URL(string: "\(gatewayBaseURL)/api/pairing/code") else {
-                throw PairingError.invalidURL
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            if let token = getGatewayToken() {
-                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            }
-
-            let (data, response) = try await URLSession.shared.data(for: request)
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw PairingError.invalidResponse
-            }
-
-            if httpResponse.statusCode == 200 {
-                let codeResponse = try JSONDecoder().decode(PairingCodeResponse.self, from: data)
-                currentCode = codeResponse.code
-                qrCodeData = "openclaw://pair/\(codeResponse.code)"
-                pairingStatus = .ready
-            } else {
-                throw PairingError.serverError(httpResponse.statusCode)
-            }
-        } catch {
-            errorMessage = error.localizedDescription
-            pairingStatus = .error(error.localizedDescription)
+    /// 检查云端服务器连接状态
+    func checkServerStatus() async -> Bool {
+        guard let url = URL(string: relayAPI) else {
+            return false
         }
-    }
 
-    // MARK: - Verify Pairing Code
-
-    /// 验证配对码
-    func verifyPairingCode(_ code: String) async -> Bool {
-        pairingStatus = .verifying
-        errorMessage = nil
-
-        let deviceId = getDeviceId()
-        let deviceName = getDeviceName()
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 5
 
         do {
-            guard let url = URL(string: "\(gatewayBaseURL)/api/pairing/verify") else {
-                throw PairingError.invalidURL
-            }
-
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-            let verifyRequest = PairingVerifyRequest(
-                code: code,
-                deviceId: deviceId,
-                deviceName: deviceName,
-                deviceType: "ios"
-            )
-
-            request.httpBody = try JSONEncoder().encode(verifyRequest)
-
-            let (data, response) = try await URLSession.shared.data(for: request)
-
+            let (_, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
-                throw PairingError.invalidResponse
+                return false
             }
-
-            if httpResponse.statusCode == 200 {
-                let verifyResponse = try JSONDecoder().decode(PairingVerifyResponse.self, from: data)
-
-                if verifyResponse.success, let token = verifyResponse.gatewayToken {
-                    saveGatewayToken(token)
-                    pairingStatus = .paired
-                    return true
-                } else {
-                    errorMessage = verifyResponse.error ?? "验证失败"
-                    pairingStatus = .error(verifyResponse.error ?? "验证失败")
-                    return false
-                }
-            } else {
-                throw PairingError.serverError(httpResponse.statusCode)
-            }
+            // 任何响应都说明服务器在线
+            return httpResponse.statusCode < 500
         } catch {
-            errorMessage = error.localizedDescription
-            pairingStatus = .error(error.localizedDescription)
             return false
         }
     }
 
-    // MARK: - QR Code Parsing
-
-    /// 解析二维码内容
-    func parseQRCode(_ content: String) -> String? {
-        // 支持格式: openclaw://pair/A3B7K9
-        if content.hasPrefix("openclaw://pair/") {
-            let code = String(content.dropFirst("openclaw://pair/".count))
-            return code.isEmpty ? nil : code
+    /// 调用云端生成配对码（桌面端用）
+    func generatePairingCode() async -> GenerateResponse? {
+        guard let url = URL(string: "\(relayAPI)/pair/generate") else {
+            errorMessage = "无效的服务器地址"
+            return nil
         }
 
-        // 直接是配对码
-        if content.count == 6 && content.allSatisfy({ $0.isLetter || $0.isNumber }) {
-            return content.uppercased()
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 10
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                errorMessage = "生成配对码失败"
+                return nil
+            }
+
+            let result = try JSONDecoder().decode(GenerateResponse.self, from: data)
+            return result
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
+    /// 解析配对 URL
+    /// 格式: openclaw://pair?code=XXX&server=ws://...
+    func parsePairingURL(_ urlString: String) -> (code: String, server: String)? {
+        guard let components = URLComponents(string: urlString),
+              components.scheme == "openclaw",
+              components.host == "pair" else {
+            return nil
         }
 
-        return nil
-    }
-
-    // MARK: - Device Info
-
-    private func getDeviceId() -> String {
-        if let stored = UserDefaults.standard.string(forKey: "pairedDeviceId") {
-            return stored
+        let queryItems = components.queryItems ?? []
+        var paramMap: [String: String] = [:]
+        for item in queryItems {
+            if let value = item.value {
+                paramMap[item.name] = value
+            }
         }
-        let newId = UUID().uuidString
-        UserDefaults.standard.set(newId, forKey: "pairedDeviceId")
-        return newId
+
+        guard let code = paramMap["code"],
+              let server = paramMap["server"] else {
+            return nil
+        }
+
+        return (code, server)
     }
 
-    private func getDeviceName() -> String {
-        UserDefaults.standard.string(forKey: "pairedDeviceName") ?? "我的 iPhone"
+    /// 验证配对码
+    func verifyPairingCode(_ code: String) async -> VerifyResponse? {
+        guard let url = URL(string: "\(relayAPI)/pair/verify") else {
+            errorMessage = "无效的服务器地址"
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 10
+
+        let body = ["code": code]
+        request.httpBody = try? JSONEncoder().encode(body)
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200 else {
+                errorMessage = "验证配对码失败"
+                return nil
+            }
+
+            let result = try JSONDecoder().decode(VerifyResponse.self, from: data)
+            return result
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
     }
 
-    // MARK: - Token Storage (Keychain)
+    /// 执行配对流程
+    func pairWithURL(_ urlString: String) async -> Bool {
+        pairingStatus = .verifying
+        errorMessage = nil
 
-    func saveGatewayToken(_ token: String) {
-        let data = token.data(using: .utf8)!
+        guard let parsed = parsePairingURL(urlString) else {
+            errorMessage = "无效的配对码"
+            pairingStatus = .error("无效的配对码")
+            return false
+        }
+
+        guard let result = await verifyPairingCode(parsed.code) else {
+            pairingStatus = .error(errorMessage ?? "验证失败")
+            return false
+        }
+
+        if result.success, let token = result.gatewayToken {
+            savePairingKey(token)
+            StorageService.shared.saveConnection(baseURL: relayAPI, apiKey: token)
+            pairingStatus = .connected
+            return true
+        } else {
+            errorMessage = result.error ?? "配对失败"
+            pairingStatus = .error(result.error ?? "配对失败")
+            return false
+        }
+    }
+
+    /// 解绑
+    func unbind() {
+        deletePairingKey()
+        StorageService.shared.disconnect()
+        pairingStatus = .idle
+    }
+
+    // MARK: - Keychain Storage
+
+    func savePairingKey(_ key: String) {
+        let data = key.data(using: .utf8)!
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "openclaw_gateway_token",
+            kSecAttrAccount as String: keychainAccount,
             kSecValueData as String: data
         ]
 
@@ -222,10 +236,10 @@ class PairingService: ObservableObject {
         SecItemAdd(query as CFDictionary, nil)
     }
 
-    func getGatewayToken() -> String? {
+    func getPairingKey() -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "openclaw_gateway_token",
+            kSecAttrAccount as String: keychainAccount,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
@@ -235,85 +249,19 @@ class PairingService: ObservableObject {
 
         guard status == errSecSuccess,
               let data = result as? Data,
-              let token = String(data: data, encoding: .utf8) else {
+              let key = String(data: data, encoding: .utf8) else {
             return nil
         }
 
-        return token
+        return key
     }
 
-    func deleteGatewayToken() {
+    func deletePairingKey() {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "openclaw_gateway_token"
+            kSecAttrAccount as String: keychainAccount
         ]
 
         SecItemDelete(query as CFDictionary)
-    }
-
-    // MARK: - Paired Devices
-
-    private func loadPairedDevices() {
-        if let data = UserDefaults.standard.data(forKey: "pairedDevices"),
-           let devices = try? JSONDecoder().decode([PairedDevice].self, from: data) {
-            pairedDevices = devices
-        }
-    }
-
-    private func savePairedDevices() {
-        if let data = try? JSONEncoder().encode(pairedDevices) {
-            UserDefaults.standard.set(data, forKey: "pairedDevices")
-        }
-    }
-
-    func addPairedDevice(_ device: PairedDevice) {
-        pairedDevices.append(device)
-        savePairedDevices()
-    }
-
-    func removePairedDevice(_ device: PairedDevice) {
-        pairedDevices.removeAll { $0.id == device.id }
-        savePairedDevices()
-    }
-
-    func disconnect() {
-        deleteGatewayToken()
-        pairingStatus = .idle
-        currentCode = nil
-        qrCodeData = nil
-    }
-
-    // MARK: - Reset
-
-    func reset() {
-        pairingStatus = .idle
-        currentCode = nil
-        qrCodeData = nil
-        errorMessage = nil
-    }
-
-    // MARK: - Errors
-
-    enum PairingError: Error, LocalizedError {
-        case invalidURL
-        case invalidResponse
-        case serverError(Int)
-        case tokenExpired
-        case pairingFailed(String)
-
-        var errorDescription: String? {
-            switch self {
-            case .invalidURL:
-                return "无效的 URL"
-            case .invalidResponse:
-                return "无效的响应"
-            case .serverError(let code):
-                return "服务器错误: \(code)"
-            case .tokenExpired:
-                return "配对已过期，请重新配对"
-            case .pairingFailed(let message):
-                return message
-            }
-        }
     }
 }
