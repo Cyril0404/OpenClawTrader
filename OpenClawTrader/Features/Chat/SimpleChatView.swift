@@ -86,10 +86,10 @@ struct SimpleChatView: View {
                 // Agent 名称 + 状态点
                 HStack(spacing: AppSpacing.xs) {
                     Circle()
-                        .fill(service.mainAgent?.status == .running ? AppColors.success : colors.textTertiary)
+                        .fill(service.isConnected ? AppColors.success : AppColors.error)
                         .frame(width: 8, height: 8)
 
-                    Text(service.mainAgent?.name ?? "助手")
+                    Text(service.isConnected ? (service.mainAgent?.name ?? "助手") : "未连接")
                         .font(AppFonts.title3())
                         .foregroundColor(colors.textPrimary)
 
