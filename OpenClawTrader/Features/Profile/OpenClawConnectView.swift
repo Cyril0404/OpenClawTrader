@@ -157,22 +157,25 @@ https://github.com/Cyril0404/ClawRed
                 .font(AppFonts.caption())
                 .foregroundColor(colors.textTertiary)
 
-            Text("复制下方命令，发送给 OpenClaw 桌面端执行")
+            Text("复制命令，发给 OpenClaw 桌面端执行")
                 .font(AppFonts.caption())
                 .foregroundColor(colors.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 代码块 - 可滚动显示
-            ScrollView {
-                Text(clawredInstallCommand)
-                    .font(.system(size: 11, design: .monospaced))
+            // 代码块 - 只显示第一行，隐藏多余行
+            ZStack(alignment: .topLeading) {
+                // 背景
+                Color.black
+                    .cornerRadius(AppRadius.small)
+
+                // 第一行命令
+                Text("curl -fsSL https://raw.githubusercontent.com/Cyril0404/ClawRed/main/install.sh | bash")
+                    .font(.system(size: 12, design: .monospaced))
                     .foregroundColor(Color(hex: "00FF00"))
-                    .lineSpacing(3)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .padding(AppSpacing.sm)
             }
-            .frame(maxHeight: 200)
-            .background(Color.black)
-            .cornerRadius(AppRadius.small)
+            .frame(height: 44)
 
             // 复制按钮
             Button(action: {
