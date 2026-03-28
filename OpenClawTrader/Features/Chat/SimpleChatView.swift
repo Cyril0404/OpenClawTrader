@@ -67,6 +67,11 @@ struct SimpleChatView: View {
 
             // Input Bar
             inputBar
+
+            // 附件工具栏
+            if showAttachmentMenu {
+                attachmentToolbar
+            }
         }
         .background(colors.background)
     }
@@ -87,28 +92,12 @@ struct SimpleChatView: View {
                     Text(service.mainAgent?.name ?? "助手")
                         .font(AppFonts.title3())
                         .foregroundColor(colors.textPrimary)
-                }
 
-                // Agent 选择器
-                Menu {
-                    ForEach(service.agents) { agent in
-                        Button(action: { selectAgent(agent) }) {
-                            HStack {
-                                Text(agent.name)
-                                if agent.id == service.mainAgent?.id {
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                        }
-                    }
-                    Divider()
                     NavigationLink(destination: AgentListView()) {
-                        Label("管理 Agent", systemImage: "person.2")
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(colors.textSecondary)
                     }
-                } label: {
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(colors.textSecondary)
                 }
 
                 Spacer()
@@ -275,15 +264,10 @@ struct SimpleChatView: View {
                 }
 
                 // 添加附件按钮
-                Button(action: { showAttachmentMenu = true }) {
-                    Image(systemName: "plus.circle.fill")
+                Button(action: { showAttachmentMenu.toggle() }) {
+                    Image(systemName: showAttachmentMenu ? "xmark.circle.fill" : "plus.circle.fill")
                         .font(.system(size: 32))
                         .foregroundColor(colors.textSecondary)
-                }
-                .confirmationDialog("添加附件", isPresented: $showAttachmentMenu) {
-                    Button("图片") { addImage() }
-                    Button("文件") { addFile() }
-                    Button("取消", role: .cancel) { }
                 }
 
                 // 发送按钮
@@ -311,6 +295,57 @@ struct SimpleChatView: View {
             return !recordedText.isEmpty
         }
         return !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    // MARK: - Attachment Toolbar
+
+    private var attachmentToolbar: some View {
+        HStack(spacing: AppSpacing.xl) {
+            // 图片
+            Button(action: { addImage() }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "photo")
+                        .font(.system(size: 24))
+                    Text("图片")
+                        .font(AppFonts.caption())
+                }
+                .foregroundColor(colors.textPrimary)
+            }
+
+            // 文件
+            Button(action: { addFile() }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "doc")
+                        .font(.system(size: 24))
+                    Text("文件")
+                        .font(AppFonts.caption())
+                }
+                .foregroundColor(colors.textPrimary)
+            }
+
+            // 语音
+            Button(action: { isVoiceMode = true }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "mic")
+                        .font(.system(size: 24))
+                    Text("语音")
+                        .font(AppFonts.caption())
+                }
+                .foregroundColor(colors.textPrimary)
+            }
+
+            Spacer()
+
+            // 关闭按钮
+            Button(action: { showAttachmentMenu = false }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16))
+                    .foregroundColor(colors.textSecondary)
+            }
+        }
+        .padding(.horizontal, AppSpacing.lg)
+        .padding(.vertical, AppSpacing.md)
+        .background(colors.backgroundSecondary)
     }
 
     // MARK: - Actions
