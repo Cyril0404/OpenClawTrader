@@ -22,6 +22,8 @@ struct OpenClawConnectView: View {
     @State private var manualCode = ""
     @State private var copied = false
     @State private var isPaired = false
+    @State private var isVerifying = false
+    @State private var errorMessage: String?
 
     var body: some View {
         ScrollView {
@@ -67,6 +69,33 @@ struct OpenClawConnectView: View {
             }
         } message: {
             Text("请输入桌面端显示的6位配对码")
+        }
+        .alert("配对失败", isPresented: .init(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("确定") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
+        .overlay {
+            if isVerifying {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    VStack(spacing: AppSpacing.md) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .tint(.white)
+                        Text("验证中...")
+                            .font(AppFonts.body())
+                            .foregroundColor(.white)
+                    }
+                    .padding(AppSpacing.xl)
+                    .background(Color.black.opacity(0.7))
+                    .cornerRadius(AppRadius.medium)
+                }
+            }
         }
     }
 
@@ -318,13 +347,29 @@ https://github.com/Cyril0404/ClawRed
     }
 
     private func verifyCode(_ code: String) {
+        guard !code.isEmpty else {
+            errorMessage = "配对码不能为空"
+            return
+        }
+
+        isVerifying = true
+        errorMessage = nil
+
         Task {
-            if let response = await pairingService.verifyPairingCode(code), response.success {
-                // 保存 token
-                if let token = response.gatewayToken {
-                    pairingService.savePairingKey(token)
+            if let response = await pairingService.verifyPairingCode(code) {
+                isVerifying = false
+                if response.success {
+                    // 保存 token
+                    if let token = response.gatewayToken {
+                        pairingService.savePairingKey(token)
+                    }
+                    isPaired = true
+                } else {
+                    errorMessage = response.error ?? "配对码无效"
                 }
-                isPaired = true
+            } else {
+                isVerifying = false
+                errorMessage = pairingService.errorMessage ?? "验证失败，请检查网络连接"
             }
         }
     }
