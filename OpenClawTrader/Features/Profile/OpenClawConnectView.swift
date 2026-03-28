@@ -25,6 +25,7 @@ struct OpenClawConnectView: View {
     @State private var errorMessage: String?
     @State private var serverStatus: ServerStatus = .checking
     @State private var showUnbindConfirm = false
+    @State private var refreshTrigger = false
 
     enum ServerStatus {
         case checking
@@ -32,9 +33,10 @@ struct OpenClawConnectView: View {
         case offline
     }
 
-    // 是否已配对 - 直接响应 pairingService
+    // 是否已配对 - 依赖 refreshTrigger 强制刷新
     private var isPaired: Bool {
-        pairingService.isPaired
+        refreshTrigger  // 依赖这个来触发刷新
+        return pairingService.isPaired
     }
 
     var body: some View {
@@ -102,6 +104,7 @@ struct OpenClawConnectView: View {
             Button("取消", role: .cancel) {}
             Button("解除配对", role: .destructive) {
                 pairingService.unbind()
+                refreshTrigger.toggle()  // 强制刷新 UI
             }
         } message: {
             Text("确定要解除与 OpenClaw 桌面端的配对连接吗？")
