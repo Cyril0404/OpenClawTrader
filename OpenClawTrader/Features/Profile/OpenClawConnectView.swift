@@ -100,21 +100,20 @@ struct OpenClawConnectView: View {
                 .font(AppFonts.caption())
                 .foregroundColor(colors.textTertiary)
 
-            Text("复制下方安装命令，发送给 OpenClaw 桌面端执行")
+            Text("复制下方安装命令，发送给 OpenClaw 桌面端执行，安装后桌面端会显示二维码")
                 .font(AppFonts.caption())
                 .foregroundColor(colors.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Button(action: {
                 copyInstallCommand()
-                generateCode()
             }) {
                 HStack {
                     VStack(alignment: .leading, spacing: AppSpacing.xs) {
                         Text("让 OpenClaw 帮忙安装")
                             .font(AppFonts.body())
                             .foregroundColor(colors.textPrimary)
-                        Text("一键完成安装和配对")
+                        Text("安装后扫桌面端二维码配对")
                             .font(AppFonts.caption())
                             .foregroundColor(colors.textSecondary)
                     }
