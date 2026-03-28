@@ -22,6 +22,7 @@ struct OpenClawConnectView: View {
     @State private var manualCode = ""
     @State private var copied = false
     @State private var isPaired = false
+    @State private var isExpanded = false
 
     var body: some View {
         ScrollView {
@@ -112,14 +113,22 @@ https://github.com/Cyril0404/ClawRed
                 .foregroundColor(colors.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // 代码块 - 终端样式
-            Text(clawredInstallCommand)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(Color(hex: "00FF00"))
-                .padding(AppSpacing.sm)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.black.opacity(0.85))
-                .cornerRadius(AppRadius.small)
+            // 代码块 - 默认单行，展开后显示全部
+            VStack(alignment: .leading, spacing: 0) {
+                Text(clawredInstallCommand)
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(Color(hex: "00FF00"))
+                    .lineLimit(isExpanded ? nil : 1)
+                    .padding(AppSpacing.sm)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.black.opacity(0.85))
+                    .cornerRadius(AppRadius.small)
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isExpanded.toggle()
+                        }
+                    }
+            }
 
             // 复制按钮
             Button(action: {
