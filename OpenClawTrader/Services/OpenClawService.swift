@@ -79,6 +79,13 @@ class OpenClawService: ObservableObject {
         reset()
     }
 
+    /// 触发重新连接（用于配对后立即连接）
+    func triggerConnect() {
+        Task {
+            await connect()
+        }
+    }
+
     /// 从 API 加载数据
     func loadFromAPI() async {
         do {

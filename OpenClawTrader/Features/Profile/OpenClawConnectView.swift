@@ -470,6 +470,8 @@ https://github.com/Cyril0404/ClawRed
                             baseURL: pairingService.relayAPI,
                             apiKey: token
                         )
+                        // 立即触发 OpenClawService 连接
+                        OpenClawService.shared.triggerConnect()
                     }
                     isPaired = true
                 } else {
