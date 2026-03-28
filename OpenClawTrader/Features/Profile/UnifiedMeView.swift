@@ -22,6 +22,8 @@ struct UnifiedMeView: View {
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAccountAlert = false
     @State private var showingOpenClawConnect = false
+    @State private var showingMobilePairing = false
+    @State private var showingSkillsView = false
     let onLogout: () -> Void
 
     enum NotificationFilter: String, CaseIterable {
@@ -64,6 +66,14 @@ struct UnifiedMeView: View {
         }
         .sheet(isPresented: $showingOpenClawConnect) {
             OpenClawConnectView()
+        }
+        .sheet(isPresented: $showingMobilePairing) {
+            MobilePairingView()
+        }
+        .sheet(isPresented: $showingSkillsView) {
+            NavigationStack {
+                SkillsView()
+            }
         }
         .alert("退出登录", isPresented: $showingLogoutAlert) {
             Button("取消", role: .cancel) {}
@@ -204,6 +214,40 @@ struct UnifiedMeView: View {
                         .font(.system(size: 16))
                     Text("添加 OpenClaw")
                         .font(AppFonts.caption())
+                }
+                .foregroundColor(colors.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppSpacing.sm)
+            }
+
+            // 移动端配对
+            Button(action: { showingMobilePairing = true }) {
+                HStack {
+                    Image(systemName: "iphone.and.arrow.forward")
+                        .font(.system(size: 16))
+                    Text("移动端配对")
+                        .font(AppFonts.caption())
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12))
+                        .foregroundColor(colors.textTertiary)
+                }
+                .foregroundColor(colors.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppSpacing.sm)
+            }
+
+            // 技能控制
+            Button(action: { showingSkillsView = true }) {
+                HStack {
+                    Image(systemName: "gearshape.2")
+                        .font(.system(size: 16))
+                    Text("技能控制")
+                        .font(AppFonts.caption())
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12))
+                        .foregroundColor(colors.textTertiary)
                 }
                 .foregroundColor(colors.textSecondary)
                 .frame(maxWidth: .infinity)
