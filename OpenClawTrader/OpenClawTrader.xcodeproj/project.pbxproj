@@ -10,7 +10,6 @@
 		0562DD444DD3309755AD89B4 /* SuggestionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F244FEED1D454E2E190F66 /* SuggestionDetailView.swift */; };
 		10A6AA14180236DB2BF5CA82 /* OpenClawTraderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF1DBEDF5B704126656E6811 /* OpenClawTraderApp.swift */; };
 		25D24491AC83315861B1596C /* NotificationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96105F714C7E33D4B99140D /* NotificationListView.swift */; };
-		27A96FBBBAAE92FA0E1C2591 /* MobilePairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9059A28189FC9F55A242FDE /* MobilePairingView.swift */; };
 		2C609CA765BF2FD276FBBC69 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EF7B0E1FD6E3CED2B227174 /* Components.swift */; };
 		2D36B00E2D45B615E488E714 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9617123DF49FA5C1F9FAADF0 /* StorageService.swift */; };
 		338148529185478525F2543B /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D2174C976957819231E60CA /* LoginView.swift */; };
@@ -99,7 +98,6 @@
 		E0672CF3F81BC2DB25F04B95 /* SkillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsView.swift; sourceTree = "<group>"; };
 		E0C489F495BD85D108F8E144 /* WorkflowListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowListView.swift; sourceTree = "<group>"; };
 		E6F5E8442C0873551CAF8E24 /* ImportOrderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportOrderView.swift; sourceTree = "<group>"; };
-		E9059A28189FC9F55A242FDE /* MobilePairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobilePairingView.swift; sourceTree = "<group>"; };
 		EB219B66D734587AE0E05340 /* HoldingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoldingListView.swift; sourceTree = "<group>"; };
 		EF1DBEDF5B704126656E6811 /* OpenClawTraderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawTraderApp.swift; sourceTree = "<group>"; };
 		F0F244FEED1D454E2E190F66 /* SuggestionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionDetailView.swift; sourceTree = "<group>"; };
@@ -150,7 +148,6 @@
 			isa = PBXGroup;
 			children = (
 				5D2174C976957819231E60CA /* LoginView.swift */,
-				E9059A28189FC9F55A242FDE /* MobilePairingView.swift */,
 				0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */,
 				18215A86D4E9893048DDDBAF /* ProfileView.swift */,
 				E0672CF3F81BC2DB25F04B95 /* SkillsView.swift */,
@@ -364,7 +361,6 @@
 				7586F641DACC4B4C24A6E6B5 /* ImportHoldingView.swift in Sources */,
 				98F2E65A4403EF52565DE3B7 /* ImportOrderView.swift in Sources */,
 				338148529185478525F2543B /* LoginView.swift in Sources */,
-				27A96FBBBAAE92FA0E1C2591 /* MobilePairingView.swift in Sources */,
 				4D6655FCE2489B1414F2DA57 /* ModelListView.swift in Sources */,
 				3FC1B13917593D9A1FB7CD6B /* Notification.swift in Sources */,
 				25D24491AC83315861B1596C /* NotificationListView.swift in Sources */,
