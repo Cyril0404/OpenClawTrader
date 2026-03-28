@@ -20,7 +20,7 @@ class PairingService: ObservableObject {
     @Published var errorMessage: String?
 
     // 云端中继服务器地址
-    private let relayAPI = "http://150.158.119.114:3001/api"
+    let relayAPI = "http://150.158.119.114:3001/api"
     private let relayWS = "ws://150.158.119.114:3001"
 
     private let keychainAccount = "openclaw_pairing_key"

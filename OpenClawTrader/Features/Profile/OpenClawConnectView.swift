@@ -462,9 +462,14 @@ https://github.com/Cyril0404/ClawRed
             if let response = await pairingService.verifyPairingCode(code) {
                 isVerifying = false
                 if response.success {
-                    // 保存 token - pairingService.isPaired 会自动响应
+                    // 保存 token 到 Keychain
                     if let token = response.gatewayToken {
                         pairingService.savePairingKey(token)
+                        // 同时保存到 StorageService 让 OpenClawService 能检测到连接状态
+                        StorageService.shared.saveConnection(
+                            baseURL: pairingService.relayAPI,
+                            apiKey: token
+                        )
                     }
                     isPaired = true
                 } else {
