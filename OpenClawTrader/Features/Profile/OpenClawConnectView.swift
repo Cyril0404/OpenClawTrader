@@ -21,7 +21,6 @@ struct OpenClawConnectView: View {
     @State private var showManualInput = false
     @State private var manualCode = ""
     @State private var copied = false
-    @State private var isPaired = false
     @State private var isVerifying = false
     @State private var errorMessage: String?
     @State private var serverStatus: ServerStatus = .checking
@@ -30,6 +29,11 @@ struct OpenClawConnectView: View {
         case checking
         case online
         case offline
+    }
+
+    // 是否已配对 - 直接响应 pairingService
+    private var isPaired: Bool {
+        pairingService.isPaired
     }
 
     var body: some View {
@@ -426,11 +430,11 @@ https://github.com/Cyril0404/ClawRed
             if let response = await pairingService.verifyPairingCode(code) {
                 isVerifying = false
                 if response.success {
-                    // 保存 token
+                    // 保存 token - pairingService.isPaired 会自动响应
                     if let token = response.gatewayToken {
                         pairingService.savePairingKey(token)
                     }
-                    isPaired = true
+                    // isPaired 是 computed property，会自动响应 pairingService.isPaired 变化
                 } else {
                     errorMessage = response.error ?? "配对码无效"
                 }
