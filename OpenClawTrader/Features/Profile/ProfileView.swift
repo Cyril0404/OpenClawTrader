@@ -16,6 +16,10 @@ struct ProfileView: View {
     @Environment(ThemeManager.self) private var themeManager
     @State private var isConnected = StorageService.shared.isConnected
     @State private var showingThemePicker = false
+    @State private var showUnbindConfirm = false
+    @State private var showPrivacyPolicy = false
+    @State private var showFreeMembership = false
+    @State private var showShareSheet = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -44,6 +48,24 @@ struct ProfileView: View {
         .background(colors.background)
         .sheet(isPresented: $showingThemePicker) {
             ThemePickerSheet()
+        }
+        .alert("确认解绑", isPresented: $showUnbindConfirm) {
+            Button("取消", role: .cancel) {}
+            Button("解绑", role: .destructive) {
+                PairingService.shared.unbind()
+                isConnected = false
+            }
+        } message: {
+            Text("确定要解除与 OpenClaw 的连接吗？")
+        }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            PrivacyPolicyView()
+        }
+        .sheet(isPresented: $showFreeMembership) {
+            FreeMembershipView()
+        }
+        .sheet(isPresented: $showShareSheet) {
+            ShareSheet(items: ["推荐你使用 OpenClawTrader，轻松交易，随时随地行情分析！https://openclaw.example.com"])
         }
     }
 
@@ -92,9 +114,8 @@ struct ProfileView: View {
             }
 
             if isConnected {
-                SecondaryButton(title: "断开连接") {
-                    StorageService.shared.disconnect()
-                    isConnected = false
+                SecondaryButton(title: "解绑") {
+                    showUnbindConfirm = true
                 }
             } else {
                 NavigationLink(destination: OpenClawConnectView()) {
@@ -190,9 +211,43 @@ struct ProfileView: View {
 
                 AppDivider()
 
-                ListItem(icon: "bell", title: "通知设置", subtitle: nil)
+                Button {
+                    showPrivacyPolicy = true
+                } label: {
+                    ListItem(icon: "lock.shield", title: "隐私政策", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
                 AppDivider()
-                ListItem(icon: "lock", title: "隐私设置", subtitle: nil)
+
+                Button {
+                    showFreeMembership = true
+                } label: {
+                    ListItem(icon: "gift", title: "领取免费会员", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                Button {
+                    rateApp()
+                } label: {
+                    ListItem(icon: "star", title: "给个五星好评", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                Button {
+                    showShareSheet = true
+                } label: {
+                    ListItem(icon: "square.and.arrow.up", title: "分享给朋友", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                ListItem(icon: "bell", title: "通知设置", subtitle: nil)
                 AppDivider()
                 ListItem(icon: "questionmark.circle", title: "帮助与反馈", subtitle: nil)
                 AppDivider()
@@ -202,6 +257,164 @@ struct ProfileView: View {
             .cornerRadius(AppRadius.medium)
         }
     }
+
+    // MARK: - Actions
+
+    private func rateApp() {
+        if let url = URL(string: "https://apps.apple.com/app/idXXXXXXXXX?action=write-review") {
+            UIApplication.shared.open(url)
+        }
+    }
+}
+
+// ============================================
+// MARK: - Privacy Policy View
+// ============================================
+
+struct PrivacyPolicyView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.appColors) private var colors
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: AppSpacing.md) {
+                    Text("隐私政策")
+                        .font(AppFonts.title1())
+                        .foregroundColor(colors.textPrimary)
+
+                    Text("""
+                    最后更新日期：2026年3月28日
+
+                    本隐私政策阐述了 OpenClawTrader 如何收集、使用和保护您的个人信息。
+
+                    **1. 信息收集**
+                    我们收集您提供的账户信息、设备信息和使用数据，以提供和改进我们的服务。
+
+                    **2. 信息使用**
+                    您的信息用于：
+                    - 提供和维持服务
+                    - 改进和优化服务
+                    - 保护您的账户安全
+
+                    **3. 信息保护**
+                    我们采用行业标准的安全措施来保护您的个人信息。
+
+                    **4. 联系我们**
+                    如有任何隐私相关问题，请联系我们。
+                    """)
+                        .font(AppFonts.body())
+                        .foregroundColor(colors.textSecondary)
+                }
+                .padding(AppSpacing.lg)
+            }
+            .background(colors.background)
+            .navigationTitle("隐私政策")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("完成") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+// ============================================
+// MARK: - Free Membership View
+// ============================================
+
+struct FreeMembershipView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.appColors) private var colors
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: AppSpacing.xl) {
+                Spacer()
+
+                Image(systemName: "gift.fill")
+                    .font(.system(size: 72))
+                    .foregroundColor(colors.accent)
+
+                VStack(spacing: AppSpacing.sm) {
+                    Text("免费会员")
+                        .font(AppFonts.title1())
+                        .foregroundColor(colors.textPrimary)
+
+                    Text("邀请好友即可获得免费会员资格")
+                        .font(AppFonts.body())
+                        .foregroundColor(colors.textSecondary)
+                        .multilineTextAlignment(.center)
+                }
+
+                VStack(spacing: AppSpacing.md) {
+                    FeatureRow(icon: "star.fill", text: "享受高级分析功能")
+                    FeatureRow(icon: "chart.bar.fill", text: "无限查看历史数据")
+                    FeatureRow(icon: "bell.fill", text: "优先接收行情提醒")
+                }
+
+                Spacer()
+
+                Button {
+                    dismiss()
+                } label: {
+                    Text("立即邀请")
+                        .font(AppFonts.body())
+                        .fontWeight(.semibold)
+                        .foregroundColor(colors.background)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(colors.accent)
+                        .cornerRadius(AppRadius.small)
+                }
+                .padding(.horizontal, AppSpacing.xl)
+            }
+            .padding(.vertical, AppSpacing.xl)
+            .background(colors.background)
+            .navigationTitle("免费会员")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("关闭") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+struct FeatureRow: View {
+    let icon: String
+    let text: String
+    @Environment(\.appColors) private var colors
+
+    var body: some View {
+        HStack(spacing: AppSpacing.md) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .foregroundColor(colors.accent)
+                .frame(width: 32)
+            Text(text)
+                .font(AppFonts.body())
+                .foregroundColor(colors.textPrimary)
+            Spacer()
+        }
+        .padding(.horizontal, AppSpacing.xl)
+    }
+}
+
+// ============================================
+// MARK: - Share Sheet
+// ============================================
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // ============================================

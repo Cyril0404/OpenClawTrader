@@ -35,6 +35,16 @@ struct TradingDashboardView: View {
                     Button(action: { showingImportOrderSheet = true }) {
                         Label("导入委托", systemImage: "doc.text")
                     }
+                    Divider()
+                    // NavigationLink(destination: TechnicalAnalysisView()) {
+                    //     Label("技术分析", systemImage: "chart.xyaxis.line")
+                    // }
+                    // NavigationLink(destination: SentimentAnalysisView()) {
+                    //     Label("舆情分析", systemImage: "bubble.left.and.bubble.right")
+                    // }
+                    NavigationLink(destination: BacktestView()) {
+                        Label("策略回测", systemImage: "arrow.triangle.2.circlepath")
+                    }
                 } label: {
                     IconButton(icon: "plus.circle") {
                         showImportMenu = true

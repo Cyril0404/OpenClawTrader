@@ -23,6 +23,9 @@ struct UnifiedMeView: View {
     @State private var showingDeleteAccountAlert = false
     @State private var showingOpenClawConnect = false
     @State private var showingSkillsView = false
+    @State private var showPrivacyPolicy = false
+    @State private var showFreeMembership = false
+    @State private var showShareSheet = false
     let onLogout: () -> Void
 
     enum NotificationFilter: String, CaseIterable {
@@ -71,6 +74,15 @@ struct UnifiedMeView: View {
                 SkillsView()
             }
         }
+        .sheet(isPresented: $showPrivacyPolicy) {
+            PrivacyPolicyView()
+        }
+        .sheet(isPresented: $showFreeMembership) {
+            FreeMembershipView()
+        }
+        .sheet(isPresented: $showShareSheet) {
+            ShareSheet(items: ["推荐你使用妙股App，轻松交易，随时随地行情分析！https://openclaw.example.com"])
+        }
         .alert("退出登录", isPresented: $showingLogoutAlert) {
             Button("取消", role: .cancel) {}
             Button("确认退出", role: .destructive) {
@@ -102,8 +114,13 @@ struct UnifiedMeView: View {
     private func performDeleteAccount() {
         StorageService.shared.deleteAccount()
         OpenClawService.shared.reset()
-        TradingService.shared.reset()
-        onLogout()
+    }
+
+    /// 给App打分
+    private func rateApp() {
+        if let url = URL(string: "https://apps.apple.com/app/idXXXXXXXXX?action=write-review") {
+            UIApplication.shared.open(url)
+        }
     }
 
     // MARK: - Profile Header
@@ -305,6 +322,42 @@ struct UnifiedMeView: View {
                     showingThemePicker = true
                 } label: {
                     ListItem(icon: "paintbrush", title: "外观", subtitle: "深色模式", showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                Button {
+                    showPrivacyPolicy = true
+                } label: {
+                    ListItem(icon: "lock.shield", title: "隐私政策", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                Button {
+                    showFreeMembership = true
+                } label: {
+                    ListItem(icon: "gift", title: "领取免费会员", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                Button {
+                    rateApp()
+                } label: {
+                    ListItem(icon: "star", title: "给个五星好评", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
+
+                AppDivider()
+
+                Button {
+                    showShareSheet = true
+                } label: {
+                    ListItem(icon: "square.and.arrow.up", title: "分享给朋友", subtitle: nil, showArrow: true)
                 }
                 .buttonStyle(.plain)
 
