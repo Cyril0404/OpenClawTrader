@@ -141,8 +141,8 @@ struct InfoCard: View {
 
         var color: Color {
             switch self {
-            case .up: return AppColors.success
-            case .down: return AppColors.error
+            case .up: return AppColors.error
+            case .down: return AppColors.success
             case .neutral: return Color(hex: "4A4A4A")
             }
         }

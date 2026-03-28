@@ -137,7 +137,7 @@ struct HoldingRow: View {
                     Text("\(String(format: "%.2f", holding.dayChangePercent))%")
                         .font(AppFonts.monoCaption())
                 }
-                .foregroundColor(holding.dayChangePercent >= 0 ? AppColors.success : AppColors.error)
+                .foregroundColor(holding.dayChangePercent >= 0 ? AppColors.error : AppColors.success)
             }
 
             Image(systemName: "chevron.right")

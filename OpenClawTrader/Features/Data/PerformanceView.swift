@@ -64,7 +64,7 @@ struct DataDashboardView: View {
 
             Text("\(String(format: "%.2f", performance.totalReturnPercent))%")
                 .font(.system(size: 48, weight: .bold, design: .monospaced))
-                .foregroundColor(performance.totalReturn >= 0 ? AppColors.success : AppColors.error)
+                .foregroundColor(performance.totalReturn >= 0 ? AppColors.error : AppColors.success)
 
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -74,7 +74,7 @@ struct DataDashboardView: View {
 
                     Text("\(String(format: "%.2f", performance.dayReturnPercent))%")
                         .font(AppFonts.monoCaption())
-                        .foregroundColor(performance.dayReturn >= 0 ? AppColors.success : AppColors.error)
+                        .foregroundColor(performance.dayReturn >= 0 ? AppColors.error : AppColors.success)
                 }
 
                 Spacer()
@@ -86,7 +86,7 @@ struct DataDashboardView: View {
 
                     Text("\(String(format: "%.2f", performance.weekReturnPercent))%")
                         .font(AppFonts.monoCaption())
-                        .foregroundColor(performance.weekReturn >= 0 ? AppColors.success : AppColors.error)
+                        .foregroundColor(performance.weekReturn >= 0 ? AppColors.error : AppColors.success)
                 }
 
                 Spacer()
@@ -98,7 +98,7 @@ struct DataDashboardView: View {
 
                     Text("\(String(format: "%.2f", performance.monthReturnPercent))%")
                         .font(AppFonts.monoCaption())
-                        .foregroundColor(performance.monthReturn >= 0 ? AppColors.success : AppColors.error)
+                        .foregroundColor(performance.monthReturn >= 0 ? AppColors.error : AppColors.success)
                 }
             }
         }

@@ -45,7 +45,7 @@ struct HoldingDetailView: View {
                                 Text("\(String(format: "%.2f", holding.dayChangePercent))%")
                                     .font(AppFonts.monoCaption())
                             }
-                            .foregroundColor(holding.dayChangePercent >= 0 ? AppColors.success : AppColors.error)
+                            .foregroundColor(holding.dayChangePercent >= 0 ? AppColors.error : AppColors.success)
                         }
                     }
                 }
@@ -59,9 +59,9 @@ struct HoldingDetailView: View {
                     DetailCard(title: "持仓成本", value: "¥ \(String(format: "%.2f", holding.averageCost))")
                     DetailCard(title: "当前价格", value: "¥ \(String(format: "%.2f", holding.currentPrice))")
                     DetailCard(title: "今日涨跌", value: "\(String(format: "%.2f", holding.dayChangePercent))%",
-                              valueColor: holding.dayChangePercent >= 0 ? AppColors.success : AppColors.error)
+                              valueColor: holding.dayChangePercent >= 0 ? AppColors.error : AppColors.success)
                     DetailCard(title: "总收益", value: "\(String(format: "%.2f", holding.profitLossPercent))%",
-                              valueColor: holding.profitLoss >= 0 ? AppColors.success : AppColors.error)
+                              valueColor: holding.profitLoss >= 0 ? AppColors.error : AppColors.success)
                     DetailCard(title: "市值", value: "¥ \(formatNumber(holding.marketValue))")
                 }
 

@@ -119,7 +119,7 @@ struct TradingDashboardView: View {
                         Text("\(formatCurrency(portfolio.dayChange)) (\(String(format: "%.2f", portfolio.dayChangePercent))%)")
                             .font(AppFonts.monoCaption())
                     }
-                    .foregroundColor(portfolio.dayChange >= 0 ? AppColors.success : AppColors.error)
+                    .foregroundColor(portfolio.dayChange >= 0 ? AppColors.error : AppColors.success)
                 }
 
                 HStack {
@@ -135,7 +135,7 @@ struct TradingDashboardView: View {
                         Text("\(formatCurrency(portfolio.totalProfitLoss)) (\(String(format: "%.2f", portfolio.totalProfitLossPercent))%)")
                             .font(AppFonts.monoCaption())
                     }
-                    .foregroundColor(portfolio.totalProfitLoss >= 0 ? AppColors.success : AppColors.error)
+                    .foregroundColor(portfolio.totalProfitLoss >= 0 ? AppColors.error : AppColors.success)
                 }
             }
         }
