@@ -25,6 +25,13 @@ struct OpenClawConnectView: View {
     @State private var errorMessage: String?
     @State private var showUnbindConfirm = false
     @State private var isPaired = false
+    @State private var refreshTrigger = false
+
+    // 依赖 refreshTrigger 强制刷新
+    private var isPairedState: Bool {
+        _ = refreshTrigger
+        return isPaired
+    }
 
     var body: some View {
         ScrollView {
@@ -32,7 +39,7 @@ struct OpenClawConnectView: View {
                 // Header
                 headerSection
 
-                if isPaired {
+                if isPairedState {
                     pairedSection
                 } else {
                     // Method 1: Let OpenClaw help install
@@ -87,6 +94,7 @@ struct OpenClawConnectView: View {
             Button("解除配对", role: .destructive) {
                 pairingService.unbind()
                 isPaired = false
+                refreshTrigger.toggle()
             }
         } message: {
             Text("确定要解除与 OpenClaw 桌面端的配对连接吗？")
