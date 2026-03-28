@@ -61,6 +61,7 @@ class PairingService: ObservableObject {
         let success: Bool
         let gatewayToken: String?
         let gatewayId: String?
+        let gatewayApiUrl: String?
         let error: String?
     }
 
