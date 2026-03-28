@@ -24,6 +24,7 @@ struct OpenClawConnectView: View {
     @State private var isVerifying = false
     @State private var errorMessage: String?
     @State private var serverStatus: ServerStatus = .checking
+    @State private var showUnbindConfirm = false
 
     enum ServerStatus {
         case checking
@@ -68,6 +69,11 @@ struct OpenClawConnectView: View {
         .background(colors.background)
         .navigationTitle("添加 OpenClaw")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            Task {
+                await checkServerStatus()
+            }
+        }
         .sheet(isPresented: $showScanner) {
             QRScannerView { code in
                 showScanner = false
@@ -91,6 +97,14 @@ struct OpenClawConnectView: View {
             Button("确定") { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+        .alert("解除配对", isPresented: $showUnbindConfirm) {
+            Button("取消", role: .cancel) {}
+            Button("解除配对", role: .destructive) {
+                pairingService.unbind()
+            }
+        } message: {
+            Text("确定要解除与 OpenClaw 桌面端的配对连接吗？")
         }
         .overlay {
             if isVerifying {
@@ -350,6 +364,12 @@ https://github.com/Cyril0404/ClawRed
                     .font(AppFonts.title1())
                     .foregroundColor(colors.textPrimary)
 
+                if let gatewayId = pairingService.gatewayId {
+                    Text("Gateway ID: \(gatewayId)")
+                        .font(AppFonts.caption())
+                        .foregroundColor(colors.textSecondary)
+                }
+
                 Text("iOS App 已与桌面端 Gateway 配对成功")
                     .font(AppFonts.body())
                     .foregroundColor(colors.textSecondary)
@@ -358,17 +378,29 @@ https://github.com/Cyril0404/ClawRed
 
             Spacer()
 
-            Button(action: {
-                dismiss()
-            }) {
-                Text("完成")
-                    .font(AppFonts.body())
-                    .fontWeight(.semibold)
-                    .foregroundColor(colors.background)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(colors.accent)
-                    .cornerRadius(AppRadius.small)
+            VStack(spacing: AppSpacing.md) {
+                Button(action: {
+                    dismiss()
+                }) {
+                    Text("完成")
+                        .font(AppFonts.body())
+                        .fontWeight(.semibold)
+                        .foregroundColor(colors.background)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(colors.accent)
+                        .cornerRadius(AppRadius.small)
+                }
+
+                Button(action: {
+                    showUnbindConfirm = true
+                }) {
+                    Text("解除配对")
+                        .font(AppFonts.body())
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                }
             }
         }
         .padding(.vertical, AppSpacing.xl)
