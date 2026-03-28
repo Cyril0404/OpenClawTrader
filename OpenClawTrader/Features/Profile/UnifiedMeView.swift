@@ -22,7 +22,6 @@ struct UnifiedMeView: View {
     @State private var showingLogoutAlert = false
     @State private var showingDeleteAccountAlert = false
     @State private var showingOpenClawConnect = false
-    @State private var showingMobilePairing = false
     @State private var showingSkillsView = false
     let onLogout: () -> Void
 
@@ -66,9 +65,6 @@ struct UnifiedMeView: View {
         }
         .sheet(isPresented: $showingOpenClawConnect) {
             OpenClawConnectView()
-        }
-        .sheet(isPresented: $showingMobilePairing) {
-            MobilePairingView()
         }
         .sheet(isPresented: $showingSkillsView) {
             NavigationStack {
@@ -213,19 +209,6 @@ struct UnifiedMeView: View {
                     Image(systemName: "plus.circle")
                         .font(.system(size: 16))
                     Text("添加 OpenClaw")
-                        .font(AppFonts.caption())
-                }
-                .foregroundColor(colors.textSecondary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, AppSpacing.sm)
-            }
-
-            // 移动端配对
-            Button(action: { showingMobilePairing = true }) {
-                HStack {
-                    Image(systemName: "iphone.and.arrow.forward")
-                        .font(.system(size: 16))
-                    Text("移动端配对")
                         .font(AppFonts.caption())
                     Spacer()
                     Image(systemName: "chevron.right")
