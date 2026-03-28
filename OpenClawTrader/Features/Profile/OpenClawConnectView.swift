@@ -44,10 +44,6 @@ struct OpenClawConnectView: View {
                     // Scan and Manual Input
                     pairingMethodsSection
 
-                    // Pairing Code Display
-                    if let code = pairingService.currentCode {
-                        qrCodeDisplaySection(code: code)
-                    }
                 }
             }
             .padding(.horizontal, AppSpacing.lg)
@@ -94,36 +90,55 @@ struct OpenClawConnectView: View {
 
     // MARK: - Method One Section
 
+    private let clawredInstallCommand = """
+请先从这个仓库安装 clawred skills，并严格按下面要求执行：
+https://github.com/Cyril0404/ClawRed
+先直接运行 npm install -g clawred@latest，确保本机的 clawred 命令已经是最新版。涉及后台常驻时不要使用 npx。
+如果本机没有 Node.js，请先安装 Node.js（https://nodejs.org/），否则 clawred 无法运行。
+完成后，请使用 clawred-pair skill 帮我完成 OpenClawTrader 配对。
+严格按 skill 的步骤执行，不要跳过检查。
+如果成功，请把最终 6 位配对码单独放一行，方便我复制。
+如果失败，请直接告诉我卡在哪一步，以及下一条应该执行的命令。
+"""
+
     private var methodOneSection: some View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
             Text("方式一")
                 .font(AppFonts.caption())
                 .foregroundColor(colors.textTertiary)
 
-            Text("复制下方安装命令，发送给 OpenClaw 桌面端执行，安装后桌面端会显示二维码")
+            Text("复制下方命令，发送给 OpenClaw 桌面端执行")
                 .font(AppFonts.caption())
                 .foregroundColor(colors.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
+            // 代码块 - 终端样式
+            Text(clawredInstallCommand)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(Color(hex: "00FF00"))
+                .padding(AppSpacing.sm)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.black.opacity(0.85))
+                .cornerRadius(AppRadius.small)
+
+            // 复制按钮
             Button(action: {
-                copyInstallCommand()
+                UIPasteboard.general.string = clawredInstallCommand
+                copied = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    copied = false
+                }
             }) {
                 HStack {
-                    VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                        Text("让 OpenClaw 帮忙安装")
-                            .font(AppFonts.body())
-                            .foregroundColor(colors.textPrimary)
-                        Text("安装后扫桌面端二维码配对")
-                            .font(AppFonts.caption())
-                            .foregroundColor(colors.textSecondary)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(colors.textTertiary)
+                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                    Text(copied ? "已复制" : "复制命令")
                 }
-                .padding(AppSpacing.md)
+                .font(AppFonts.caption())
+                .foregroundColor(colors.accent)
+                .frame(maxWidth: .infinity)
+                .padding(AppSpacing.sm)
                 .background(colors.backgroundSecondary)
-                .cornerRadius(AppRadius.medium)
+                .cornerRadius(AppRadius.small)
             }
         }
     }
@@ -231,52 +246,6 @@ struct OpenClawConnectView: View {
         }
     }
 
-    // MARK: - QR Code Display Section
-
-    private func qrCodeDisplaySection(code: String) -> some View {
-        VStack(spacing: AppSpacing.md) {
-            Text("桌面端扫码配对")
-                .font(AppFonts.caption())
-                .foregroundColor(colors.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            VStack(spacing: AppSpacing.md) {
-                // QR Code
-                if let qrData = pairingService.qrCodeData,
-                   let qrImage = generateQRCode(from: qrData) {
-                    Image(uiImage: qrImage)
-                        .interpolation(.none)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 200, height: 200)
-                        .padding(AppSpacing.md)
-                        .background(Color.white)
-                        .cornerRadius(AppRadius.medium)
-                } else if pairingService.pairingStatus == PairingService.PairingStatus.generating {
-                    RoundedRectangle(cornerRadius: AppRadius.medium)
-                        .fill(colors.backgroundSecondary)
-                        .frame(width: 200, height: 200)
-                        .overlay(
-                            ProgressView()
-                        )
-                }
-
-                // Code display
-                Text(code)
-                    .font(.system(size: 32, weight: .bold, design: .monospaced))
-                    .foregroundColor(colors.textPrimary)
-                    .tracking(8)
-
-                Text("配对码有效期: 5分钟")
-                    .font(AppFonts.caption())
-                    .foregroundColor(colors.textTertiary)
-            }
-            .padding(AppSpacing.lg)
-            .background(colors.backgroundSecondary)
-            .cornerRadius(AppRadius.medium)
-        }
-    }
-
     // MARK: - Paired Section
 
     private var pairedSection: some View {
@@ -335,9 +304,9 @@ struct OpenClawConnectView: View {
     }
 
     private func handleScannedCode(_ code: String) {
-        if let validCode = pairingService.parseQRCode(code) {
-            manualCode = validCode
-            verifyCode(validCode)
+        if let parsed = pairingService.parsePairingURL(code) {
+            manualCode = parsed.code
+            verifyCode(parsed.code)
         }
     }
 
@@ -348,8 +317,7 @@ struct OpenClawConnectView: View {
 
     private func verifyCode(_ code: String) {
         Task {
-            let success = await pairingService.verifyPairingCode(code)
-            if success {
+            if let response = await pairingService.verifyPairingCode(code), response.success {
                 isPaired = true
             }
         }
