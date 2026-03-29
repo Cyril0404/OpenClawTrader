@@ -32,10 +32,6 @@ class SentimentService: ObservableObject {
         // TODO: 调用真实API获取舆情数据
         // let response: SentimentResponse = try await APIClient.shared.request("/v1/sentiment/\(stockCode)")
 
-        // Mock数据
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        stockSentiment = SentimentData.mock(stockCode: stockCode, stockName: stockName)
-
         isLoading = false
     }
 
@@ -48,10 +44,6 @@ class SentimentService: ObservableObject {
         // TODO: 调用真实API
         // let response: [SentimentRankingResponse] = try await APIClient.shared.request("/v1/sentiment/rankings")
 
-        // Mock数据
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        rankings = SentimentRanking.mockList()
-
         isLoading = false
     }
 
@@ -63,10 +55,6 @@ class SentimentService: ObservableObject {
 
         // TODO: 调用真实API
         // let response: [SocialPostResponse] = try await APIClient.shared.request("/v1/sentiment/hot")
-
-        // Mock数据
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        hotPosts = SocialPost.mockList()
 
         isLoading = false
     }

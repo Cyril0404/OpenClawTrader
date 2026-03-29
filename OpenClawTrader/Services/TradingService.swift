@@ -27,22 +27,7 @@ class TradingService: ObservableObject {
     @Published var error: String?
 
     private init() {
-        loadMockData()
-    }
-
-    // MARK: - Mock Data
-
-    private func loadMockData() {
-        // 使用真实A股持仓数据（2026-03-27收盘）
-        portfolio = PortfolioSummary.fromRealStocks
-        tradingStyle = TradingStyle.preview
-        riskAssessment = RiskAssessment.preview
-        suggestions = TradingSuggestion.previewList
-        performance = PerformanceReport.preview
-
-        // 使用真实交易记录
-        trades = Trade.previewList
-        orders = Order.previewList
+        // 初始为空，等待数据加载
     }
 
     // MARK: - Holdings

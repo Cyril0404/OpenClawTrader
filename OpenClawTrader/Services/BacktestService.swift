@@ -31,8 +31,9 @@ class BacktestService: ObservableObject {
         error = nil
         signals = []
 
-        // 获取K线数据
-        let klineData = KLineData.mockData(days: 120)
+        // TODO: 获取真实K线数据
+        // let klineData = await StockDataService.shared.fetchKLineData(stockCode: params.stockCode)
+        let klineData: [KLineData] = []
 
         // 根据策略类型运行回测
         let (trades, equityCurve) = calculateBacktest(

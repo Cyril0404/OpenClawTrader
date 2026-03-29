@@ -21,16 +21,12 @@ class SkillsService: ObservableObject {
 
     private let gatewayBaseURL = "http://localhost:18789"
 
-    private init() {
-        loadSkills()
-    }
+    private init() {}
 
     // MARK: - Load Skills
 
     func loadSkills() {
         // TODO: 后续对接真实 API
-        // 目前使用 mock 数据
-        skills = Skill.mockSkills
     }
 
     // MARK: - Fetch from API
@@ -39,21 +35,11 @@ class SkillsService: ObservableObject {
         isLoading = true
         error = nil
 
-        do {
-            // TODO: 调用真实 API
-            // let response: [SkillResponse] = try await APIClient.shared.request("/v1/skills")
-            // skills = response.map { Skill(id: $0.id, name: $0.name, ... ) }
+        // TODO: 调用真实 API
+        // let response: [SkillResponse] = try await APIClient.shared.request("/v1/skills")
+        // skills = response.map { Skill(id: $0.id, name: $0.name, ... ) }
 
-            // Mock 数据
-            try await Task.sleep(nanoseconds: 500_000_000) // 模拟网络延迟
-            skills = Skill.mockSkills
-            isLoading = false
-        } catch {
-            self.error = error.localizedDescription
-            isLoading = false
-            // 失败时使用 mock 数据
-            skills = Skill.mockSkills
-        }
+        isLoading = false
     }
 
     // MARK: - Toggle Skill

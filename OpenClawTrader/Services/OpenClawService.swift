@@ -109,16 +109,9 @@ class OpenClawService: ObservableObject {
             // 设置当前 workspace
             currentWorkspace = workspaces.first { $0.isActive } ?? workspaces.first
 
-            // 暂时用 mock 数据，因为 API 可能没有返回这些
-            models = AIModel.previewList
-            agents = Agent.previewList
-            workflows = Workflow.previewList
-
             setupMainAgent()
         } catch {
             self.error = "加载数据失败: \(error.localizedDescription)"
-            // 加载失败时使用 mock 数据
-            loadMockData()
         }
     }
 
@@ -138,24 +131,6 @@ class OpenClawService: ObservableObject {
         workflows = []
         mainAgent = nil
         error = nil
-    }
-
-    // MARK: - Mock Data
-
-    private func loadMockData() {
-        workspaces = [
-            Workspace(id: "ws_001", name: "Production", description: "生产环境", createdAt: Date(), isActive: true,
-                     agentCount: 12, workflowCount: 8, tokenUsage: Workspace.TokenUsage(total: 5000000, usedToday: 450000, limit: 5000000)),
-            Workspace(id: "ws_002", name: "Development", description: "开发环境", createdAt: Date().addingTimeInterval(-86400), isActive: false,
-                     agentCount: 5, workflowCount: 3, tokenUsage: Workspace.TokenUsage(total: 1000000, usedToday: 120000, limit: 1000000)),
-            Workspace(id: "ws_003", name: "Testing", description: "测试环境", createdAt: Date().addingTimeInterval(-172800), isActive: false,
-                     agentCount: 3, workflowCount: 2, tokenUsage: Workspace.TokenUsage(total: 500000, usedToday: 45000, limit: 500000))
-        ]
-        currentWorkspace = workspaces.first { $0.isActive } ?? workspaces.first
-
-        models = AIModel.previewList
-        agents = Agent.previewList
-        workflows = Workflow.previewList
     }
 
     // MARK: - Workspace Operations
@@ -321,16 +296,7 @@ class OpenClawService: ObservableObject {
                 }
             } catch {
                 await MainActor.run {
-                    // API 调用失败时，返回模拟回复
-                    let mockReply = self.getMockReply(for: content, agentId: agentId)
-                    let assistantMessage = Conversation.Message(
-                        id: UUID().uuidString,
-                        role: .assistant,
-                        content: mockReply,
-                        timestamp: Date()
-                    )
-                    conversations[agentId]?.append(assistantMessage)
-                    completion(.success(mockReply))
+                    completion(.failure(error))
                 }
             }
         }
@@ -339,22 +305,5 @@ class OpenClawService: ObservableObject {
     /// 获取当前 Agent 的会话历史
     func getConversation(for agentId: String) -> [Conversation.Message] {
         return conversations[agentId] ?? []
-    }
-
-    /// 获取模拟回复（开发阶段使用）
-    private func getMockReply(for content: String, agentId: String) -> String {
-        guard let agent = agents.first(where: { $0.id == agentId }) else {
-            return "你好，有什么可以帮你的吗？"
-        }
-
-        if content.contains("分析") || content.contains("股票") {
-            return "我来帮你分析一下。从当前市场情况来看，建议关注以下几点..."
-        } else if content.contains("建议") || content.contains("推荐") {
-            return "根据你的持仓情况，我有以下建议：\n1. 适当分散仓位\n2. 关注大盘走势\n3. 设置止损点"
-        } else if content.contains("你好") || content.contains("hi") || content.contains("hello") {
-            return "你好！我是 \(agent.name)，很高兴为你服务。有什么可以帮你的吗？"
-        } else {
-            return "收到你的消息：\(content)\n\n正在处理中，请稍候..."
-        }
     }
 }

@@ -17,7 +17,7 @@ struct UnifiedMeView: View {
     @Environment(ThemeManager.self) private var themeManager
     @StateObject private var tradingService = TradingService.shared
     @StateObject private var service = OpenClawService.shared
-    @State private var notifications: [AppNotification] = AppNotification.previewList
+    @State private var notifications: [AppNotification] = []
     @State private var selectedFilter: NotificationFilter = .all
     @State private var showingThemePicker = false
     @State private var showingLogoutAlert = false
@@ -138,12 +138,12 @@ struct UnifiedMeView: View {
                 )
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("倪子凡")
+                Text(service.isConnected ? (service.currentWorkspace?.name ?? "用户") : "未登录")
                     .font(AppFonts.title2())
                     .foregroundColor(colors.textPrimary)
-                Text("在线")
+                Text(service.isConnected ? "在线" : "离线")
                     .font(AppFonts.caption())
-                    .foregroundColor(AppColors.success)
+                    .foregroundColor(service.isConnected ? AppColors.success : colors.textTertiary)
             }
 
             Spacer()

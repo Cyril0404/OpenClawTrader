@@ -13,7 +13,7 @@ import SwiftUI
 
 struct NotificationListView: View {
     @Environment(\.appColors) private var colors
-    @State private var notifications: [AppNotification] = AppNotification.previewList
+    @State private var notifications: [AppNotification] = []
     @State private var selectedFilter: NotificationFilter = .all
 
     enum NotificationFilter: String, CaseIterable {

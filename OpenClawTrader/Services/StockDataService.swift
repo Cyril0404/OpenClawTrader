@@ -37,13 +37,7 @@ class StockDataService: ObservableObject {
         // TODO: 调用真实API
         // let response: [KLineResponse] = try await APIClient.shared.request("/v1/stock/\(stockCode)/kline?period=\(period.rawValue)")
 
-        // Mock数据
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        klineData = KLineData.mockData(days: 60)
         currentStock = StockInfo(id: stockCode, name: stockCodeToName(stockCode), market: "深交所")
-
-        // 计算技术指标
-        indicators = calculateIndicators(data: klineData)
 
         isLoading = false
     }
@@ -242,13 +236,7 @@ class StockDataService: ObservableObject {
     // MARK: - 搜索股票
 
     func searchStocks(keyword: String) -> [StockInfo] {
-        // Mock实现
-        return [
-            StockInfo(id: "000001", name: "平安银行", market: "深交所"),
-            StockInfo(id: "000002", name: "万科A", market: "深交所"),
-            StockInfo(id: "600000", name: "浦发银行", market: "上交所"),
-            StockInfo(id: "600519", name: "贵州茅台", market: "上交所"),
-            StockInfo(id: "000858", name: "五粮液", market: "深交所")
-        ].filter { $0.name.contains(keyword) || $0.id.contains(keyword) }
+        // TODO: 调用真实API搜索股票
+        return []
     }
 }

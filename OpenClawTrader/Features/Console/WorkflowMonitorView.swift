@@ -102,9 +102,6 @@ struct WorkflowMonitorView: View {
         }
         .background(colors.background)
         .navigationBarHidden(true)
-        .onAppear {
-            loadMockLogs()
-        }
     }
 
     private var statusColor: Color {
@@ -124,21 +121,6 @@ struct WorkflowMonitorView: View {
 
     private func toggleWorkflow() {
         service.toggleWorkflowStatus(workflow)
-    }
-
-    private func loadMockLogs() {
-        logs = [
-            WorkflowLog(id: "log_001", workflowId: workflow.id, stepId: "step_001", level: .info,
-                      message: "开始收集数据源...", timestamp: Date().addingTimeInterval(-30)),
-            WorkflowLog(id: "log_002", workflowId: workflow.id, stepId: "step_001", level: .info,
-                      message: "成功连接数据源 A", timestamp: Date().addingTimeInterval(-25)),
-            WorkflowLog(id: "log_003", workflowId: workflow.id, stepId: "step_001", level: .info,
-                      message: "成功连接数据源 B", timestamp: Date().addingTimeInterval(-20)),
-            WorkflowLog(id: "log_004", workflowId: workflow.id, stepId: "step_001", level: .warning,
-                      message: "数据源 C 连接超时，使用缓存数据", timestamp: Date().addingTimeInterval(-15)),
-            WorkflowLog(id: "log_005", workflowId: workflow.id, stepId: "step_002", level: .info,
-                      message: "开始处理数据...", timestamp: Date().addingTimeInterval(-10))
-        ]
     }
 }
 
