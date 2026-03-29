@@ -17,6 +17,7 @@ struct UnifiedMeView: View {
     @Environment(ThemeManager.self) private var themeManager
     @StateObject private var tradingService = TradingService.shared
     @StateObject private var service = OpenClawService.shared
+    @StateObject private var authService = AuthService.shared
     @State private var notifications: [AppNotification] = []
     @State private var selectedFilter: NotificationFilter = .all
     @State private var showingThemePicker = false
@@ -27,6 +28,7 @@ struct UnifiedMeView: View {
     @State private var showPrivacyPolicy = false
     @State private var showFreeMembership = false
     @State private var showShareSheet = false
+    @State private var showingLoginSheet = false
     let onLogout: () -> Void
 
     enum NotificationFilter: String, CaseIterable {
@@ -84,6 +86,9 @@ struct UnifiedMeView: View {
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(items: ["推荐你使用妙股App，轻松交易，随时随地行情分析！https://openclaw.example.com"])
         }
+        .sheet(isPresented: $showingLoginSheet) {
+            LoginSheet(onLoginSuccess: { showingLoginSheet = false })
+        }
         .alert("退出登录", isPresented: $showingLogoutAlert) {
             Button("取消", role: .cancel) {}
             Button("确认退出", role: .destructive) {
@@ -106,6 +111,7 @@ struct UnifiedMeView: View {
 
     /// 退出登录
     private func performLogout() {
+        authService.logout()
         StorageService.shared.disconnect()
         OpenClawService.shared.reset()
         onLogout()
@@ -113,6 +119,7 @@ struct UnifiedMeView: View {
 
     /// 注销账号
     private func performDeleteAccount() {
+        authService.logout()
         StorageService.shared.deleteAccount()
         OpenClawService.shared.reset()
     }
@@ -138,10 +145,10 @@ struct UnifiedMeView: View {
                 )
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(service.isConnected ? (service.currentWorkspace?.name ?? "OpenClaw") : "未登录")
+                Text(authService.isLoggedIn ? authService.currentUser?.username ?? "用户" : "未登录")
                     .font(AppFonts.title2())
                     .foregroundColor(colors.textPrimary)
-                Text(service.isConnected ? "在线" : "离线")
+                Text(authService.isLoggedIn ? "在线" : "离线")
                     .font(AppFonts.caption())
                     .foregroundColor(service.isConnected ? AppColors.success : colors.textTertiary)
             }
@@ -170,7 +177,7 @@ struct UnifiedMeView: View {
                         Text(service.isConnected ? (service.currentWorkspace?.name ?? "OpenClaw") : "未连接")
                             .font(AppFonts.body())
                             .foregroundColor(colors.textPrimary)
-                        Text(service.isConnected ? "OpenClaw 已连接" : "OpenClaw 未连接")
+                        Text(service.isConnected ? "OpenClaw 已连接" : authService.isLoggedIn ? "OpenClaw 未连接" : "请先登录")
                             .font(AppFonts.caption())
                             .foregroundColor(service.isConnected ? colors.textSecondary : AppColors.error)
                     }
@@ -375,39 +382,59 @@ struct UnifiedMeView: View {
 
                 AppDivider()
 
-                // 退出登录
-                Button(action: { showingLogoutAlert = true }) {
-                    HStack {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
-                            .font(.system(size: 16))
-                            .foregroundColor(AppColors.error)
-                            .frame(width: 24)
-                        Text("退出登录")
-                            .font(AppFonts.body())
-                            .foregroundColor(AppColors.error)
-                        Spacer()
+                if authService.isLoggedIn {
+                    // 已登录 - 显示退出登录和注销账号
+                    Button(action: { showingLogoutAlert = true }) {
+                        HStack {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .font(.system(size: 16))
+                                .foregroundColor(AppColors.error)
+                                .frame(width: 24)
+                            Text("退出登录")
+                                .font(AppFonts.body())
+                                .foregroundColor(AppColors.error)
+                            Spacer()
+                        }
+                        .padding(AppSpacing.md)
                     }
-                    .padding(AppSpacing.md)
-                }
-                .buttonStyle(.plain)
+                    .buttonStyle(.plain)
 
-                AppDivider()
+                    AppDivider()
 
-                // 注销账号
-                Button(action: { showingDeleteAccountAlert = true }) {
-                    HStack {
-                        Image(systemName: "person.crop.circle.badge.minus")
-                            .font(.system(size: 16))
-                            .foregroundColor(AppColors.error)
-                            .frame(width: 24)
-                        Text("注销账号")
-                            .font(AppFonts.body())
-                            .foregroundColor(AppColors.error)
-                        Spacer()
+                    Button(action: { showingDeleteAccountAlert = true }) {
+                        HStack {
+                            Image(systemName: "person.crop.circle.badge.minus")
+                                .font(.system(size: 16))
+                                .foregroundColor(AppColors.error)
+                                .frame(width: 24)
+                            Text("注销账号")
+                                .font(AppFonts.body())
+                                .foregroundColor(AppColors.error)
+                            Spacer()
+                        }
+                        .padding(AppSpacing.md)
                     }
-                    .padding(AppSpacing.md)
+                    .buttonStyle(.plain)
+                } else {
+                    // 未登录 - 显示登录按钮
+                    Button(action: { showingLoginSheet = true }) {
+                        HStack {
+                            Image(systemName: "person.crop.circle.badge.plus")
+                                .font(.system(size: 16))
+                                .foregroundColor(colors.accent)
+                                .frame(width: 24)
+                            Text("登录")
+                                .font(AppFonts.body())
+                                .foregroundColor(colors.accent)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12))
+                                .foregroundColor(colors.textTertiary)
+                        }
+                        .padding(AppSpacing.md)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .background(colors.backgroundSecondary)
             .cornerRadius(AppRadius.medium)
@@ -452,5 +479,133 @@ struct UnifiedNotificationRow: View {
             .padding(AppSpacing.md)
         }
         .buttonStyle(.plain)
+    }
+}
+
+// ============================================
+// MARK: - Login Sheet
+// ============================================
+
+struct LoginSheet: View {
+    @Environment(\.appColors) private var colors
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var authService = AuthService.shared
+
+    @State private var username = ""
+    @State private var password = ""
+    @State private var email = ""
+    @State private var isRegisterMode = false
+    @State private var errorMessage: String?
+
+    let onLoginSuccess: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: AppSpacing.xl) {
+                // Logo
+                Image(systemName: "person.crop.circle.fill")
+                    .font(.system(size: 72, weight: .light))
+                    .foregroundColor(colors.accent)
+                    .padding(.top, AppSpacing.xl)
+
+                // Title
+                Text(isRegisterMode ? "注册账号" : "登录")
+                    .font(AppFonts.title1())
+                    .foregroundColor(colors.textPrimary)
+
+                // Form
+                VStack(spacing: AppSpacing.md) {
+                    TextField("用户名", text: $username)
+                        .textContentType(.username)
+                        .autocapitalization(.none)
+                        .padding()
+                        .background(colors.backgroundSecondary)
+                        .cornerRadius(AppRadius.small)
+
+                    SecureField("密码", text: $password)
+                        .textContentType(isRegisterMode ? .newPassword : .password)
+                        .padding()
+                        .background(colors.backgroundSecondary)
+                        .cornerRadius(AppRadius.small)
+
+                    if isRegisterMode {
+                        TextField("邮箱（可选）", text: $email)
+                            .textContentType(.emailAddress)
+                            .keyboardType(.emailAddress)
+                            .autocapitalization(.none)
+                            .padding()
+                            .background(colors.backgroundSecondary)
+                            .cornerRadius(AppRadius.small)
+                    }
+                }
+                .padding(.horizontal, AppSpacing.lg)
+
+                // Error message
+                if let error = errorMessage {
+                    Text(error)
+                        .font(AppFonts.caption())
+                        .foregroundColor(AppColors.error)
+                }
+
+                // Submit button
+                Button(action: submit) {
+                    if authService.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        Text(isRegisterMode ? "注册" : "登录")
+                            .font(AppFonts.body())
+                            .fontWeight(.semibold)
+                    }
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(colors.accent)
+                .cornerRadius(AppRadius.small)
+                .padding(.horizontal, AppSpacing.lg)
+                .disabled(authService.isLoading)
+
+                // Toggle mode
+                Button(action: { isRegisterMode.toggle(); errorMessage = nil }) {
+                    Text(isRegisterMode ? "已有账号？登录" : "没有账号？注册")
+                        .font(AppFonts.caption())
+                        .foregroundColor(colors.accent)
+                }
+
+                Spacer()
+            }
+            .background(colors.background)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("取消") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func submit() {
+        errorMessage = nil
+
+        Task {
+            let success: Bool
+            if isRegisterMode {
+                success = await authService.register(
+                    username: username,
+                    password: password,
+                    email: email.isEmpty ? nil : email
+                )
+            } else {
+                success = await authService.login(username: username, password: password)
+            }
+
+            if success {
+                onLoginSuccess()
+                dismiss()
+            } else {
+                errorMessage = authService.error ?? "操作失败"
+            }
+        }
     }
 }

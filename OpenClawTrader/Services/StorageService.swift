@@ -25,6 +25,7 @@ class StorageService {
         static let priceAlertEnabled = "price_alert_enabled"
         static let tradeNotificationsEnabled = "trade_notifications_enabled"
         static let watchlist = "watchlist"
+        static let currentUser = "current_user"
     }
 
     private init() {}
@@ -120,5 +121,30 @@ class StorageService {
         let domain = Bundle.main.bundleIdentifier!
         userDefaults.removePersistentDomain(forName: domain)
         userDefaults.synchronize()
+    }
+
+    // MARK: - User
+
+    /// 保存用户信息
+    /// - Parameter user: 用户对象
+    func saveUser(_ user: User) {
+        if let data = try? JSONEncoder().encode(user) {
+            userDefaults.set(data, forKey: Keys.currentUser)
+        }
+    }
+
+    /// 获取保存的用户信息
+    /// - Returns: 用户对象，如果不存在返回 nil
+    func getUser() -> User? {
+        guard let data = userDefaults.data(forKey: Keys.currentUser),
+              let user = try? JSONDecoder().decode(User.self, from: data) else {
+            return nil
+        }
+        return user
+    }
+
+    /// 清除用户信息
+    func clearUser() {
+        userDefaults.removeObject(forKey: Keys.currentUser)
     }
 }

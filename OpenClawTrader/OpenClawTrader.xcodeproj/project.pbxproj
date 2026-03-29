@@ -62,6 +62,8 @@
 		F6AC29741B3ABA52017CD2CF /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB307292488DF178CE7B707F /* Workspace.swift */; };
 		FA93EE535ABFA2B29C90764B /* HoldingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F5BA1A8555C1B7C2A0A351 /* HoldingDetailView.swift */; };
 		FFD8B8AC1A5C35334A8273CC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18215A86D4E9893048DDDBAF /* ProfileView.swift */; };
+		USER1234567890ABCD /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = USER9876543210FEDCBA /* User.swift */; };
+		AUTH1234567890FEDCBA /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH9876543210FEDCBA /* AuthService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -122,6 +124,8 @@
 		F894F7A67B9E69E61EF0A1C7 /* ModelListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelListView.swift; sourceTree = "<group>"; };
 		FB307292488DF178CE7B707F /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
 		FFA07CE1ED7FDDBB8550B2E8 /* Agent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Agent.swift; sourceTree = "<group>"; };
+		USER9876543210FEDCBA /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		AUTH9876543210FEDCBA /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -218,6 +222,7 @@
 		84BEEBB58C0D39426D532947 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AUTH9876543210FEDCBA /* AuthService.swift */,
 				2B0533E2DFF9477C0E99F3B1 /* APIClient.swift */,
 				DE66514A603BD60849BDDFA4 /* BacktestService.swift */,
 				8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */,
@@ -282,6 +287,7 @@
 				7BFAA901553C9AA3D1C53414 /* TradingAnalysis.swift */,
 				92B1DE06EAE865AE1C1F4ABF /* Workflow.swift */,
 				FB307292488DF178CE7B707F /* Workspace.swift */,
+				USER9876543210FEDCBA /* User.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -417,6 +423,7 @@
 				C3A9684EF5D5D27151098FAB /* SentimentData.swift in Sources */,
 				E4B2503FD5DA6FD4C6B70098 /* SentimentService.swift in Sources */,
 				6A4CCFCD5F5369DAC4E29BC5 /* SimpleChatView.swift in Sources */,
+				AUTH1234567890FEDCBA /* AuthService.swift in Sources */,
 				A4AA24BD2483CD0627373E96 /* Skill.swift in Sources */,
 				8D05D216CA6746312DDC06DD /* SkillsService.swift in Sources */,
 				71C902131737158C416FE58D /* SkillsView.swift in Sources */,
@@ -429,6 +436,7 @@
 				6C09E06A5489C645F7BA12AB /* TradingAnalysis.swift in Sources */,
 				4F9E4BE7E6BCEF3F212B7EA6 /* TradingService.swift in Sources */,
 				6B84C0278EDF273495513757 /* Typography.swift in Sources */,
+				USER1234567890ABCD /* User.swift in Sources */,
 				A4E7AD1E867AED0112C9AC92 /* UnifiedMeView.swift in Sources */,
 				F17DA1579551EF1DDFAF28AF /* Workflow.swift in Sources */,
 				7311091C4C1B435DEF693C40 /* WorkflowListView.swift in Sources */,
