@@ -457,47 +457,46 @@ https://github.com/Cyril0404/ClawRed
 
         isVerifying = true
         errorMessage = nil
+        print("[DEBUG] verifyCode called with: \(code)")
 
         Task {
-            if let response = await pairingService.verifyPairingCode(code) {
-                if response.success {
-                    // 保存 token 到 Keychain
-                    if let token = response.gatewayToken {
-                        pairingService.savePairingKey(token)
-                        // 优先使用 gatewayApiUrl，否则使用 relayAPI
-                        let baseURL = response.gatewayApiUrl ?? pairingService.relayAPI
-                        // 同时保存到 StorageService 让 OpenClawService 能检测到连接状态
-                        StorageService.shared.saveConnection(
-                            baseURL: baseURL,
-                            apiKey: token
-                        )
-                        // 立即触发 OpenClawService 连接
-                        await OpenClawService.shared.connect()
-                        // 只有 connect() 成功后才设 isPaired
-                        isPaired = OpenClawService.shared.isConnected
-                    } else if let apiUrl = response.gatewayApiUrl {
-                        // gatewayToken 为空但有 apiUrl，尝试使用
-                        StorageService.shared.saveConnection(
-                            baseURL: apiUrl,
-                            apiKey: pairingService.getPairingKey() ?? ""
-                        )
-                        await OpenClawService.shared.connect()
-                        isPaired = OpenClawService.shared.isConnected
-                    } else {
-                        // 服务器返回成功但没有有效凭证
-                        errorMessage = "配对成功但未返回有效凭证，请重试"
-                        isPaired = false
-                    }
-                    isVerifying = false
-                } else {
-                    errorMessage = response.error ?? "配对码无效"
-                    isPaired = false
-                    isVerifying = false
-                }
-            } else {
+            print("[DEBUG] Calling verifyPairingCode...")
+            let response = await pairingService.verifyPairingCode(code)
+            print("[DEBUG] verifyPairingCode returned: \(String(describing: response))")
+
+            guard let response = response else {
+                print("[DEBUG] response is nil - network error")
                 isVerifying = false
                 errorMessage = pairingService.errorMessage ?? "验证失败，请检查网络连接"
                 isPaired = false
+                return
+            }
+
+            print("[DEBUG] response.success = \(response.success)")
+            if response.success {
+                if let token = response.gatewayToken {
+                    print("[DEBUG] Saving token: \(token.prefix(8))...")
+                    pairingService.savePairingKey(token)
+                    let baseURL = response.gatewayApiUrl ?? pairingService.relayAPI
+                    print("[DEBUG] baseURL: \(baseURL)")
+                    StorageService.shared.saveConnection(baseURL: baseURL, apiKey: token, relayURL: pairingService.relayAPI)
+                    print("[DEBUG] Calling triggerConnect...")
+                    OpenClawService.shared.triggerConnect()
+                    print("[DEBUG] Setting isPaired = true")
+                    isPaired = true
+                    print("[DEBUG] isPaired now = \(isPaired), isPairedState = \(isPaired || pairingService.isPaired)")
+                } else {
+                    print("[DEBUG] No gatewayToken in response")
+                    errorMessage = "配对成功但未返回有效凭证，请重试"
+                    isPaired = false
+                }
+                isVerifying = false
+                print("[DEBUG] isVerifying = false, isPaired = \(isPaired)")
+            } else {
+                print("[DEBUG] verify failed: \(response.error ?? "unknown")")
+                errorMessage = response.error ?? "配对码无效"
+                isPaired = false
+                isVerifying = false
             }
         }
     }

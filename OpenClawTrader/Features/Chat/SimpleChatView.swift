@@ -166,7 +166,7 @@ struct SimpleChatView: View {
             // 恢复之前保存的输入
             inputText = ChatInputState.shared.pendingText
             // 只要有凭证就尝试连接 WebSocket（不依赖 isConnected，因为 /v1/status 可能404）
-            let baseURL = StorageService.shared.apiBaseURL
+            let baseURL = StorageService.shared.relayURL
             let token = StorageService.shared.apiKey
             print("[Chat] baseURL=\(baseURL), token=\(token.prefix(8))..., emptyURL=\(baseURL.isEmpty), emptyToken=\(token.isEmpty)")
             if !baseURL.isEmpty && !token.isEmpty {

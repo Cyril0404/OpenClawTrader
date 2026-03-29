@@ -218,7 +218,7 @@ class PairingService: ObservableObject {
 
         if result.success, let token = result.gatewayToken {
             savePairingKey(token)
-            StorageService.shared.saveConnection(baseURL: relayAPI, apiKey: token)
+            StorageService.shared.saveConnection(baseURL: relayAPI, apiKey: token, relayURL: relayAPI)
             pairingStatus = .connected
             return true
         } else {

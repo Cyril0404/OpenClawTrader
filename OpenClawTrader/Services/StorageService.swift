@@ -19,6 +19,7 @@ class StorageService {
     private enum Keys {
         static let apiBaseURL = "api_base_url"
         static let apiKey = "api_key"
+        static let relayURL = "relay_url"
         static let isConnected = "is_connected"
         static let selectedWorkspaceId = "selected_workspace_id"
         static let notificationsEnabled = "notifications_enabled"
@@ -53,6 +54,19 @@ class StorageService {
         set {
             print("[Storage] apiKey WRITE: \(newValue.prefix(8))...")
             userDefaults.set(newValue, forKey: Keys.apiKey)
+        }
+    }
+
+    /// relay-server URL（用于 WebSocket 连接）
+    var relayURL: String {
+        get {
+            let value = userDefaults.string(forKey: Keys.relayURL) ?? ""
+            print("[Storage] relayURL READ: \(value)")
+            return value
+        }
+        set {
+            print("[Storage] relayURL WRITE: \(newValue)")
+            userDefaults.set(newValue, forKey: Keys.relayURL)
         }
     }
 
@@ -113,11 +127,13 @@ class StorageService {
 
     /// 保存 OpenClaw 连接信息
     /// - Parameters:
-    ///   - baseURL: API 基础地址
-    ///   - apiKey: API 密钥
-    func saveConnection(baseURL: String, apiKey: String) {
+    ///   - baseURL: Gateway API 地址
+    ///   - apiKey: 密钥
+    ///   - relayURL: relay-server WebSocket URL（用于设备连接）
+    func saveConnection(baseURL: String, apiKey: String, relayURL: String) {
         self.apiBaseURL = baseURL
         self.apiKey = apiKey
+        self.relayURL = relayURL
         self.isConnected = true
     }
 
@@ -125,6 +141,7 @@ class StorageService {
     func disconnect() {
         apiBaseURL = ""
         apiKey = ""
+        relayURL = ""
         isConnected = false
         selectedWorkspaceId = nil
     }
