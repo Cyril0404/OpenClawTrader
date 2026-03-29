@@ -475,14 +475,28 @@ https://github.com/Cyril0404/ClawRed
                         )
                         // 立即触发 OpenClawService 连接
                         await OpenClawService.shared.connect()
+                        isPaired = true
+                    } else if let apiUrl = response.gatewayApiUrl {
+                        // gatewayToken 为空，尝试使用 gatewayApiUrl 作为后备
+                        StorageService.shared.saveConnection(
+                            baseURL: apiUrl,
+                            apiKey: pairingService.getPairingKey() ?? ""
+                        )
+                        await OpenClawService.shared.connect()
+                        isPaired = true
+                    } else {
+                        // 服务器返回成功但没有有效凭证
+                        errorMessage = "配对成功但未返回有效凭证，请重试"
+                        isPaired = false
                     }
-                    isPaired = true
                 } else {
                     errorMessage = response.error ?? "配对码无效"
+                    isPaired = false
                 }
             } else {
                 isVerifying = false
                 errorMessage = pairingService.errorMessage ?? "验证失败，请检查网络连接"
+                isPaired = false
             }
         }
     }

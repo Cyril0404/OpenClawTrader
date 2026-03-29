@@ -351,14 +351,18 @@ struct PostCard: View {
         VStack(alignment: .leading, spacing: AppSpacing.sm) {
             // 头部
             HStack {
-                // 平台标签
-                Text(post.platform.rawValue)
-                    .font(AppFonts.caption())
-                    .foregroundColor(.white)
-                    .padding(.horizontal, AppSpacing.xs)
-                    .padding(.vertical, 2)
-                    .background(platformColor)
-                    .cornerRadius(4)
+                // 平台标签带图标
+                HStack(spacing: 4) {
+                    Image(systemName: platformIcon)
+                        .font(.system(size: 10))
+                    Text(post.platform.rawValue)
+                        .font(AppFonts.caption())
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, AppSpacing.xs)
+                .padding(.vertical, 2)
+                .background(platformColor)
+                .cornerRadius(4)
 
                 Text(post.author)
                     .font(AppFonts.caption())
@@ -415,6 +419,15 @@ struct PostCard: View {
         case .xueqiu: return .green
         case .guba: return .orange
         case .weibo: return .red
+        }
+    }
+
+    private var platformIcon: String {
+        switch post.platform {
+        case .twitter: return "bubble.left.and.bubble.right"
+        case .xueqiu: return "chart.line.uptrend.xyaxis"
+        case .guba: return "person.3"
+        case .weibo: return "at"
         }
     }
 

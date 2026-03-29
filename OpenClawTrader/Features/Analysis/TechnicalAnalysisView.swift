@@ -18,6 +18,8 @@ struct TechnicalAnalysisView: View {
 
     @State private var searchText = ""
     @State private var showStockPicker = false
+    @State private var selectedCandle: KLineData?
+    @State private var tooltipPosition: CGPoint = .zero
 
     var body: some View {
         VStack(spacing: 0) {
@@ -127,8 +129,26 @@ struct TechnicalAnalysisView: View {
                     .foregroundColor(colors.textSecondary)
                     .frame(height: 300)
             } else {
-                KLineChartView(data: dataService.klineData)
+                ZStack(alignment: .topLeading) {
+                    KLineChartView(data: dataService.klineData) { candle, position in
+                        selectedCandle = candle
+                        tooltipPosition = position
+                    }
                     .frame(height: 300)
+
+                    // 选中蜡烛详情提示
+                    if let candle = selectedCandle {
+                        CandleTooltip(candle: candle)
+                            .padding(AppSpacing.sm)
+                            .background(colors.background.opacity(0.9))
+                            .cornerRadius(AppRadius.small)
+                            .shadow(radius: 4)
+                            .padding(AppSpacing.sm)
+                            .onTapGesture {
+                                selectedCandle = nil
+                            }
+                    }
+                }
             }
         }
         .padding(AppSpacing.md)
@@ -242,11 +262,58 @@ struct TechnicalAnalysisView: View {
 }
 
 // ============================================
+// MARK: - K线详情提示
+// ============================================
+
+struct CandleTooltip: View {
+    let candle: KLineData
+    @Environment(\.appColors) private var colors
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(formatDate(candle.date))
+                .font(AppFonts.caption())
+                .foregroundColor(colors.textSecondary)
+
+            HStack(spacing: 12) {
+                tooltipItem(title: "开", value: candle.open)
+                tooltipItem(title: "高", value: candle.high)
+                tooltipItem(title: "低", value: candle.low)
+                tooltipItem(title: "收", value: candle.close)
+            }
+
+            Text("涨跌: \(candle.isBullish ? "+" : "")\(String(format: "%.2f", candle.close - candle.open))")
+                .font(AppFonts.small())
+                .foregroundColor(candle.isBullish ? colors.accent : AppColors.error)
+        }
+        .padding(AppSpacing.sm)
+    }
+
+    private func tooltipItem(title: String, value: Double) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.system(size: 10))
+                .foregroundColor(colors.textTertiary)
+            Text(String(format: "%.2f", value))
+                .font(AppFonts.small())
+                .foregroundColor(colors.textPrimary)
+        }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: date)
+    }
+}
+
+// ============================================
 // MARK: - K线图 View
 // ============================================
 
 struct KLineChartView: View {
     let data: [KLineData]
+    var onSelect: ((KLineData, CGPoint) -> Void)?
     @Environment(\.appColors) private var colors
 
     var body: some View {
@@ -293,6 +360,9 @@ struct KLineChartView: View {
                         .fill(color)
                         .frame(width: max(2, candleWidth * 0.6), height: bodyHeight)
                         .position(x: x, y: bodyTop + bodyHeight / 2)
+                        .onTapGesture {
+                            onSelect?(candle, CGPoint(x: x, y: yHigh))
+                        }
                 }
             }
         }

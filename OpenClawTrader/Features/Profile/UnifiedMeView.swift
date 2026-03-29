@@ -14,6 +14,7 @@ import SwiftUI
 
 struct UnifiedMeView: View {
     @Environment(\.appColors) private var colors
+    @Environment(ThemeManager.self) private var themeManager
     @StateObject private var tradingService = TradingService.shared
     @StateObject private var service = OpenClawService.shared
     @State private var notifications: [AppNotification] = AppNotification.previewList
@@ -323,7 +324,7 @@ struct UnifiedMeView: View {
                 Button {
                     showingThemePicker = true
                 } label: {
-                    ListItem(icon: "paintbrush", title: "外观", subtitle: "深色模式", showArrow: true)
+                    ListItem(icon: "paintbrush", title: "外观", subtitle: themeManager.mode.rawValue, showArrow: true)
                 }
                 .buttonStyle(.plain)
 
