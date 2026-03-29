@@ -18,6 +18,7 @@ struct UnifiedMeView: View {
     @StateObject private var tradingService = TradingService.shared
     @StateObject private var service = OpenClawService.shared
     @StateObject private var authService = AuthService.shared
+    @StateObject private var wsService = WebSocketChatService.shared
     @State private var notifications: [AppNotification] = []
     @State private var selectedFilter: NotificationFilter = .all
     @State private var showingThemePicker = false
@@ -172,21 +173,21 @@ struct UnifiedMeView: View {
                 // 当前连接的 Workspace
                 HStack(spacing: AppSpacing.sm) {
                     Circle()
-                        .fill(service.isConnected ? AppColors.success : colors.textTertiary)
+                        .fill((service.isConnected || wsService.isConnected) ? AppColors.success : colors.textTertiary)
                         .frame(width: 8, height: 8)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(service.isConnected ? (service.currentWorkspace?.name ?? "OpenClaw") : "未连接")
+                        Text((service.isConnected || wsService.isConnected) ? (service.currentWorkspace?.name ?? "OpenClaw") : "未连接")
                             .font(AppFonts.body())
                             .foregroundColor(colors.textPrimary)
-                        Text(service.isConnected ? "OpenClaw 已连接" : authService.isLoggedIn ? "OpenClaw 未连接" : "请先登录")
+                        Text((service.isConnected || wsService.isConnected) ? "OpenClaw 已连接" : authService.isLoggedIn ? "OpenClaw 未连接" : "请先登录")
                             .font(AppFonts.caption())
-                            .foregroundColor(service.isConnected ? colors.textSecondary : AppColors.error)
+                            .foregroundColor((service.isConnected || wsService.isConnected) ? colors.textSecondary : AppColors.error)
                     }
 
                     Spacer()
 
-                    if service.isConnected {
+                    if service.isConnected || wsService.isConnected {
                         Button(action: { service.disconnect() }) {
                             Text("断开")
                                 .font(AppFonts.caption())
