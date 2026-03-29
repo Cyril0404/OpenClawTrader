@@ -5,7 +5,7 @@ import UserNotifications
 //  SimpleChatView.swift
 //  OpenClawTrader
 //
-//  功能：极简AI聊天界面，仅保留对话核心功能
+//  功能:极简AI聊天界面,仅保留对话核心功能
 //
 
 // ============================================
@@ -25,6 +25,7 @@ final class ChatInputState: ObservableObject {
 struct SimpleChatView: View {
     @Environment(\.appColors) private var colors
     @StateObject private var service = OpenClawService.shared
+    @StateObject private var wsService = WebSocketChatService.shared
     @State private var inputText = ""
     @State private var messages: [SimpleChatMessage] = []
     @State private var isLoading = false
@@ -149,10 +150,28 @@ struct SimpleChatView: View {
         .onAppear {
             // 恢复之前保存的输入
             inputText = ChatInputState.shared.pendingText
+            // 只要有凭证就尝试连接 WebSocket（不依赖 isConnected，因为 /v1/status 可能404）
+            let baseURL = StorageService.shared.apiBaseURL
+            let token = StorageService.shared.apiKey
+            if !baseURL.isEmpty && !token.isEmpty {
+                print("[Chat] Connecting WebSocket to \(baseURL)...")
+                wsService.connect(baseURL: baseURL, token: token)
+                wsService.setStreamCallback { [self] text in
+                    // 流式消息追加到最后一个 AI 消息
+                    if let lastIdx = messages.lastIndex(where: { $0.role == "assistant" }) {
+                        messages[lastIdx] = SimpleChatMessage(
+                            role: "assistant",
+                            content: messages[lastIdx].content + text,
+                            timestamp: messages[lastIdx].timestamp
+                        )
+                    }
+                }
+            }
         }
         .onDisappear {
             // 保存当前输入
             ChatInputState.shared.pendingText = inputText
+            wsService.disconnect()
         }
     }
 
@@ -166,10 +185,10 @@ struct SimpleChatView: View {
                 // Agent 名称 + 状态点
                 HStack(spacing: AppSpacing.xs) {
                     Circle()
-                        .fill(service.isConnected ? AppColors.success : AppColors.error)
+                        .fill((service.isConnected || wsService.isConnected) ? AppColors.success : AppColors.error)
                         .frame(width: 8, height: 8)
 
-                    Text(service.isConnected ? (service.mainAgent?.name ?? "助手") : "未连接")
+                    Text((service.isConnected || wsService.isConnected) ? (service.mainAgent?.name ?? "助手") : "未连接")
                         .font(AppFonts.title3())
                         .foregroundColor(colors.textPrimary)
 
@@ -183,7 +202,7 @@ struct SimpleChatView: View {
                 Spacer()
             }
 
-            // Context 用量（不带前缀）
+            // Context 用量(不带前缀)
             Text(contextUsageText)
                 .font(AppFonts.small())
                 .foregroundColor(colors.textTertiary)
@@ -228,7 +247,7 @@ struct SimpleChatView: View {
             Text("随时开始对话")
                 .font(AppFonts.title3())
                 .foregroundColor(colors.textSecondary)
-            Text("可以问我任何问题，股票分析、资讯查找、交易建议都可以")
+            Text("可以问我任何问题,股票分析、资讯查找、交易建议都可以")
                 .font(AppFonts.caption())
                 .foregroundColor(colors.textTertiary)
                 .multilineTextAlignment(.center)
@@ -473,7 +492,7 @@ struct SimpleChatView: View {
             return
         }
 
-        // 构建消息内容（包含附件描述）
+        // 构建消息内容(包含附件描述)
         var fullContent = text
         if !pendingAttachments.isEmpty {
             let attachmentDescs = pendingAttachments.map { attachment in
@@ -505,24 +524,59 @@ struct SimpleChatView: View {
         showAttachmentMenu = false
         isLoading = true
 
-        // 调用服务发送消息
-        service.sendMessage(content: fullContent, to: agentId) { [self] result in
+        // 调用服务发送消息(优先 WebSocket,fallback HTTP)
+        if wsService.isConnected {
+            // WebSocket 模式
+            // 添加 AI 占位消息
+            let aiMsgId = UUID().uuidString
+            var aiMsg = SimpleChatMessage(
+                role: "assistant",
+                content: "思考中...",
+                timestamp: Date()
+            )
+            messages.append(aiMsg)
+            let aiMsgIdx = messages.count - 1
+
             isLoading = false
-            switch result {
-            case .success(let reply):
-                let assistantMsg = SimpleChatMessage(
-                    role: "assistant",
-                    content: reply,
-                    timestamp: Date()
-                )
-                messages.append(assistantMsg)
-            case .failure(let error):
-                let errorMsg = SimpleChatMessage(
-                    role: "assistant",
-                    content: "发送失败: \(error.localizedDescription)",
-                    timestamp: Date()
-                )
-                messages.append(errorMsg)
+            wsService.sendChatMessage(fullContent) { response in
+                Task { @MainActor in
+                    if let lastIdx = messages.lastIndex(where: { $0.role == "assistant" }) {
+                        if let resp = response, !resp.isEmpty {
+                            messages[lastIdx] = SimpleChatMessage(
+                                role: "assistant",
+                                content: resp,
+                                timestamp: messages[lastIdx].timestamp
+                            )
+                        } else {
+                            messages[lastIdx] = SimpleChatMessage(
+                                role: "assistant",
+                                content: "(空响应)",
+                                timestamp: messages[lastIdx].timestamp
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            // HTTP fallback
+            service.sendMessage(content: fullContent, to: agentId) { [self] result in
+                isLoading = false
+                switch result {
+                case .success(let reply):
+                    let assistantMsg = SimpleChatMessage(
+                        role: "assistant",
+                        content: reply,
+                        timestamp: Date()
+                    )
+                    messages.append(assistantMsg)
+                case .failure(let error):
+                    let errorMsg = SimpleChatMessage(
+                        role: "assistant",
+                        content: "发送失败: \(error.localizedDescription)",
+                        timestamp: Date()
+                    )
+                    messages.append(errorMsg)
+                }
             }
         }
     }
@@ -691,7 +745,7 @@ struct CommandListSheet: View {
                 }
             }
             .alert("添加命令", isPresented: $showingAddCommand) {
-                TextField("命令前缀，如 /gpt", text: $newCommandPrefix)
+                TextField("命令前缀,如 /gpt", text: $newCommandPrefix)
                 TextField("命令名称", text: $newCommandName)
                 Button("取消", role: .cancel) {
                     newCommandPrefix = ""
