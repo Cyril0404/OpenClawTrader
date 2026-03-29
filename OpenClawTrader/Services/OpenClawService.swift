@@ -63,6 +63,7 @@ class OpenClawService: ObservableObject {
 
             do {
                 // 测试连接
+                print("OpenClaw: 开始测试连接到 \(baseURL)")
                 let status: StatusResponse = try await APIClient.shared.testConnection()
                 print("OpenClaw Status: \(status.status ?? "unknown")")
 
@@ -73,6 +74,7 @@ class OpenClawService: ObservableObject {
                 isConnected = true
                 StorageService.shared.isConnected = true
             } catch {
+                print("OpenClaw: 连接失败 - \(error.localizedDescription)")
                 self.error = error.localizedDescription
                 isConnected = false
                 StorageService.shared.isConnected = false

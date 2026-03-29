@@ -473,7 +473,8 @@ https://github.com/Cyril0404/ClawRed
                         )
                         // 立即触发 OpenClawService 连接
                         await OpenClawService.shared.connect()
-                        isPaired = true
+                        // 只有 connect() 成功后才设 isPaired
+                        isPaired = OpenClawService.shared.isConnected
                     } else if let apiUrl = response.gatewayApiUrl {
                         // gatewayToken 为空但有 apiUrl，尝试使用
                         StorageService.shared.saveConnection(
@@ -481,7 +482,7 @@ https://github.com/Cyril0404/ClawRed
                             apiKey: pairingService.getPairingKey() ?? ""
                         )
                         await OpenClawService.shared.connect()
-                        isPaired = true
+                        isPaired = OpenClawService.shared.isConnected
                     } else {
                         // 服务器返回成功但没有有效凭证
                         errorMessage = "配对成功但未返回有效凭证，请重试"
