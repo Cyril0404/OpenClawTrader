@@ -138,7 +138,7 @@ struct UnifiedMeView: View {
                 )
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(service.isConnected ? (service.currentWorkspace?.name ?? "用户") : "未登录")
+                Text(service.isConnected ? (service.currentWorkspace?.name ?? "OpenClaw") : "未登录")
                     .font(AppFonts.title2())
                     .foregroundColor(colors.textPrimary)
                 Text(service.isConnected ? "在线" : "离线")
@@ -167,7 +167,7 @@ struct UnifiedMeView: View {
                         .frame(width: 8, height: 8)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(service.currentWorkspace?.name ?? "未选择")
+                        Text(service.isConnected ? (service.currentWorkspace?.name ?? "OpenClaw") : "未连接")
                             .font(AppFonts.body())
                             .foregroundColor(colors.textPrimary)
                         Text(service.isConnected ? "OpenClaw 已连接" : "OpenClaw 未连接")
