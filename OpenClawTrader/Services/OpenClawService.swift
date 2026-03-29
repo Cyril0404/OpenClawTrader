@@ -89,11 +89,9 @@ class OpenClawService: ObservableObject {
 
     /// 从 API 加载数据
     func loadFromAPI() async {
+        // 获取 workspaces
         do {
-            // 获取 workspaces
             let workspaceResponses: [WorkspaceResponse] = try await APIClient.shared.getWorkspaces()
-
-            // 转换为本地 Workspace 模型
             workspaces = workspaceResponses.map { response in
                 Workspace(
                     id: response.id,
@@ -106,11 +104,13 @@ class OpenClawService: ObservableObject {
                     tokenUsage: Workspace.TokenUsage(total: 0, usedToday: 0, limit: 0)
                 )
             }
-
-            // 设置当前 workspace
             currentWorkspace = workspaces.first { $0.isActive } ?? workspaces.first
+        } catch {
+            print("获取 workspaces 失败: \(error.localizedDescription)")
+        }
 
-            // 获取 agents
+        // 获取 agents - 独立处理，失败不影响其他
+        do {
             let agentResponses: [AgentResponse] = try await APIClient.shared.getAgents()
             agents = agentResponses.map { response in
                 Agent(
@@ -126,8 +126,12 @@ class OpenClawService: ObservableObject {
                     tags: []
                 )
             }
+        } catch {
+            print("获取 agents 失败: \(error.localizedDescription)")
+        }
 
-            // 获取 models
+        // 获取 models - 独立处理
+        do {
             let modelResponses: [ModelResponse] = try await APIClient.shared.getModels()
             models = modelResponses.map { response in
                 AIModel(
@@ -141,8 +145,12 @@ class OpenClawService: ObservableObject {
                     usageStats: AIModel.UsageStats(totalCalls: 0, totalTokens: 0, successfulCalls: 0, failedCalls: 0, avgResponseTime: 0)
                 )
             }
+        } catch {
+            print("获取 models 失败: \(error.localizedDescription)")
+        }
 
-            // 获取 workflows
+        // 获取 workflows - 独立处理
+        do {
             let workflowResponses: [WorkflowResponse] = try await APIClient.shared.getWorkflows()
             workflows = workflowResponses.map { response in
                 Workflow(
@@ -158,11 +166,11 @@ class OpenClawService: ObservableObject {
                     steps: []
                 )
             }
-
-            setupMainAgent()
         } catch {
-            self.error = "加载数据失败: \(error.localizedDescription)"
+            print("获取 workflows 失败: \(error.localizedDescription)")
         }
+
+        setupMainAgent()
     }
 
     /// 测试连接（用于 OpenClawConnectView）
