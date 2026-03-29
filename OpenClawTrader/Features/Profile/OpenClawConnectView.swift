@@ -478,8 +478,9 @@ https://github.com/Cyril0404/ClawRed
                     print("[DEBUG] Saving token: \(token.prefix(8))...")
                     pairingService.savePairingKey(token)
                     let baseURL = response.gatewayApiUrl ?? pairingService.relayAPI
-                    print("[DEBUG] baseURL: \(baseURL)")
-                    StorageService.shared.saveConnection(baseURL: baseURL, apiKey: token, relayURL: pairingService.relayAPI)
+                    let relay = pairingService.relayAPI
+                    print("[DEBUG] baseURL: \(baseURL), relayURL: \(relay)")
+                    StorageService.shared.saveConnection(baseURL: baseURL, apiKey: token, relayURL: relay)
                     print("[DEBUG] Calling triggerConnect...")
                     OpenClawService.shared.triggerConnect()
                     print("[DEBUG] Setting isPaired = true")
