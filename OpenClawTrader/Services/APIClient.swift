@@ -92,6 +92,24 @@ actor APIClient {
         return try await request("/v1/workspaces", method: .get)
     }
 
+    /// 获取 Agent 列表
+    func getAgents() async throws -> [AgentResponse] {
+        // TODO: 根据实际 API 端点调整
+        return try await request("/v1/agents", method: .get)
+    }
+
+    /// 获取模型列表
+    func getModels() async throws -> [ModelResponse] {
+        // TODO: 根据实际 API 端点调整
+        return try await request("/v1/models", method: .get)
+    }
+
+    /// 获取工作流列表
+    func getWorkflows() async throws -> [WorkflowResponse] {
+        // TODO: 根据实际 API 端点调整
+        return try await request("/v1/workflows", method: .get)
+    }
+
     // MARK: - HTTP Method
 
     enum HTTPMethod: String {
@@ -170,5 +188,61 @@ struct WorkspaceResponse: Codable {
         case description
         case createdAt = "created_at"
         case isActive = "is_active"
+    }
+}
+
+// MARK: - Agent Response
+
+struct AgentResponse: Codable {
+    let id: String
+    let name: String
+    let description: String?
+    let modelId: String?
+    let status: String?
+    let createdAt: String?
+    let lastActiveAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case description
+        case modelId = "model_id"
+        case status
+        case createdAt = "created_at"
+        case lastActiveAt = "last_active_at"
+    }
+}
+
+// MARK: - Model Response
+
+struct ModelResponse: Codable {
+    let id: String
+    let name: String
+    let provider: String?
+    let status: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case provider
+        case status
+    }
+}
+
+// MARK: - Workflow Response
+
+struct WorkflowResponse: Codable {
+    let id: String
+    let name: String
+    let description: String?
+    let status: String?
+    let createdAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case description
+        case status
+        case createdAt = "created_at"
     }
 }

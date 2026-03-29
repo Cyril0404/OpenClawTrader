@@ -110,6 +110,55 @@ class OpenClawService: ObservableObject {
             // 设置当前 workspace
             currentWorkspace = workspaces.first { $0.isActive } ?? workspaces.first
 
+            // 获取 agents
+            let agentResponses: [AgentResponse] = try await APIClient.shared.getAgents()
+            agents = agentResponses.map { response in
+                Agent(
+                    id: response.id,
+                    name: response.name,
+                    description: response.description ?? "",
+                    modelId: response.modelId ?? "",
+                    systemPrompt: "",
+                    status: Agent.AgentStatus(rawValue: response.status ?? "idle") ?? .idle,
+                    createdAt: ISO8601DateFormatter().date(from: response.createdAt ?? "") ?? Date(),
+                    lastActiveAt: ISO8601DateFormatter().date(from: response.lastActiveAt ?? "") ?? Date(),
+                    conversationCount: 0,
+                    tags: []
+                )
+            }
+
+            // 获取 models
+            let modelResponses: [ModelResponse] = try await APIClient.shared.getModels()
+            models = modelResponses.map { response in
+                AIModel(
+                    id: response.id,
+                    name: response.name,
+                    provider: response.provider ?? "",
+                    version: "1.0",
+                    status: AIModel.ModelStatus(rawValue: response.status ?? "active") ?? .active,
+                    isDefault: false,
+                    config: AIModel.ModelConfig(temperature: 0.7, maxTokens: 2048, topP: 0.9, frequencyPenalty: 0.0, presencePenalty: 0.0),
+                    usageStats: AIModel.UsageStats(totalCalls: 0, totalTokens: 0, successfulCalls: 0, failedCalls: 0, avgResponseTime: 0)
+                )
+            }
+
+            // 获取 workflows
+            let workflowResponses: [WorkflowResponse] = try await APIClient.shared.getWorkflows()
+            workflows = workflowResponses.map { response in
+                Workflow(
+                    id: response.id,
+                    name: response.name,
+                    description: response.description ?? "",
+                    status: Workflow.WorkflowStatus(rawValue: response.status ?? "draft") ?? .draft,
+                    triggerType: .manual,
+                    lastRunAt: nil,
+                    totalRuns: 0,
+                    failedRuns: 0,
+                    avgDuration: 0,
+                    steps: []
+                )
+            }
+
             setupMainAgent()
         } catch {
             self.error = "加载数据失败: \(error.localizedDescription)"
