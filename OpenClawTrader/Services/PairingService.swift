@@ -75,7 +75,7 @@ class PairingService: ObservableObject {
     }
 
     /// 获取配对信息
-    var gatewayId: String? {
+    var gatewayToken: String? {
         getPairingKey()
     }
 

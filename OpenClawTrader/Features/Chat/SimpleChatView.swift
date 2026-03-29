@@ -132,17 +132,19 @@ struct SimpleChatView: View {
             Button("取消", role: .cancel) {}
         }
         .sheet(isPresented: $showRemindSheet) {
-            ReminderSheet(
-                message: remindMessageForSheet!,
-                remindTime: $remindTime,
-                onConfirm: { message, time in
-                    scheduleReminder(for: message, at: time)
-                    showRemindSheet = false
-                },
-                onCancel: {
-                    showRemindSheet = false
-                }
-            )
+            if let message = remindMessageForSheet {
+                ReminderSheet(
+                    message: message,
+                    remindTime: $remindTime,
+                    onConfirm: { msg, time in
+                        scheduleReminder(for: msg, at: time)
+                        showRemindSheet = false
+                    },
+                    onCancel: {
+                        showRemindSheet = false
+                    }
+                )
+            }
         }
         .onAppear {
             // 恢复之前保存的输入
@@ -313,21 +315,17 @@ struct SimpleChatView: View {
                 }
 
                 if isVoiceMode {
-                    // 语音输入模式
+                    // 语音输入模式 - TODO: 实现语音录制功能
                     Button(action: {}) {
-                        Text(isRecording ? "松开结束" : "按住说话")
+                        Text("语音功能开发中")
                             .font(AppFonts.body())
-                            .foregroundColor(isRecording ? .white : colors.textPrimary)
+                            .foregroundColor(colors.textSecondary)
                             .frame(maxWidth: .infinity)
                             .frame(height: 40)
-                            .background(isRecording ? AppColors.error : colors.backgroundTertiary)
+                            .background(colors.backgroundTertiary)
                             .cornerRadius(20)
                     }
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in isRecording = true }
-                            .onEnded { _ in isRecording = false }
-                    )
+                    .disabled(true)
                 } else {
                     // 文字输入模式
                     TextField("输入消息...", text: $inputText, axis: .vertical)

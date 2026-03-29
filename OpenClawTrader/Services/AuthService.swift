@@ -53,7 +53,9 @@ class AuthService: ObservableObject {
         // 模拟登录成功
         try? await Task.sleep(nanoseconds: 500_000_000)
 
-        let user = User(username: username)
+        // 尝试复用已有用户的 ID，避免每次登录生成新 ID
+        let existingUser = StorageService.shared.getUser()
+        let user = User(id: existingUser?.id ?? UUID().uuidString, username: username)
         saveUser(user)
         currentUser = user
         isLoading = false

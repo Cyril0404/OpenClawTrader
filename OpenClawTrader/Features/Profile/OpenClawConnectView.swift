@@ -25,12 +25,10 @@ struct OpenClawConnectView: View {
     @State private var errorMessage: String?
     @State private var showUnbindConfirm = false
     @State private var isPaired = false
-    @State private var refreshTrigger = false
 
-    // 依赖 refreshTrigger 强制刷新
+    // 直接使用 pairingService.isPaired 作为状态源
     private var isPairedState: Bool {
-        _ = refreshTrigger
-        return isPaired
+        isPaired || pairingService.isPaired
     }
 
     var body: some View {
@@ -97,7 +95,6 @@ struct OpenClawConnectView: View {
             Button("解除配对", role: .destructive) {
                 pairingService.unbind()
                 isPaired = false
-                refreshTrigger.toggle()
             }
         } message: {
             Text("确定要解除与 OpenClaw 桌面端的配对连接吗？")
@@ -367,8 +364,8 @@ https://github.com/Cyril0404/ClawRed
                     .font(AppFonts.title1())
                     .foregroundColor(colors.textPrimary)
 
-                if let gatewayId = pairingService.gatewayId {
-                    Text("Gateway ID: \(gatewayId)")
+                if let token = pairingService.gatewayToken {
+                    Text("Gateway Token: \(String(token.prefix(8)))...")
                         .font(AppFonts.caption())
                         .foregroundColor(colors.textSecondary)
                 }
@@ -468,16 +465,18 @@ https://github.com/Cyril0404/ClawRed
                     // 保存 token 到 Keychain
                     if let token = response.gatewayToken {
                         pairingService.savePairingKey(token)
+                        // 优先使用 gatewayApiUrl，否则使用 relayAPI
+                        let baseURL = response.gatewayApiUrl ?? pairingService.relayAPI
                         // 同时保存到 StorageService 让 OpenClawService 能检测到连接状态
                         StorageService.shared.saveConnection(
-                            baseURL: pairingService.relayAPI,
+                            baseURL: baseURL,
                             apiKey: token
                         )
                         // 立即触发 OpenClawService 连接
                         await OpenClawService.shared.connect()
                         isPaired = true
                     } else if let apiUrl = response.gatewayApiUrl {
-                        // gatewayToken 为空，尝试使用 gatewayApiUrl 作为后备
+                        // gatewayToken 为空但有 apiUrl，尝试使用
                         StorageService.shared.saveConnection(
                             baseURL: apiUrl,
                             apiKey: pairingService.getPairingKey() ?? ""

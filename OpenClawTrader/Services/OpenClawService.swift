@@ -64,6 +64,7 @@ class OpenClawService: ObservableObject {
         } catch {
             self.error = error.localizedDescription
             isConnected = false
+            StorageService.shared.isConnected = false
         }
 
         isLoading = false

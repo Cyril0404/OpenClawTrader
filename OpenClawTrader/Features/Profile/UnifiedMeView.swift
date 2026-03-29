@@ -122,6 +122,8 @@ struct UnifiedMeView: View {
         authService.logout()
         StorageService.shared.deleteAccount()
         OpenClawService.shared.reset()
+        // 清除 Keychain 中的配对数据
+        PairingService.shared.deletePairingKey()
     }
 
     /// 给App打分
