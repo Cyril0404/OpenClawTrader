@@ -460,7 +460,6 @@ https://github.com/Cyril0404/ClawRed
 
         Task {
             if let response = await pairingService.verifyPairingCode(code) {
-                isVerifying = false
                 if response.success {
                     // 保存 token 到 Keychain
                     if let token = response.gatewayToken {
@@ -488,9 +487,11 @@ https://github.com/Cyril0404/ClawRed
                         errorMessage = "配对成功但未返回有效凭证，请重试"
                         isPaired = false
                     }
+                    isVerifying = false
                 } else {
                     errorMessage = response.error ?? "配对码无效"
                     isPaired = false
+                    isVerifying = false
                 }
             } else {
                 isVerifying = false
