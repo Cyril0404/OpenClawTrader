@@ -154,6 +154,14 @@ struct SimpleChatView: View {
                 showAgentList = false
             })
         }
+        .onReceive(wsService.$incomingMessages) { newMessages in
+            for text in newMessages {
+                messages.append(SimpleChatMessage(role: "assistant", content: text, timestamp: Date()))
+            }
+            if !newMessages.isEmpty {
+                wsService.incomingMessages.removeAll()
+            }
+        }
         .onAppear {
             // 恢复之前保存的输入
             inputText = ChatInputState.shared.pendingText

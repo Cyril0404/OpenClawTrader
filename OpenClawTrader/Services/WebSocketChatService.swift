@@ -17,6 +17,7 @@ class WebSocketChatService: NSObject, ObservableObject {
     @Published var isConnected = false
     @Published var lastAIResponse: String?
     @Published var errorMessage: String?
+    @Published var incomingMessages: [String] = []
 
     private var webSocketTask: URLSessionWebSocketTask?
     private var urlSession: URLSession!
@@ -226,6 +227,7 @@ class WebSocketChatService: NSObject, ObservableObject {
                        let data = payload["data"] as? [String: Any],
                        let text = data["text"] as? String {
                         streamCallback?(text)
+                        self.incomingMessages.append(text)
                     }
                 }
             }
