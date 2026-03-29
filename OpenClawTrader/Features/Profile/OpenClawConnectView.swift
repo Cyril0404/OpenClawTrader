@@ -74,9 +74,12 @@ struct OpenClawConnectView: View {
         .alert("输入配对码", isPresented: $showManualInput) {
             TextField("请输入6位配对码", text: $manualCode)
                 .textInputAutocapitalization(.characters)
-            Button("取消", role: .cancel) {}
+            Button("取消", role: .cancel) {
+                manualCode = ""
+            }
             Button("确认") {
                 handleManualCode(manualCode)
+                manualCode = ""
             }
         } message: {
             Text("请输入桌面端显示的6位配对码")
