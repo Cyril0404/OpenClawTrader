@@ -33,13 +33,27 @@ class StorageService {
     // MARK: - API Configuration
 
     var apiBaseURL: String {
-        get { userDefaults.string(forKey: Keys.apiBaseURL) ?? "" }
-        set { userDefaults.set(newValue, forKey: Keys.apiBaseURL) }
+        get {
+            let value = userDefaults.string(forKey: Keys.apiBaseURL) ?? ""
+            print("[Storage] apiBaseURL READ: \(value)")
+            return value
+        }
+        set {
+            print("[Storage] apiBaseURL WRITE: \(newValue)")
+            userDefaults.set(newValue, forKey: Keys.apiBaseURL)
+        }
     }
 
     var apiKey: String {
-        get { userDefaults.string(forKey: Keys.apiKey) ?? "" }
-        set { userDefaults.set(newValue, forKey: Keys.apiKey) }
+        get {
+            let value = userDefaults.string(forKey: Keys.apiKey) ?? ""
+            print("[Storage] apiKey READ: \(value.prefix(8))...")
+            return value
+        }
+        set {
+            print("[Storage] apiKey WRITE: \(newValue.prefix(8))...")
+            userDefaults.set(newValue, forKey: Keys.apiKey)
+        }
     }
 
     var isConnected: Bool {

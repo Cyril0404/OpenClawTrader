@@ -153,6 +153,7 @@ struct SimpleChatView: View {
             // 只要有凭证就尝试连接 WebSocket（不依赖 isConnected，因为 /v1/status 可能404）
             let baseURL = StorageService.shared.apiBaseURL
             let token = StorageService.shared.apiKey
+            print("[Chat] baseURL=\(baseURL), token=\(token.prefix(8))..., emptyURL=\(baseURL.isEmpty), emptyToken=\(token.isEmpty)")
             if !baseURL.isEmpty && !token.isEmpty {
                 print("[Chat] Connecting WebSocket to \(baseURL)...")
                 wsService.connect(baseURL: baseURL, token: token)
