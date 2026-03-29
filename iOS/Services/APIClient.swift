@@ -76,9 +76,19 @@ actor APIClient {
 
     // MARK: - API Methods
 
-    /// 测试连接状态
+    /// 测试连接状态（Gateway 返回 JSON-RPC 格式，需要解包装）
     func testConnection() async throws -> StatusResponse {
-        return try await request("/v1/status", method: .get)
+        // 先用通用 request 拿到 JSON-RPC 包装
+        let rpcResponse: JSONRPCResponse<StatusResponse> = try await request("/v1/status", method: .get)
+        // 检查 error 字段
+        if let err = rpcResponse.error {
+            throw APIError.serverError(message: err.message ?? "Unknown error")
+        }
+        // 提取 payload
+        guard let payload = rpcResponse.payload else {
+            throw APIError.serverError(message: "No payload in response")
+        }
+        return payload
     }
 
     /// 发送聊天消息
@@ -128,6 +138,7 @@ actor APIClient {
         case invalidResponse
         case httpError(statusCode: Int)
         case decodingError(Error)
+        case serverError(message: String)
 
         var errorDescription: String? {
             switch self {
@@ -136,6 +147,7 @@ actor APIClient {
             case .invalidResponse: return "无效的响应"
             case .httpError(let statusCode): return "HTTP 错误: \(statusCode)"
             case .decodingError(let error): return "解码错误: \(error.localizedDescription)"
+            case .serverError(let message): return "服务器错误: \(message)"
             }
         }
     }
@@ -145,10 +157,57 @@ actor APIClient {
 // MARK: - API Models
 // ============================================
 
+// JSON-RPC 2.0 响应包装器（Gateway API 所有响应都包在这一层）
+struct JSONRPCResponse<T: Codable>: Codable {
+    let type: String       // "res"
+    let id: String?
+    let ok: Bool?
+    let error: JSONRPCError?
+    let payload: T?         // 实际数据在这里
+
+    struct JSONRPCError: Codable {
+        let code: Int?
+        let message: String?
+    }
+}
+
 struct StatusResponse: Codable {
-    let status: String?
-    let version: String?
-    let message: String?
+    let runtimeVersion: String?
+    let heartbeat: HeartbeatInfo?
+
+    struct HeartbeatInfo: Codable {
+        let defaultAgentId: String?
+        let agents: [AgentInfo]?
+        let channelSummary: [String: ChannelInfo]?
+
+        enum CodingKeys: String, CodingKey {
+            case defaultAgentId = "defaultAgentId"
+            case agents
+            case channelSummary
+        }
+    }
+
+    struct AgentInfo: Codable {
+        let agentId: String?
+        let enabled: Bool?
+        let every: String?
+
+        enum CodingKeys: String, CodingKey {
+            case agentId = "agentId"
+            case enabled
+            case every
+        }
+    }
+
+    struct ChannelInfo: Codable {
+        let configured: Bool?
+        let running: Bool?
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case runtimeVersion
+        case heartbeat
+    }
 }
 
 struct ChatRequest: Encodable {

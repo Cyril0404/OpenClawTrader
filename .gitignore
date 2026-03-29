@@ -53,3 +53,9 @@ Icon?
 .env
 .env.local
 stock_data.json
+
+# relay-server (Node.js)
+relay-server/node_modules/
+relay-server/logs/
+relay-server/data/*.json
+relay-server/.pm2/

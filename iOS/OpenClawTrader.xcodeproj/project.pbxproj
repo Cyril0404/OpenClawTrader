@@ -33,6 +33,7 @@
 		7586F641DACC4B4C24A6E6B5 /* ImportHoldingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C7BA403239EB994EE177CB8 /* ImportHoldingView.swift */; };
 		785F1FDF29E9C5BBD9714772 /* SentimentAnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D353F6D18284A79DDFABB4 /* SentimentAnalysisView.swift */; };
 		797BEDB09BE33A8DA3CCF40C /* OpenClawService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */; };
+			B2C3D4E5F6A7B8C9D0E1F2A3 /* WebSocketChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* WebSocketChatService.swift */; };
 		82F816E0FF2A69C7D98855E6 /* HoldingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB219B66D734587AE0E05340 /* HoldingListView.swift */; };
 		88479A220EC1F72A038CE962 /* AIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ABA54C95BF454A92353E2D5 /* AIModel.swift */; };
 		8A6A72502E24805CADA1F477 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59EF687BEDAF49227658B079 /* Assets.xcassets */; };
@@ -100,6 +101,7 @@
 		7E324C15CC580A705C031BB3 /* WorkflowMonitorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkflowMonitorView.swift; sourceTree = "<group>"; };
 		845BF882A533382EB7200D72 /* Holding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Holding.swift; sourceTree = "<group>"; };
 		8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawService.swift; sourceTree = "<group>"; };
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* WebSocketChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketChatService.swift; sourceTree = "<group>"; };
 		8AE3D8AAC37271CB21604A96 /* SimpleChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleChatView.swift; sourceTree = "<group>"; };
 		92B1DE06EAE865AE1C1F4ABF /* Workflow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workflow.swift; sourceTree = "<group>"; };
 		9617123DF49FA5C1F9FAADF0 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
@@ -226,6 +228,7 @@
 				2B0533E2DFF9477C0E99F3B1 /* APIClient.swift */,
 				DE66514A603BD60849BDDFA4 /* BacktestService.swift */,
 				8924DFF60E1BEBB6F333AA7F /* OpenClawService.swift */,
+								A1B2C3D4E5F6A7B8C9D0E1F2 /* WebSocketChatService.swift */,
 				39444681EDBB8C11626B8E28 /* PairingService.swift */,
 				09E63A5EF8CA5B9F3FD4724B /* SentimentService.swift */,
 				6947F164981A37464F52D902 /* SkillsService.swift */,
@@ -413,6 +416,7 @@
 				25D24491AC83315861B1596C /* NotificationListView.swift in Sources */,
 				D9226F154447F7A691E5DDE2 /* OpenClawConnectView.swift in Sources */,
 				797BEDB09BE33A8DA3CCF40C /* OpenClawService.swift in Sources */,
+								B2C3D4E5F6A7B8C9D0E1F2A3 /* WebSocketChatService.swift in Sources */,
 				10A6AA14180236DB2BF5CA82 /* OpenClawTraderApp.swift in Sources */,
 				8EAC547FAC15C3D86D8E25ED /* PairingService.swift in Sources */,
 				DE852C70B10FB6CA49387E7D /* Performance.swift in Sources */,
