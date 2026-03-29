@@ -36,3 +36,30 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
     dependencies: []
+
+  OpenClawTraderTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/OpenClawTraderTests
+    settings:
+      base:
+        INFOPLIST_FILE: Tests/OpenClawTraderTests/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.openclaw.trader.tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/OpenClawTrader.app/OpenClawTrader
+        BUNDLE_LOADER: $(TEST_HOST)
+    dependencies:
+      - target: OpenClawTrader
+
+  OpenClawTraderUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/OpenClawTraderUITests
+    settings:
+      base:
+        INFOPLIST_FILE: Tests/OpenClawTraderUITests/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.openclaw.trader.uitests
+        TEST_TARGET_NAME: OpenClawTrader
+    dependencies:
+      - target: OpenClawTrader
