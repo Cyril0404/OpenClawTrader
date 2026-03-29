@@ -9,6 +9,16 @@ import UserNotifications
 //
 
 // ============================================
+// MARK: - Chat Input State (Shared)
+// ============================================
+
+@MainActor
+final class ChatInputState: ObservableObject {
+    static let shared = ChatInputState()
+    @Published var pendingText: String = ""
+}
+
+// ============================================
 // MARK: - Simple Chat View
 // ============================================
 
@@ -41,8 +51,8 @@ struct SimpleChatView: View {
     @State private var favoriteMessages: [SimpleChatMessage] = []
     @State private var remindTime = Date().addingTimeInterval(3600) // 默认1小时后
 
-    // 输入框状态持久化
-    @State private var pendingInput = ""
+    // 输入框状态持久化 - 使用静态变量保证跨视图实例持久化
+    @State private var pendingInput = ChatInputState.shared.pendingText
 
 
     // SimpleChatMessage moved to top-level
@@ -136,11 +146,11 @@ struct SimpleChatView: View {
         }
         .onAppear {
             // 恢复之前保存的输入
-            inputText = pendingInput
+            inputText = ChatInputState.shared.pendingText
         }
         .onDisappear {
             // 保存当前输入
-            pendingInput = inputText
+            ChatInputState.shared.pendingText = inputText
         }
     }
 
@@ -438,7 +448,32 @@ struct SimpleChatView: View {
 
     private func sendMessage() {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty || !pendingAttachments.isEmpty, let agentId = service.mainAgent?.id else { return }
+
+        // 检查是否已连接
+        guard service.isConnected else {
+            // 未连接时显示提示消息
+            let errorMsg = SimpleChatMessage(
+                role: "assistant",
+                content: "请先连接 OpenClaw 才能发送消息",
+                timestamp: Date()
+            )
+            messages.append(errorMsg)
+            return
+        }
+
+        // 检查是否有有效内容
+        guard !text.isEmpty || !pendingAttachments.isEmpty else { return }
+
+        // 检查是否有选中的 Agent
+        guard let agentId = service.mainAgent?.id else {
+            let errorMsg = SimpleChatMessage(
+                role: "assistant",
+                content: "请先选择一个助手 Agent",
+                timestamp: Date()
+            )
+            messages.append(errorMsg)
+            return
+        }
 
         // 构建消息内容（包含附件描述）
         var fullContent = text
@@ -467,6 +502,7 @@ struct SimpleChatView: View {
         )
         messages.append(userMsg)
         inputText = ""
+        ChatInputState.shared.pendingText = ""
         pendingAttachments = []
         showAttachmentMenu = false
         isLoading = true
