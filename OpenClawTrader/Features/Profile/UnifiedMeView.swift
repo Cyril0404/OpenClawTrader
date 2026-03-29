@@ -150,7 +150,7 @@ struct UnifiedMeView: View {
                     .foregroundColor(colors.textPrimary)
                 Text(authService.isLoggedIn ? "在线" : "离线")
                     .font(AppFonts.caption())
-                    .foregroundColor(service.isConnected ? AppColors.success : colors.textTertiary)
+                    .foregroundColor(authService.isLoggedIn ? AppColors.success : colors.textTertiary)
             }
 
             Spacer()
