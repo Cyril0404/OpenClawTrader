@@ -211,9 +211,20 @@ class WebSocketChatService: NSObject, ObservableObject {
 
         case "event":
             if let event = content["event"] as? String {
+                // 处理聊天事件
                 if event == "chat_start" || event == "chat_fragment" || event == "chat_end" {
                     if let payload = content["payload"] as? [String: Any],
                        let text = payload["text"] as? String {
+                        streamCallback?(text)
+                    }
+                }
+                // 处理 agent 事件（如 stream: "assistant"）
+                if event == "agent" {
+                    if let payload = content["payload"] as? [String: Any],
+                       let stream = payload["stream"] as? String,
+                       stream == "assistant",
+                       let data = payload["data"] as? [String: Any],
+                       let text = data["text"] as? String {
                         streamCallback?(text)
                     }
                 }
