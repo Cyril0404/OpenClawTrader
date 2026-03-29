@@ -65,7 +65,7 @@ class OpenClawService: ObservableObject {
                 // 测试连接
                 print("OpenClaw: 开始测试连接到 \(baseURL)")
                 let status: StatusResponse = try await APIClient.shared.testConnection()
-                print("OpenClaw Status: \(status.status ?? "unknown")")
+                print("OpenClaw Connected: runtimeVersion=\(status.runtimeVersion ?? "unknown")")
 
                 // 加载数据
                 await loadFromAPI()
@@ -309,6 +309,12 @@ class OpenClawService: ObservableObject {
     func stopAgent(_ agent: Agent) {
         guard let index = agents.firstIndex(where: { $0.id == agent.id }) else { return }
         agents[index].status = .idle
+    }
+
+    /// 选择 Agent 作为当前聊天对象
+    /// - Parameter agent: 要选择的 Agent
+    func selectAgent(_ agent: Agent) {
+        mainAgent = agent
     }
 
     // MARK: - Workflow Operations

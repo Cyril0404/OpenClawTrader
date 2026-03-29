@@ -36,6 +36,7 @@ struct SimpleChatView: View {
     @State private var showModelPicker = false
     @State private var showCommandList = false
     @State private var showUsageDetail = false
+    @State private var showAgentList = false
     @FocusState private var isInputFocused: Bool
 
     // 图片/文件选择
@@ -147,6 +148,12 @@ struct SimpleChatView: View {
                 )
             }
         }
+        .sheet(isPresented: $showAgentList) {
+            AgentListView(onAgentSelected: { agent in
+                service.mainAgent = agent
+                showAgentList = false
+            })
+        }
         .onAppear {
             // 恢复之前保存的输入
             inputText = ChatInputState.shared.pendingText
@@ -189,11 +196,13 @@ struct SimpleChatView: View {
                         .fill((service.isConnected || wsService.isConnected) ? AppColors.success : AppColors.error)
                         .frame(width: 8, height: 8)
 
-                    Text((service.isConnected || wsService.isConnected) ? (service.mainAgent?.name ?? "助手") : "未连接")
+                    Text((service.isConnected || wsService.isConnected) ? (service.mainAgent?.name ?? "OpenClaw") : "未连接")
                         .font(AppFonts.title3())
                         .foregroundColor(colors.textPrimary)
 
-                    NavigationLink(destination: AgentListView()) {
+                    Button {
+                        showAgentList = true
+                    } label: {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(colors.textSecondary)

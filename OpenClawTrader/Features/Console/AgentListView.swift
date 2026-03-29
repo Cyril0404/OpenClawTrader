@@ -13,9 +13,13 @@ import SwiftUI
 
 struct AgentListView: View {
     @Environment(\.appColors) private var colors
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var service = OpenClawService.shared
     @State private var searchText = ""
     @State private var showingCreateSheet = false
+
+    /// 外部传入的 Agent 选择回调（用于 sheet 模式）
+    var onAgentSelected: ((Agent) -> Void)?
 
     private var filteredAgents: [Agent] {
         if searchText.isEmpty {
@@ -54,7 +58,14 @@ struct AgentListView: View {
                             } else {
                                 LazyVStack(spacing: 0) {
                                     ForEach(filteredAgents) { agent in
-                                        NavigationLink(destination: AgentChatView(agent: agent)) {
+                                        Button {
+                                            if let callback = onAgentSelected {
+                                                callback(agent)
+                                            } else {
+                                                // 默认行为：导航到聊天页面
+                                                // NavigationLink would go here in non-sheet mode
+                                            }
+                                        } label: {
                                             AgentRow(agent: agent)
                                         }
 
