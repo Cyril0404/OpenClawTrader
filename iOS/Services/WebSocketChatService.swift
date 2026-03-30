@@ -3,11 +3,12 @@ import Foundation
 // ============================================================
 // WebSocketChatService — 通过 relay-server WebSocket 收发聊天消息
 //
-// 协议：
+// 协议（参考 ClawPilot）：
 //   1. 连接成功后发送 { type: "register", token: "<pairingToken>" }
 //   2. 收到 { type: "registered", role: "device" } → 注册成功
-//   3. 发消息: { type: "message", content: "{\"type\":\"req\",\"id\":\"...\",\"method\":\"chat\",\"params\":{\"message\":\"...\"}}" }
-//   4. 收消息: { type: "message", from: "gateway", content: "..." } → 解析 content
+//   3. 发消息: { type: "message", content: "{\"type\":\"req\",\"id\":\"...\",\"method\":\"chat.send\",\"params\":{\"message\":\"...\",\"deliver\":false}}" }
+//   4. 收消息: { type: "message", from: "gateway", content: "..." } → 解析 event 事件
+//   5. AI 响应通过 agent 事件 (stream: "assistant") 或 chat.push 事件推送
 // ============================================================
 
 @MainActor
@@ -25,6 +26,8 @@ class WebSocketChatService: NSObject, ObservableObject {
     private var deviceToken: String = ""
     private var pendingMessages: [String: (String?) -> Void] = [:]
     private var streamCallback: ((String) -> Void)?
+    // 追踪是否已经有流式内容到达，避免 state==final 回调覆盖已 streaming 的内容
+    private var hasStreamedContent = false
 
     override init() {
         super.init()
@@ -86,13 +89,19 @@ class WebSocketChatService: NSObject, ObservableObject {
     // MARK: - 发消息
 
     func sendChatMessage(_ text: String, onResponse: @escaping (String?) -> Void) {
+        // 重置流式内容状态
+        lastAIResponse = nil
+        hasStreamedContent = false
+
         let id = UUID().uuidString
+        // 使用 chat.send 方法，deliver=false 让响应通过 WebSocket 事件推送
         let content: [String: Any] = [
             "type": "req",
             "id": id,
-            "method": "chat",
+            "method": "chat.send",
             "params": [
-                "message": text
+                "message": text,
+                "deliver": false  // 关键：让 Gateway 通过 WebSocket 推送响应
             ]
         ]
 
@@ -101,9 +110,10 @@ class WebSocketChatService: NSObject, ObservableObject {
             "content": JSONString(content)
         ]
 
+        // chat.send 不等待 RPC 响应，响应通过事件推送
         pendingMessages[id] = onResponse
         send(wrapper)
-        print("[WSChat] Sent chat message, id=\(id)")
+        print("[WSChat] Sent chat.send message, id=\(id)")
     }
 
     // MARK: - 事件监听
@@ -202,6 +212,7 @@ class WebSocketChatService: NSObject, ObservableObject {
         }
 
         let msgType = content["type"] as? String ?? ""
+        print("[WSChat] handleGatewayMessage: type=\(msgType), content=\(contentStr.prefix(200))")
 
         switch msgType {
         case "res":
@@ -209,16 +220,55 @@ class WebSocketChatService: NSObject, ObservableObject {
                let callback = pendingMessages.removeValue(forKey: id) {
                 let result = content["payload"] as? String ?? ""
                 let error = content["error"] as? [String: Any]
-                callback(error == nil ? result : "错误: \(error?["message"] ?? "unknown")")
+                // 如果已经有流式内容，不要用空结果覆盖
+                if hasStreamedContent && result.isEmpty {
+                    // 流式内容已通过 chat 事件处理，这里忽略空响应
+                    hasStreamedContent = false
+                } else {
+                    callback(error == nil ? result : "错误: \(error?["message"] ?? "unknown")")
+                }
             }
 
         case "event":
             if let event = content["event"] as? String {
-                // 处理聊天事件
-                if event == "chat_start" || event == "chat_fragment" || event == "chat_end" {
-                    if let payload = content["payload"] as? [String: Any],
-                       let text = payload["text"] as? String {
-                        streamCallback?(text)
+                print("[WSChat] handleGatewayMessage: event=\(event), payload=\(content["payload"] ?? "nil")")
+                // 处理 chat.push 事件（ClawPilot 协议）
+                if event == "chat" {
+                    if let payload = content["payload"] as? [String: Any] {
+                        print("[WSChat] chat event payload: \(payload)")
+                        var streamedText = ""
+                        // chat.push 包含 delta 或 text
+                        if let delta = payload["delta"] as? String {
+                            print("[WSChat] chat delta: \(delta.prefix(100))")
+                            streamCallback?(delta)
+                            streamedText += delta
+                            hasStreamedContent = true
+                            lastAIResponse = (lastAIResponse ?? "") + delta
+                        }
+                        if let text = payload["text"] as? String {
+                            print("[WSChat] chat text: \(text.prefix(100))")
+                            // text 可能是完整内容或增量，先添加到 incomingMessages 显示
+                            if !text.isEmpty {
+                                self.incomingMessages.append(text)
+                            }
+                            hasStreamedContent = true
+                            lastAIResponse = (lastAIResponse ?? "") + text
+                        }
+                        // state == "final" 表示聊天结束
+                        if payload["state"] as? String == "final" {
+                            // 如果已经有流式内容到达，不要用空内容覆盖回调
+                            if hasStreamedContent {
+                                // 标记流式内容已处理完毕，清除标志
+                                hasStreamedContent = false
+                            } else {
+                                // 没有流式内容，调用回调处理（处理非 streaming 响应）
+                                let callbacks = Array(pendingMessages.values)
+                                pendingMessages.removeAll()
+                                for callback in callbacks {
+                                    callback(streamedText.isEmpty ? "" : streamedText)
+                                }
+                            }
+                        }
                     }
                 }
                 // 处理 agent 事件（如 stream: "assistant"）
@@ -230,6 +280,8 @@ class WebSocketChatService: NSObject, ObservableObject {
                        let text = data["text"] as? String {
                         streamCallback?(text)
                         self.incomingMessages.append(text)
+                        hasStreamedContent = true
+                        lastAIResponse = (lastAIResponse ?? "") + text
                     }
                 }
             }

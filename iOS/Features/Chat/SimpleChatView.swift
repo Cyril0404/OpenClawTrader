@@ -16,6 +16,7 @@ import UserNotifications
 final class ChatInputState: ObservableObject {
     static let shared = ChatInputState()
     @Published var pendingText: String = ""
+    @Published var messages: [SimpleChatMessage] = []
 }
 
 // ============================================
@@ -26,8 +27,8 @@ struct SimpleChatView: View {
     @Environment(\.appColors) private var colors
     @StateObject private var service = OpenClawService.shared
     @StateObject private var wsService = WebSocketChatService.shared
+    @ObservedObject private var chatState = ChatInputState.shared
     @State private var inputText = ""
-    @State private var messages: [SimpleChatMessage] = []
     @State private var isLoading = false
     @State private var isVoiceMode = false
     @State private var isRecording = false
@@ -67,10 +68,10 @@ struct SimpleChatView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: AppSpacing.md) {
-                        if messages.isEmpty {
+                        if chatState.messages.isEmpty {
                             emptyState
                         } else {
-                            ForEach(messages) { message in
+                            ForEach(chatState.messages) { message in
                                 ChatMessageBubble(
                                     message: message,
                                     onCopy: { copyMessage(message.content) },
@@ -86,9 +87,9 @@ struct SimpleChatView: View {
                     .padding(.horizontal, AppSpacing.md)
                     .padding(.vertical, AppSpacing.lg)
                 }
-                .onChange(of: messages.count) { _, _ in
+                .onChange(of: chatState.messages.count) { _, _ in
                     withAnimation {
-                        if let last = messages.last {
+                        if let last = chatState.messages.last {
                             proxy.scrollTo(last.id, anchor: .bottom)
                         }
                     }
@@ -156,7 +157,7 @@ struct SimpleChatView: View {
         }
         .onReceive(wsService.$incomingMessages) { newMessages in
             for text in newMessages {
-                messages.append(SimpleChatMessage(role: "assistant", content: text, timestamp: Date()))
+                chatState.messages.append(SimpleChatMessage(role: "assistant", content: text, timestamp: Date()))
             }
             if !newMessages.isEmpty {
                 wsService.incomingMessages.removeAll()
@@ -174,11 +175,11 @@ struct SimpleChatView: View {
                 wsService.connect(baseURL: baseURL, token: token)
                 wsService.setStreamCallback { [self] text in
                     // 流式消息追加到最后一个 AI 消息
-                    if let lastIdx = messages.lastIndex(where: { $0.role == "assistant" }) {
-                        messages[lastIdx] = SimpleChatMessage(
+                    if let lastIdx = chatState.messages.lastIndex(where: { $0.role == "assistant" }) {
+                        chatState.messages[lastIdx] = SimpleChatMessage(
                             role: "assistant",
-                            content: messages[lastIdx].content + text,
-                            timestamp: messages[lastIdx].timestamp
+                            content: chatState.messages[lastIdx].content + text,
+                            timestamp: chatState.messages[lastIdx].timestamp
                         )
                     }
                 }
@@ -472,7 +473,7 @@ struct SimpleChatView: View {
     private func loadConversation() {
         guard let agentId = service.mainAgent?.id else { return }
         let history = service.getConversation(for: agentId)
-        messages = history.map { msg in
+        chatState.messages = history.map { msg in
             SimpleChatMessage(
                 role: msg.role.rawValue,
                 content: msg.content,
@@ -492,7 +493,7 @@ struct SimpleChatView: View {
                 content: "请先连接 OpenClaw 才能发送消息",
                 timestamp: Date()
             )
-            messages.append(errorMsg)
+            chatState.messages.append(errorMsg)
             return
         }
 
@@ -506,7 +507,7 @@ struct SimpleChatView: View {
                 content: "请先选择一个助手 Agent",
                 timestamp: Date()
             )
-            messages.append(errorMsg)
+            chatState.messages.append(errorMsg)
             return
         }
 
@@ -535,7 +536,7 @@ struct SimpleChatView: View {
             timestamp: Date(),
             attachments: pendingAttachments
         )
-        messages.append(userMsg)
+        chatState.messages.append(userMsg)
         inputText = ""
         ChatInputState.shared.pendingText = ""
         pendingAttachments = []
@@ -552,24 +553,24 @@ struct SimpleChatView: View {
                 content: "思考中...",
                 timestamp: Date()
             )
-            messages.append(aiMsg)
-            let aiMsgIdx = messages.count - 1
+            chatState.messages.append(aiMsg)
+            let aiMsgIdx = chatState.messages.count - 1
 
             isLoading = false
             wsService.sendChatMessage(fullContent) { response in
                 Task { @MainActor in
-                    if let lastIdx = messages.lastIndex(where: { $0.role == "assistant" }) {
+                    if let lastIdx = chatState.messages.lastIndex(where: { $0.role == "assistant" }) {
                         if let resp = response, !resp.isEmpty {
-                            messages[lastIdx] = SimpleChatMessage(
+                            chatState.messages[lastIdx] = SimpleChatMessage(
                                 role: "assistant",
                                 content: resp,
-                                timestamp: messages[lastIdx].timestamp
+                                timestamp: chatState.messages[lastIdx].timestamp
                             )
                         } else {
-                            messages[lastIdx] = SimpleChatMessage(
+                            chatState.messages[lastIdx] = SimpleChatMessage(
                                 role: "assistant",
                                 content: "(空响应)",
-                                timestamp: messages[lastIdx].timestamp
+                                timestamp: chatState.messages[lastIdx].timestamp
                             )
                         }
                     }
@@ -586,14 +587,14 @@ struct SimpleChatView: View {
                         content: reply,
                         timestamp: Date()
                     )
-                    messages.append(assistantMsg)
+                    chatState.messages.append(assistantMsg)
                 case .failure(let error):
                     let errorMsg = SimpleChatMessage(
                         role: "assistant",
                         content: "发送失败: \(error.localizedDescription)",
                         timestamp: Date()
                     )
-                    messages.append(errorMsg)
+                    chatState.messages.append(errorMsg)
                 }
             }
         }
@@ -606,10 +607,10 @@ struct SimpleChatView: View {
     }
 
     private func favoriteMessage(_ message: SimpleChatMessage) {
-        if let index = messages.firstIndex(where: { $0.id == message.id }) {
-            messages[index].isFavorite.toggle()
-            if messages[index].isFavorite {
-                favoriteMessages.append(messages[index])
+        if let index = chatState.messages.firstIndex(where: { $0.id == message.id }) {
+            chatState.messages[index].isFavorite.toggle()
+            if chatState.messages[index].isFavorite {
+                favoriteMessages.append(chatState.messages[index])
             } else {
                 favoriteMessages.removeAll { $0.id == message.id }
             }
@@ -617,8 +618,8 @@ struct SimpleChatView: View {
     }
 
     private func deleteMessage(_ message: SimpleChatMessage) {
-        if let index = messages.firstIndex(where: { $0.id == message.id }) {
-            messages.remove(at: index)
+        if let index = chatState.messages.firstIndex(where: { $0.id == message.id }) {
+            chatState.messages.remove(at: index)
         }
     }
 
