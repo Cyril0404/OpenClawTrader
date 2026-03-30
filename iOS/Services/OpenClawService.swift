@@ -30,11 +30,9 @@ class OpenClawService: ObservableObject {
     private var _connectionTask: Task<Void, Never>?
 
     private init() {
-        // 如果有保存的配置，则自动连接（仅当没有其他连接在进行时）
+        // 如果有保存的配置，则自动连接
         if !StorageService.shared.apiBaseURL.isEmpty && StorageService.shared.isConnected {
-            _connectionTask = Task {
-                await connect()
-            }
+            triggerConnect()
         }
     }
 
@@ -46,45 +44,34 @@ class OpenClawService: ObservableObject {
 
     /// 连接到 OpenClaw API
     func connect() async {
-        // 防止并发调用：如果已有连接任务在进行中，直接返回
-        if _connectionTask != nil {
-            print("OpenClaw: 连接已在进行中，跳过重复调用")
-            return
+        isLoading = true
+        error = nil
+
+        // 配置 APIClient
+        let baseURL = StorageService.shared.apiBaseURL
+        let apiKey = StorageService.shared.apiKey
+        await APIClient.shared.configure(baseURL: baseURL, apiKey: apiKey)
+
+        do {
+            // 测试连接
+            print("OpenClaw: 开始测试连接到 \(baseURL)")
+            let status: StatusResponse = try await APIClient.shared.testConnection()
+            print("OpenClaw Connected: runtimeVersion=\(status.runtimeVersion ?? "unknown")")
+
+            // 加载数据
+            await loadFromAPI()
+
+            // 只有 testConnection 成功才设置 isConnected
+            isConnected = true
+            StorageService.shared.isConnected = true
+        } catch {
+            print("OpenClaw: 连接失败 - \(error.localizedDescription)")
+            self.error = error.localizedDescription
+            isConnected = false
+            StorageService.shared.isConnected = false
         }
 
-        _connectionTask = Task {
-            isLoading = true
-            error = nil
-
-            // 配置 APIClient
-            let baseURL = StorageService.shared.apiBaseURL
-            let apiKey = StorageService.shared.apiKey
-            await APIClient.shared.configure(baseURL: baseURL, apiKey: apiKey)
-
-            do {
-                // 测试连接
-                print("OpenClaw: 开始测试连接到 \(baseURL)")
-                let status: StatusResponse = try await APIClient.shared.testConnection()
-                print("OpenClaw Connected: runtimeVersion=\(status.runtimeVersion ?? "unknown")")
-
-                // 加载数据
-                await loadFromAPI()
-
-                // 只有 testConnection 成功才设置 isConnected
-                isConnected = true
-                StorageService.shared.isConnected = true
-            } catch {
-                print("OpenClaw: 连接失败 - \(error.localizedDescription)")
-                self.error = error.localizedDescription
-                isConnected = false
-                StorageService.shared.isConnected = false
-            }
-
-            isLoading = false
-            _connectionTask = nil
-        }
-
-        await _connectionTask?.value
+        isLoading = false
     }
 
     /// 断开连接
@@ -103,9 +90,8 @@ class OpenClawService: ObservableObject {
 
     /// 触发重新连接（用于配对后立即连接）
     func triggerConnect() {
-        // 取消现有任务后重新连接
+        // 取消现有任务
         _connectionTask?.cancel()
-        _connectionTask = nil
 
         _connectionTask = Task {
             await connect()
