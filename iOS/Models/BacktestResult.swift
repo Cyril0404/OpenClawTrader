@@ -62,7 +62,7 @@ struct BacktestResult: Identifiable {
         self.stockName = stockName
         self.strategy = strategy
         self.startDate = startDate
-        self.endDate = startDate
+        self.endDate = endDate
         self.initialCapital = initialCapital
         self.totalTrades = totalTrades
         self.winTrades = winTrades

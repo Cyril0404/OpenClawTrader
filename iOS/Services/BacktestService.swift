@@ -112,7 +112,7 @@ class BacktestService: ObservableObject {
                     } else if ma5Val < ma20Val && ma5Prev >= ma20Prev && position > 0 {
                         // 死叉卖出
                         cash += Double(position) * candle.close
-                        let profit = (candle.close - trades.last!.price) * Double(position)
+                        let profit = trades.last.map { (candle.close - $0.price) * Double(position) } ?? 0
                         trades.append(TradeRecord(date: candle.date, type: .sell, price: candle.close, quantity: position, profit: profit))
                         position = 0
                     }
@@ -127,7 +127,7 @@ class BacktestService: ObservableObject {
                         trades.append(TradeRecord(date: candle.date, type: .buy, price: candle.close, quantity: position, profit: 0))
                     } else if rsiVal > 70 && position > 0 {
                         cash += Double(position) * candle.close
-                        let profit = (candle.close - trades.last!.price) * Double(position)
+                        let profit = trades.last.map { (candle.close - $0.price) * Double(position) } ?? 0
                         trades.append(TradeRecord(date: candle.date, type: .sell, price: candle.close, quantity: position, profit: profit))
                         position = 0
                     }
@@ -142,7 +142,7 @@ class BacktestService: ObservableObject {
                         trades.append(TradeRecord(date: candle.date, type: .buy, price: candle.close, quantity: position, profit: 0))
                     } else if macdVal < 0 && macdPrev >= 0 && position > 0 {
                         cash += Double(position) * candle.close
-                        let profit = (candle.close - trades.last!.price) * Double(position)
+                        let profit = trades.last.map { (candle.close - $0.price) * Double(position) } ?? 0
                         trades.append(TradeRecord(date: candle.date, type: .sell, price: candle.close, quantity: position, profit: profit))
                         position = 0
                     }
@@ -161,7 +161,7 @@ class BacktestService: ObservableObject {
                     trades.append(TradeRecord(date: candle.date, type: .buy, price: candle.close, quantity: position, profit: 0))
                 } else if candle.close > upper && position > 0 {
                     cash += Double(position) * candle.close
-                    let profit = (candle.close - trades.last!.price) * Double(position)
+                    let profit = trades.last.map { (candle.close - $0.price) * Double(position) } ?? 0
                     trades.append(TradeRecord(date: candle.date, type: .sell, price: candle.close, quantity: position, profit: profit))
                     position = 0
                 }

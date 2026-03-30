@@ -76,7 +76,7 @@ app.get('/health', (req, res) => {
 })
 
 // 获取服务器信息
-app.get('/api/server info', (req, res) => {
+app.get('/api/server-info', (req, res) => {
   res.json({
     wsUrl: `ws://${req.headers.host || `${HOST}:${PORT}`}`,
     wssUrl: `wss://${req.headers.host || `${HOST}:${PORT}`}`,
@@ -168,10 +168,12 @@ app.all('/api/v1/:path(*)', (req, res) => {
   pendingHttpProxies.set(requestId, {
     resolve: (result) => {
       console.log(`[HTTPProxy] Resolving request ${requestId}:`, JSON.stringify(result).substring(0, 100))
+      clearTimeout(timeout)
       res.json(result)
     },
     reject: (err) => {
       console.log(`[HTTPProxy] Rejecting request ${requestId}:`, err.message)
+      clearTimeout(timeout)
       res.status(500).json({ error: err.message })
     },
     timeout

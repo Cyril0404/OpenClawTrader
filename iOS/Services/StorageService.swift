@@ -35,24 +35,18 @@ class StorageService {
 
     var apiBaseURL: String {
         get {
-            let value = userDefaults.string(forKey: Keys.apiBaseURL) ?? ""
-            print("[Storage] apiBaseURL READ: \(value)")
-            return value
+            return userDefaults.string(forKey: Keys.apiBaseURL) ?? ""
         }
         set {
-            print("[Storage] apiBaseURL WRITE: \(newValue)")
             userDefaults.set(newValue, forKey: Keys.apiBaseURL)
         }
     }
 
     var apiKey: String {
         get {
-            let value = userDefaults.string(forKey: Keys.apiKey) ?? ""
-            print("[Storage] apiKey READ: \(value.prefix(8))...")
-            return value
+            return userDefaults.string(forKey: Keys.apiKey) ?? ""
         }
         set {
-            print("[Storage] apiKey WRITE: \(newValue.prefix(8))...")
             userDefaults.set(newValue, forKey: Keys.apiKey)
         }
     }
@@ -60,12 +54,9 @@ class StorageService {
     /// relay-server URL（用于 WebSocket 连接）
     var relayURL: String {
         get {
-            let value = userDefaults.string(forKey: Keys.relayURL) ?? ""
-            print("[Storage] relayURL READ: \(value)")
-            return value
+            return userDefaults.string(forKey: Keys.relayURL) ?? ""
         }
         set {
-            print("[Storage] relayURL WRITE: \(newValue)")
             userDefaults.set(newValue, forKey: Keys.relayURL)
         }
     }

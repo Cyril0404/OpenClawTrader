@@ -45,7 +45,9 @@ class WebSocketChatService: NSObject, ObservableObject {
         if cleanBase.hasSuffix("/api") || cleanBase.hasSuffix("/api/") {
             cleanBase = String(cleanBase.dropLast(4)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         }
-        relayURL = "ws://\(cleanBase)/"
+        // 根据 baseURL 协议决定使用 ws:// 还是 wss://
+        let scheme = baseURL.hasPrefix("https") ? "wss" : "ws"
+        relayURL = "\(scheme)://\(cleanBase)/"
 
         guard let url = URL(string: relayURL) else {
             errorMessage = "无效的 URL: \(relayURL)"
@@ -56,7 +58,7 @@ class WebSocketChatService: NSObject, ObservableObject {
         webSocketTask = urlSession.webSocketTask(with: url)
         webSocketTask?.resume()
 
-        print("[WSChat] Connecting to \(relayURL) with token \(token.prefix(8))...")
+        print("[WSChat] Connecting to \(relayURL)")
 
         receiveMessage()
 

@@ -105,8 +105,8 @@ router.post('/generate', (req, res) => {
   // 生成临时 token（用于验证阶段）
   const token = require('uuid').v4()
 
-  // 5 分钟过期
-  const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+  // 永久有效（开发测试用）
+  const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
 
   // 自动选择已连接的 gateway（如果没有指定）
   const availableGateways = gatewayManager ? gatewayManager.keys() : []
