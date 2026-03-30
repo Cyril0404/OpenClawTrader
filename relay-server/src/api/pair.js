@@ -17,8 +17,8 @@ router.setGatewayManager = (gm) => { gatewayManager = gm }
 const { generatePairingCode, verifyPairingCode: doVerifyPairingCode } = require('../utils/codeGen')
 const { registerToken, getGatewayIdByToken } = require('../shared/tokenRegistry')
 
-// 文件持久化路径（绝对路径，兼容 PM2）
-const DATA_DIR = '/Users/zifanni/openclaw/relay-server/data'
+// 文件持久化路径（使用相对路径，兼容 PM2 和任意部署环境）
+const DATA_DIR = path.join(process.cwd(), 'data')
 const PAIRING_CODES_FILE = path.join(DATA_DIR, 'pairing-codes.json')
 
 // 确保 data 目录存在

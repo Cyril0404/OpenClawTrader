@@ -19,21 +19,13 @@ class PairingService: ObservableObject {
     @Published var pairingStatus: PairingStatus = .idle
     @Published var errorMessage: String?
 
-    // 中继服务器地址（模拟器用局域网 IP，真机用腾讯云）
+    // 中继服务器地址（统一使用腾讯云）
     var relayAPI: String {
-        #if targetEnvironment(simulator)
-        return "http://192.168.31.94:3001/api"
-        #else
         return "http://150.158.119.114:3001/api"
-        #endif
     }
 
     private var relayWS: String {
-        #if targetEnvironment(simulator)
-        return "ws://192.168.31.94:3001"
-        #else
         return "ws://150.158.119.114:3001"
-        #endif
     }
 
     private let keychainAccount = "openclaw_pairing_key"

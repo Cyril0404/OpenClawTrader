@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'openclaw-relay',
-      script: 'src/index.js',
+      script: __dirname + '/src/index.js',
       instances: 1,
       exec_mode: 'fork',
       watch: false,
