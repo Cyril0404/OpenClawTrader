@@ -126,7 +126,7 @@ class GatewayBridge extends EventEmitter {
         this.gatewayWsUrl = opts.gatewayWsUrl;
         this.gatewayToken = opts.gatewayToken;
         this.gatewayId = opts.gatewayId;
-        
+
         this.relayWs = null;
         this.gatewayWs = null;
         this.connectedToRelay = false;
@@ -137,7 +137,14 @@ class GatewayBridge extends EventEmitter {
         this.reconnectDelay = 1000;
         this.maxReconnectDelay = 30000;
         this.stopped = false;
-        
+
+        // 存储 deviceToken（ClawPilot 风格）
+        this.storedDeviceToken = null;
+        this.connectTimer = null;
+        this.tickTimer = null;
+        this.lastTick = 0;
+        this.tickIntervalMs = 30_000;
+
         // 加载或创建设备身份
         this.identity = loadOrCreateDeviceIdentity();
         log('BRIDGE', `Device ID: ${this.identity.deviceId.substring(0, 16)}...`);
@@ -223,30 +230,34 @@ class GatewayBridge extends EventEmitter {
     }
     
     // ----------------------------------------
-    // 连接 OpenClaw Gateway（使用 Ed25519 设备身份）
+    // 连接 OpenClaw Gateway（使用 Ed25519 设备身份，ClawPilot 风格）
     // ----------------------------------------
     async connectToGateway() {
         return new Promise((resolve, reject) => {
             log('GATEWAY', `Connecting to OpenClaw Gateway...`);
-            
+
             const headers = {};
             if (this.gatewayToken) {
                 headers['Authorization'] = `Bearer ${this.gatewayToken}`;
             }
-            
+
             this.gatewayWs = new WebSocket(this.gatewayWsUrl, { headers });
-            
+
             const timeout = setTimeout(() => {
                 if (!this.connectedToGateway) {
                     this.gatewayWs.close();
                     reject(new Error('Gateway connection timeout'));
                 }
             }, 20000);
-            
+
             this.gatewayWs.on('open', () => {
                 log('GATEWAY', 'WebSocket opened, waiting for challenge...');
+                this.connectNonce = null;
+                this.connectSent = false;
+                // ClawPilot 风格：1秒后如果没收到 challenge 也发送 connect
+                this.connectTimer = setTimeout(() => this.sendGatewayConnect(), 1000);
             });
-            
+
             this.gatewayWs.on('message', (data) => {
                 try {
                     const msg = JSON.parse(data.toString());
@@ -255,27 +266,40 @@ class GatewayBridge extends EventEmitter {
                     log('GATEWAY', `Parse error: ${e.message}`);
                 }
             });
-            
+
             this.gatewayWs.on('close', (code, reason) => {
                 log('GATEWAY', `Gateway disconnected (code=${code})`);
+                this.teardown();
                 this.connectedToGateway = false;
-                this.connectSent = false;
                 if (!this.stopped) this.scheduleGatewayReconnect();
             });
-            
+
             this.gatewayWs.on('error', (err) => {
                 clearTimeout(timeout);
+                this.teardown();
                 log('GATEWAY', `Error: ${err.message}`);
                 if (!this.connectedToGateway) reject(err);
             });
         });
     }
-    
+
+    teardown() {
+        if (this.connectTimer) {
+            clearTimeout(this.connectTimer);
+            this.connectTimer = null;
+        }
+        if (this.tickTimer) {
+            clearInterval(this.tickTimer);
+            this.tickTimer = null;
+        }
+    }
+
     scheduleGatewayReconnect() {
+        if (this.stopped) return;
         const delay = this.reconnectDelay;
-        this.reconnectDelay = Math.min(this.reconnectDelay * 1.5, this.maxReconnectDelay);
+        this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
         log('GATEWAY', `Reconnecting in ${Math.round(delay / 1000)}s...`);
-        setTimeout(() => { if (!this.stopped) this.connectToGateway(); }, delay);
+        setTimeout(() => { if (!this.stopped) this.connectToGateway(); }, delay).unref();
     }
     
     sendToGateway(msg) {
@@ -318,13 +342,17 @@ class GatewayBridge extends EventEmitter {
         
         if (msg.type === 'event' && msg.event === 'connect.challenge') {
             clearTimeout(timeout);
+            if (this.connectTimer) {
+                clearTimeout(this.connectTimer);
+                this.connectTimer = null;
+            }
             this.connectNonce = msg.payload?.nonce;
             log('GATEWAY', `Got challenge nonce: ${this.connectNonce}`);
             this.sendGatewayConnect();
             if (resolve) resolve();
             return;
         }
-        
+
         if (msg.type === 'res' && msg.id && this.pendingRequests.has(msg.id)) {
             clearTimeout(timeout);
             const pending = this.pendingRequests.get(msg.id);
@@ -332,14 +360,19 @@ class GatewayBridge extends EventEmitter {
             pending(msg);
             return;
         }
-        
+
         if (msg.type === 'event') {
             log('GATEWAY', `Gateway event: ${msg.event}`);
+            // 处理 tick 事件
+            if (msg.event === 'tick') {
+                this.lastTick = Date.now();
+                return;
+            }
             // 转发事件到 relay
             this.forwardToRelay({ type: 'message', from: 'gateway', content: msg });
             return;
         }
-        
+
         // 其他响应直接转发
         if (msg.type === 'res') {
             this.forwardToRelay({ type: 'message', from: 'gateway', content: msg });
@@ -349,40 +382,46 @@ class GatewayBridge extends EventEmitter {
     sendGatewayConnect() {
         if (this.connectSent) { log('GATEWAY', 'Connect already sent'); return; }
         this.connectSent = true;
-        
+
+        const role = 'operator';
+        const scopes = ['operator.admin', 'operator.read', 'operator.write', 'operator.approvals', 'operator.pairing'];
+        const clientId = 'openclaw-macos';
+        const clientMode = 'ui';
+        const signedAtMs = Date.now();
+        const nonce = this.connectNonce ?? undefined;
+        // ClawPilot 风格：优先用 storedDeviceToken
+        const authToken = this.storedDeviceToken ?? this.gatewayToken;
+
         const signedDevice = buildSignedDevice(this.identity, {
-            clientId: 'openclaw-macos',
-            clientMode: 'ui',
-            role: 'operator',
-            scopes: ['operator.read', 'operator.write', 'operator.admin', 'operator.pairing'],
-            token: this.gatewayToken,
-            nonce: this.connectNonce,
-            signedAtMs: Date.now(),
+            clientId, clientMode, role, scopes, signedAtMs,
+            token: authToken ?? undefined,
+            nonce,
         });
-        
-        const req = {
-            type: 'req',
-            id: uuid(),
-            method: 'connect',
-            params: {
-                minProtocol: 3,
-                maxProtocol: 3,
-                client: {
-                    id: 'openclaw-macos',
-                    version: 'internal',
-                    platform: 'darwin',
-                    mode: 'ui',
-                },
-                role: 'operator',
-                scopes: ['operator.read', 'operator.write', 'operator.admin', 'operator.pairing'],
-                auth: this.gatewayToken ? { token: this.gatewayToken } : undefined,
-                device: signedDevice,
-            }
+
+        const params = {
+            minProtocol: 3,
+            maxProtocol: 3,
+            role,
+            scopes,
+            caps: ['tool-events'],
+            client: {
+                id: 'openclaw-macos',
+                displayName: 'Macmini',
+                version: '1.0.0',
+                platform: process.platform,
+                mode: clientMode,
+            },
+            device: signedDevice,
+            auth: (authToken || this.gatewayToken)
+                ? { token: authToken, password: this.gatewayToken }
+                : undefined,
         };
-        
+
+        const req = { type: 'req', id: uuid(), method: 'connect', params };
+
         log('GATEWAY', `Sending connect request...`);
         this.sendToGateway(req);
-        
+
         const reqId = req.id;
         const timeout = setTimeout(() => {
             if (this.pendingRequests.has(reqId)) {
@@ -391,18 +430,43 @@ class GatewayBridge extends EventEmitter {
                 this.connectSent = false; // allow retry
             }
         }, 15000);
-        
+
         this.pendingRequests.set(reqId, (res) => {
             clearTimeout(timeout);
             if (res.ok) {
+                // ClawPilot 风格：保存 deviceToken
+                const deviceToken = res.payload?.auth?.deviceToken;
+                if (typeof deviceToken === 'string') {
+                    this.storedDeviceToken = deviceToken;
+                    log('GATEWAY', `Stored deviceToken: ${deviceToken.substring(0, 8)}...`);
+                }
+                if (typeof res.payload?.policy?.tickIntervalMs === 'number') {
+                    this.tickIntervalMs = res.payload.policy.tickIntervalMs;
+                }
+                this.backoffMs = 1000;
+                this.lastTick = Date.now();
+                this.startTickWatch();
                 this.connectedToGateway = true;
                 this.reconnectDelay = 1000;
                 log('GATEWAY', `✅ Connected to Gateway! (role=${res.payload?.auth?.role || 'unknown'})`);
             } else {
                 log('GATEWAY', `❌ Connect failed: ${JSON.stringify(res.error)}`);
+                // ClawPilot 风格：清除 deviceToken，下次用原始 token 重试
+                this.storedDeviceToken = null;
                 this.connectSent = false; // allow retry
             }
         });
+    }
+
+    startTickWatch() {
+        if (this.tickTimer) clearInterval(this.tickTimer);
+        const interval = Math.max(this.tickIntervalMs, 1000);
+        this.tickTimer = setInterval(() => {
+            if (this.stopped || !this.lastTick) return;
+            if (Date.now() - this.lastTick > this.tickIntervalMs * 2) {
+                this.gatewayWs?.close(4000, 'tick timeout');
+            }
+        }, interval);
     }
     
     // ----------------------------------------
