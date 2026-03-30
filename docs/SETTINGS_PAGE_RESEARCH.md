@@ -1,6 +1,6 @@
 # Settings页面数据获取方案研究
 
-> 最后更新：2026-03-30
+> 最后更新：2026-03-30 17:27（北京时间）
 > 作者：丞相
 > 状态：✅ 已验证
 
@@ -145,18 +145,25 @@ ClawPilot（Mac mini后台运行）
 
 ---
 
-## 五、待确认
+## 五、RPC接口验证结果 ✅
 
-以下RPC是否存在于OpenClaw Gateway：
+**验证时间：** 2026-03-30 17:27（北京时间）
 
-| RPC方法 | 说明 | 状态 |
-|---------|------|------|
-| `models.list` | 获取已配置的模型列表 | ❓ 待验证 |
-| `skills.status` | 获取skills启用状态 | ❓ 待验证 |
+**验证方法：** 在Mac mini上运行 `openclaw logs`，观察PocketClaw重连时的RPC调用。
 
-**验证方法：** 在Mac mini上运行 `openclaw logs --follow`，观察PocketClaw是否有调用这两个方法。
+**确认存在的RPC：**
 
-如果两者都存在，则Settings页面的所有数据都可以通过RPC获取，context用量（52k/204k）可通过sessions.list + 本地文件计算补充。
+| RPC方法 | 用途 | 响应时间 | 状态 |
+|---------|------|---------|------|
+| `sessions.list` | agents列表 + 工作状态 | ~130ms | ✅ |
+| `models.list` | 模型信息 | ~320ms | ✅ |
+| `skills.status` | skills启用状态 | ~230ms | ✅ |
+
+**确认不存在的RPC：** `workflows`、`workspaces` 均未在日志中出现。
+
+**结论：** Settings页面所有核心数据均可通过RPC获取，无需ClawPilot中继文件读取。
+
+**context用量（52k/204k）补充方案：** 通过本地读取`.jsonl`文件统计字节数估算，后续可选实现。
 
 ## 六、相关文档
 
