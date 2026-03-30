@@ -76,19 +76,31 @@ actor APIClient {
 
     // MARK: - API Methods
 
-    /// 测试连接状态（Gateway 返回 JSON-RPC 格式，需要解包装）
+    /// 测试连接状态（HTTP 响应是裸 JSON，直接解析）
     func testConnection() async throws -> StatusResponse {
-        // 先用通用 request 拿到 JSON-RPC 包装
-        let rpcResponse: JSONRPCResponse<StatusResponse> = try await request("/v1/status", method: .get)
-        // 检查 error 字段
-        if let err = rpcResponse.error {
-            throw APIError.serverError(message: err.message ?? "Unknown error")
+        guard !baseURL.isEmpty, !apiKey.isEmpty else {
+            throw APIError.notConfigured
         }
-        // 提取 payload
-        guard let payload = rpcResponse.payload else {
-            throw APIError.serverError(message: "No payload in response")
+
+        guard let url = URL(string: "\(baseURL)/v1/status") else {
+            throw APIError.invalidURL
         }
-        return payload
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw APIError.invalidResponse
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(StatusResponse.self, from: data)
     }
 
     /// 发送聊天消息
