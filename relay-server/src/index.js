@@ -97,6 +97,19 @@ pairAPI.setGatewayManager(gatewayManager)
 // ============================================================
 // HTTP → WebSocket 代理（供 App HTTP API 调用）
 // ============================================================
+// HTTP path -> RPC method 映射
+// Gateway 的 WebSocket 协议使用 .list / .status 后缀
+const PATH_TO_METHOD = {
+  'status': 'status',
+  'agents': 'agents.list',
+  'models': 'models.list',
+  'sessions': 'sessions.list',
+  'skills': 'skills.status',
+  // workflows 和 workspaces Gateway 不支持
+  'workflows': null,
+  'workspaces': null,
+}
+
 const pendingHttpProxies = new Map()
 
 // HTTP 代理端点：App 用 HTTP 调用 Gateway API
@@ -119,35 +132,26 @@ app.all('/api/v1/:path(*)', (req, res) => {
     return res.status(503).json({ error: 'Gateway not connected' })
   }
 
+  // 查询 method 映射
+  const rpcMethod = PATH_TO_METHOD[req.params.path]
+  if (rpcMethod === null) {
+    // 不支持的端点，返回空数组
+    res.json([])
+    return
+  }
+  if (!rpcMethod) {
+    // 未知的 path，使用原名称
+    res.status(400).json({ error: `Unknown API: ${req.params.path}` })
+    return
+  }
+
   // 把 HTTP 请求转换成 JSON-RPC 2.0 消息
   const requestId = require('crypto').randomUUID()
   const rpcRequest = {
     type: 'req',
     id: requestId,
-    method: req.params.path === 'status' ? 'status' : req.params.path,
+    method: rpcMethod,
     params: req.method === 'GET' ? {} : req.body || {}
-  }
-
-  // 拦截 agents 查询，用 gateway-bridge 代查
-  if (req.params.path === 'agents') {
-    const gb = global._gatewayBridge
-    if (!gb || !gb.connectedToGateway) {
-      return res.status(503).json({ error: 'Gateway bridge not connected' })
-    }
-    const agentsReqId = 'http_agents_' + Date.now()
-    let timeout
-    new Promise((resolve, reject) => {
-      timeout = setTimeout(() => { gb.pendingRequests.delete(agentsReqId); reject(new Error('timeout')); }, 5000)
-      gb.pendingRequests.set(agentsReqId, (msg) => { clearTimeout(timeout); resolve(msg.payload || msg); })
-      gb.forwardToGateway(JSON.stringify({ jsonrpc: '2.0', id: agentsReqId, method: 'agents.list', params: {} }))
-    }).then((result) => {
-      res.json({ agents: result })
-    }).catch((e) => {
-      clearTimeout(timeout)
-      gb.pendingRequests.delete(agentsReqId)
-      res.status(504).json({ error: e.message })
-    })
-    return
   }
 
   const wrapper = {
