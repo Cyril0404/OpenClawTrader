@@ -4,7 +4,7 @@ module.exports = {
       name: 'openclaw-relay',
       script: 'src/index.js',
       instances: 1,
-      exec_mode: 'cluster',
+      exec_mode: 'fork',
       watch: false,
       max_memory_restart: '500M',
       env: {
