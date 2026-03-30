@@ -145,7 +145,20 @@ ClawPilot（Mac mini后台运行）
 
 ---
 
-## 五、相关文档
+## 五、待确认
+
+以下RPC是否存在于OpenClaw Gateway：
+
+| RPC方法 | 说明 | 状态 |
+|---------|------|------|
+| `models.list` | 获取已配置的模型列表 | ❓ 待验证 |
+| `skills.status` | 获取skills启用状态 | ❓ 待验证 |
+
+**验证方法：** 在Mac mini上运行 `openclaw logs --follow`，观察PocketClaw是否有调用这两个方法。
+
+如果两者都存在，则Settings页面的所有数据都可以通过RPC获取，context用量（52k/204k）可通过sessions.list + 本地文件计算补充。
+
+## 六、相关文档
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - 整体架构
 - [STATUS_20260330.md](./STATUS_20260330.md) - 项目现状
