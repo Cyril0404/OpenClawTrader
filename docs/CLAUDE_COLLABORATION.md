@@ -2,27 +2,6 @@
 
 ## 2026-04-02 更新
 
-### stock-website 项目整理
-
-**项目路径**: `/Users/zifanni/stock-website`
-**GitHub**: https://github.com/Cyril0404/stock-website
-**部署**: https://stock-website.vercel.app / openstock.top
-
-**本次完成**：
-1. 修复 efinance bug - `get_latest_quote(['000001'])` 返回平安银行而非上证指数，改用新浪 API
-2. 修复 API routes 绝对路径问题，改为 `process.cwd()` 兼容 Vercel
-3. 清理券商数据 - 4家改为只留东莞证券
-4. 将 fetch_data.py 从 openclaw/website (Gitee) 复制到 stock-website (GitHub)
-5. 添加开发日志 `DEV_LOG.md`
-
-**GitHub Token**: [需在GitHub设置中查看]
-
-**当前状态**:
-- ✅ Phase 1 MVP 基本完成（指数/涨跌停/自选股/开户Tab单页）
-- ❌ 缺少AI早报、选股工具、用户系统等
-
----
-
 ### 用户档案系统 v1
 
 创建了 `/Users/zifanni/.openclaw/workspace/scripts/user_profile.py`
