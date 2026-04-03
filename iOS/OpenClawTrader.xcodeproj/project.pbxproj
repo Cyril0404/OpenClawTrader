@@ -63,7 +63,7 @@
 		F6AC29741B3ABA52017CD2CF /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB307292488DF178CE7B707F /* Workspace.swift */; };
 		FA93EE535ABFA2B29C90764B /* HoldingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F5BA1A8555C1B7C2A0A351 /* HoldingDetailView.swift */; };
 		FFD8B8AC1A5C35334A8273CC /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18215A86D4E9893048DDDBAF /* ProfileView.swift */; };
-		SETTINGS123456789ABCDEF01 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SETTINGS123456789ABCDEF00 /* SettingsView.swift */; };
+
 		USER1234567890ABCD /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = USER9876543210FEDCBA /* User.swift */; };
 		AUTH1234567890FEDCBA /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AUTH9876543210FEDCBA /* AuthService.swift */; };
 /* End PBXBuildFile section */
@@ -77,7 +77,7 @@
 		0D5764E713B958898AF2652A /* AgentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentListView.swift; sourceTree = "<group>"; };
 		0D8DC6D1929E67F08CFC04EE /* PerformanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceView.swift; sourceTree = "<group>"; };
 		18215A86D4E9893048DDDBAF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		SETTINGS123456789ABCDEF00 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+
 		2097A9560F69CB723294B945 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		270B7D67656C759A5EDA1FF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2B0533E2DFF9477C0E99F3B1 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
@@ -185,7 +185,6 @@
 				0AB92FB5A00FE1EF09DB50E7 /* OpenClawConnectView.swift */,
 				18215A86D4E9893048DDDBAF /* ProfileView.swift */,
 				E0672CF3F81BC2DB25F04B95 /* SkillsView.swift */,
-				SETTINGS123456789ABCDEF00 /* SettingsView.swift */,
 				3810620B0AF11B3C7C72DDBF /* UnifiedMeView.swift */,
 			);
 			path = Profile;
@@ -434,7 +433,6 @@
 				A4AA24BD2483CD0627373E96 /* Skill.swift in Sources */,
 				8D05D216CA6746312DDC06DD /* SkillsService.swift in Sources */,
 				71C902131737158C416FE58D /* SkillsView.swift in Sources */,
-				SETTINGS123456789ABCDEF01 /* SettingsView.swift in Sources */,
 				66FAB1AD69588B9DDE796D9E /* StockChart.swift in Sources */,
 				8AC8A351204A65620BDA02C3 /* StockDataService.swift in Sources */,
 				2D36B00E2D45B615E488E714 /* StorageService.swift in Sources */,
