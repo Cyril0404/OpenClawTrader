@@ -34,12 +34,68 @@ class StockDataService: ObservableObject {
         isLoading = true
         error = nil
 
-        // TODO: 调用真实API
-        // let response: [KLineResponse] = try await APIClient.shared.request("/v1/stock/\(stockCode)/kline?period=\(period.rawValue)")
-
-        currentStock = StockInfo(id: stockCode, name: stockCodeToName(stockCode), market: "深交所")
+        // 从 stock-website API 获取真实数据
+        do {
+            let url = URL(string: "https://stock-website.vercel.app/api/stocks?code=\(stockCode)")!
+            let (data, _) = try await URLSession.shared.data(from: url)
+            if let json = try? JSONDecoder().decode(StockAPIResponse.self, from: data) {
+                if let stock = json.stocks.first {
+                    currentStock = StockInfo(
+                        id: stockCode,
+                        name: stock.name,
+                        market: stockCode.hasPrefix("6") ? "上交所" : "深交所"
+                    )
+                }
+            }
+        } catch {
+            self.error = "获取数据失败: \(error.localizedDescription)"
+        }
 
         isLoading = false
+    }
+
+    // MARK: - 获取指数数据
+
+    func fetchIndices() async -> [IndexData] {
+        do {
+            let url = URL(string: "https://stock-website.vercel.app/api/indices")!
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(IndicesAPIResponse.self, from: data)
+            return response.data.map { item in
+                IndexData(
+                    code: item.code,
+                    name: item.name,
+                    price: Double(item.price) ?? 0,
+                    change: Double(item.change.replacingOccurrences(of: "+", with: "")) ?? 0,
+                    changePercent: Double(item.changePercent.replacingOccurrences(of: "%", with: "").replacingOccurrences(of: "+", with: "")) ?? 0
+                )
+            }
+        } catch {
+            self.error = "获取指数失败: \(error.localizedDescription)"
+            return []
+        }
+    }
+
+    // MARK: - 获取自选股实时价格
+
+    func fetchStockQuotes(codes: [String]) async -> [StockQuote] {
+        do {
+            let url = URL(string: "https://stock-website.vercel.app/api/stocks")!
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(StockListAPIResponse.self, from: data)
+            return response.stocks.filter { codes.contains($0.code) }.map { stock in
+                StockQuote(
+                    code: stock.code,
+                    name: stock.name,
+                    price: Double(stock.price) ?? 0,
+                    change: Double(stock.change) ?? 0,
+                    changePercent: Double(stock.changePercent) ?? 0
+                )
+            }
+        } catch {
+            self.error = "获取股票报价失败: \(error.localizedDescription)"
+            return []
+        }
     }
 
     // MARK: - 计算技术指标
@@ -239,4 +295,58 @@ class StockDataService: ObservableObject {
         // TODO: 调用真实API搜索股票
         return []
     }
+}
+
+// ============================================
+// MARK: - API Response Models
+// ============================================
+
+struct StockAPIResponse: Codable {
+    let stocks: [StockAPIItem]
+}
+
+struct StockAPIItem: Codable {
+    let code: String
+    let name: String
+    let price: String
+    let change: String
+    let changePercent: String
+}
+
+struct IndicesAPIResponse: Codable {
+    let success: Bool
+    let data: [IndexAPIItem]
+}
+
+struct IndexAPIItem: Codable {
+    let code: String
+    let name: String
+    let price: String
+    let change: String
+    let changePercent: String
+}
+
+struct StockListAPIResponse: Codable {
+    let success: Bool
+    let stocks: [StockAPIItem]
+}
+
+// ============================================
+// MARK: - Helper Structs
+// ============================================
+
+struct IndexData {
+    let code: String
+    let name: String
+    let price: Double
+    let change: Double
+    let changePercent: Double
+}
+
+struct StockQuote {
+    let code: String
+    let name: String
+    let price: Double
+    let change: Double
+    let changePercent: Double
 }

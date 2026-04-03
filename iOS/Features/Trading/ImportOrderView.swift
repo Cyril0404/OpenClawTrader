@@ -22,6 +22,7 @@ struct ImportOrderView: View {
     @State private var orderSide: Order.OrderSide = .buy
     @State private var shares = ""
     @State private var price = ""
+    @State private var showSuccessAlert = false
 
     enum InputMethod: String, CaseIterable {
         case manual = "手动输入"
@@ -64,6 +65,13 @@ struct ImportOrderView: View {
                     }
                     .foregroundColor(colors.textSecondary)
                 }
+            }
+            .alert("导入成功", isPresented: $showSuccessAlert) {
+                Button("确定") {
+                    dismiss()
+                }
+            } message: {
+                Text("委托单已添加到列表")
             }
         }
     }
@@ -168,7 +176,8 @@ struct ImportOrderView: View {
             price: priceDouble
         )
 
-        dismiss()
+        // 显示导入成功提示
+        showSuccessAlert = true
     }
 }
 

@@ -13,6 +13,7 @@ import SwiftUI
 
 struct LoginView: View {
     @Environment(\.appColors) private var colors
+    @StateObject private var authService = AuthService.shared
     @State private var phone = ""
     @State private var code = ""
     @State private var countdown = 0
@@ -184,11 +185,16 @@ struct LoginView: View {
         isLoading = true
         errorMessage = nil
 
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            isLoading = false
-            // Login success - notify parent to show main app
-            onLoginSuccess()
+        Task {
+            let success = await authService.login(username: phone, password: code)
+            await MainActor.run {
+                isLoading = false
+                if success {
+                    onLoginSuccess()
+                } else {
+                    errorMessage = authService.error ?? "登录失败"
+                }
+            }
         }
     }
 }
