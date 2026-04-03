@@ -79,7 +79,6 @@ class WebSocketChatService: NSObject, ObservableObject {
         config.waitsForConnectivity = true
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
-        config.keepAliveInterval = 30
         config.httpAdditionalHeaders = [
             "Connection": "keep-alive"
         ]
@@ -360,19 +359,25 @@ class WebSocketChatService: NSObject, ObservableObject {
             case .success(let message):
                 switch message {
                 case .string(let text):
-                    self?.handleMessage(text)
+                    Task { @MainActor [weak self] in
+                        self?.handleMessage(text)
+                    }
                 case .data(let data):
                     if let text = String(data: data, encoding: .utf8) {
-                        self?.handleMessage(text)
+                        Task { @MainActor [weak self] in
+                            self?.handleMessage(text)
+                        }
                     }
                 @unknown default:
                     break
                 }
-                self?.receiveMessage()
+                Task { @MainActor [weak self] in
+                    self?.receiveMessage()
+                }
 
             case .failure(let error):
                 print("[WSChat] Receive error: \(error)")
-                Task { @MainActor in
+                Task { @MainActor [weak self] in
                     self?.handleDisconnection()
                 }
             }
