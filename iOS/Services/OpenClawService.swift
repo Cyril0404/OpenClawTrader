@@ -58,8 +58,11 @@ class OpenClawService: ObservableObject {
             let status: StatusResponse = try await APIClient.shared.testConnection()
             print("OpenClaw Connected: runtimeVersion=\(status.runtimeVersion ?? "unknown")")
 
+            // 获取默认模型 ID
+            let defaultModelId = status.sessions?.defaults?.model
+
             // 加载数据
-            await loadFromAPI()
+            await loadFromAPI(defaultModelId: defaultModelId)
 
             // 只有 testConnection 成功才设置 isConnected
             isConnected = true
@@ -99,7 +102,7 @@ class OpenClawService: ObservableObject {
     }
 
     /// 从 API 加载数据
-    func loadFromAPI() async {
+    func loadFromAPI(defaultModelId: String? = nil) async {
         // 获取 workspaces
         do {
             let workspaceResponses: [WorkspaceResponse] = try await APIClient.shared.getWorkspaces()
@@ -126,7 +129,7 @@ class OpenClawService: ObservableObject {
             agents = agentResponses.map { response in
                 Agent(
                     id: response.id,
-                    name: response.name,
+                    name: response.name ?? response.id,
                     description: response.description ?? "",
                     modelId: response.modelId ?? "",
                     systemPrompt: "",
@@ -151,7 +154,7 @@ class OpenClawService: ObservableObject {
                     provider: response.provider ?? "",
                     version: "1.0",
                     status: AIModel.ModelStatus(rawValue: response.status ?? "active") ?? .active,
-                    isDefault: false,
+                    isDefault: response.id == defaultModelId,
                     config: AIModel.ModelConfig(temperature: 0.7, maxTokens: 2048, topP: 0.9, frequencyPenalty: 0.0, presencePenalty: 0.0),
                     usageStats: AIModel.UsageStats(totalCalls: 0, totalTokens: 0, successfulCalls: 0, failedCalls: 0, avgResponseTime: 0)
                 )

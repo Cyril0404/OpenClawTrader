@@ -26,6 +26,7 @@ struct UnifiedMeView: View {
     @State private var showingDeleteAccountAlert = false
     @State private var showingOpenClawConnect = false
     @State private var showingSkillsView = false
+    @State private var showingSettingsView = false
     @State private var showPrivacyPolicy = false
     @State private var showFreeMembership = false
     @State private var showShareSheet = false
@@ -76,6 +77,11 @@ struct UnifiedMeView: View {
         .sheet(isPresented: $showingSkillsView) {
             NavigationStack {
                 SkillsView()
+            }
+        }
+        .sheet(isPresented: $showingSettingsView) {
+            NavigationStack {
+                SettingsView()
             }
         }
         .sheet(isPresented: $showPrivacyPolicy) {
@@ -377,6 +383,14 @@ struct UnifiedMeView: View {
                 AppDivider()
 
                 ListItem(icon: "bell", title: "通知设置", subtitle: nil)
+                AppDivider()
+
+                Button {
+                    showingSettingsView = true
+                } label: {
+                    ListItem(icon: "key", title: "API Key", subtitle: nil, showArrow: true)
+                }
+                .buttonStyle(.plain)
                 AppDivider()
 
                 ListItem(icon: "questionmark.circle", title: "帮助与反馈", subtitle: nil)

@@ -186,6 +186,16 @@ struct JSONRPCResponse<T: Codable>: Codable {
 struct StatusResponse: Codable {
     let runtimeVersion: String?
     let heartbeat: HeartbeatInfo?
+    let sessions: SessionsInfo?
+
+    struct SessionsInfo: Codable {
+        let defaults: SessionDefaults?
+
+        struct SessionDefaults: Codable {
+            let model: String?
+            let contextTokens: Int?
+        }
+    }
 
     struct HeartbeatInfo: Codable {
         let defaultAgentId: String?
@@ -219,6 +229,7 @@ struct StatusResponse: Codable {
     enum CodingKeys: String, CodingKey {
         case runtimeVersion
         case heartbeat
+        case sessions
     }
 }
 
@@ -266,7 +277,7 @@ struct WorkspaceResponse: Codable {
 
 struct AgentResponse: Codable {
     let id: String
-    let name: String
+    let name: String?
     let description: String?
     let modelId: String?
     let status: String?

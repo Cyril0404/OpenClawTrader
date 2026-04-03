@@ -26,9 +26,9 @@ struct OpenClawConnectView: View {
     @State private var showUnbindConfirm = false
     @State private var isPaired = false
 
-    // 直接使用 pairingService.isPaired 作为状态源
+    // isPaired 直接响应本地 @State 状态变化
     private var isPairedState: Bool {
-        isPaired || pairingService.isPaired
+        isPaired
     }
 
     var body: some View {
