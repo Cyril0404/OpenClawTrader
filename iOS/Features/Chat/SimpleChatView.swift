@@ -155,7 +155,7 @@ struct SimpleChatView: View {
                 showAgentList = false
             })
         }
-        .onReceive(wsService.$incomingMessages) { newMessages in
+        .onChange(of: wsService.incomingMessages) { oldMessages, newMessages in
             for text in newMessages {
                 chatState.messages.append(SimpleChatMessage(role: "assistant", content: text, timestamp: Date()))
             }
