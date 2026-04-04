@@ -1,439 +1,446 @@
-# OpenClaw Trader - 开发手册 v1.0
+# 妙股AI · 炒股助手 - 开发手册 v2.0
+
+> 更新：2026-04-04
+> 版本定位：产品方向确认后的完整开发手册
+
+---
 
 ## 目录
-1. [项目概述](#1-项目概述)
-2. [技术架构](#2-技术架构)
-3. [开发环境](#3-开发环境)
-4. [云端中继服务](#4-云端中继服务)
-5. [移动端配对流程](#5-移动端配对流程)
-6. [核心模块说明](#6-核心模块说明)
-7. [构建与部署](#7-构建与部署)
+1. [产品定位与核心价值](#1-产品定位与核心价值)
+2. [用户故事与核心流程](#2-用户故事与核心流程)
+3. [产品架构](#3-产品架构)
+4. [开户验证机制](#4-开户验证机制)
+5. [数据导入流程](#5-数据导入流程)
+6. [AI报告生成](#6-ai报告生成)
+7. [技术架构](#7-技术架构)
+8. [开发优先级](#8-开发优先级)
+9. [构建与部署](#9-构建与部署)
+10. [核心模块说明](#10-核心模块说明)
+11. [附录-交易行为分析框架](#11-附录-交易行为分析框架)
 
 ---
 
-## 1. 项目概述
+## 1. 产品定位与核心价值
 
-OpenClaw Trader 是一款 iOS 应用，用于与 OpenClaw 桌面端 Gateway 进行配对连接，实现移动端与桌面端的消息中继。
+### 1.1 产品定位
 
-### 1.1 核心功能
-- **移动端配对**：通过扫码或手动输入配对码连接桌面端
-- **消息中继**：移动端通过云端 WebSocket 中继与桌面端通信
-- **AI 对话**：将用户消息转发至本地 AI 进行处理
+**产品名称：** 妙股AI · 炒股助手
 
-### 1.2 技术栈
+**产品类型：** 引流工具 → 券商开户转化
+
+**一句话定位：** 用AI帮散户复盘自己的交易，找出亏损的真正原因
+
+**核心口号：** "让AI帮你找出亏损的真正原因"
+
+**与竞品的根本差异：**
+
+| 竞品（东方财富/同花顺） | 妙股AI |
+|------------------------|--------|
+| 给数据，你自己判断 | 分析你这个人 |
+| 行情工具 | 行为分析工具 |
+| 告诉你市场怎么样 | 告诉你你怎么亏的 |
+
+### 1.2 核心价值
+
+**不告诉用户买什么，只告诉用户为什么会亏。**
+
+- 用户真正想要：赚钱
+- 但直接给结论=荐股=法律风险+Apple审核被拒
+- 间接给价值：帮他找出亏损根因，让他自己成长
+- 马后炮是手段，不是目的
+
+### 1.3 商业模式
+
+**靠开户转化赚钱，不靠订阅。**
+
+用户路径：
+1. 用户使用App → 体验Demo分析
+2. 想用真实数据 → 必须输入资金账号（证明已开户）
+3. 导入真实交易 → AI生成个性化报告
+4. 持续使用 → 持续在券商交易
+
+### 1.4 产品边界（必须遵守）
+
+**可以做：**
+- 交易行为分析
+- 亏损原因诊断
+- 改进建议（不涉及具体股票）
+
+**绝对不做：**
+- 荐股
+- 预测涨跌
+- 提供买卖具体股票的建议
+- 代客操盘
+
+---
+
+## 2. 用户故事与核心流程
+
+### 2.1 用户故事
+
+**用户A（未开户）：**
+> "我总是在股市亏钱，但不知道为什么。看到这个App能分析我的交易记录，帮我找出亏损原因，我先试试Demo。如果真的有用，我会考虑开户。"
+
+**用户B（已开户）：**
+> "我在券商开户了，现在想把我的交易记录导进来，让AI帮我分析一下我到底哪里做错了。"
+
+### 2.2 用户核心流程
+
+```
+┌─────────────────┐
+│  下载App        │
+│  ↓              │
+│  注册账号        │
+│  ↓              │
+│  体验Demo分析    │ ← 全程无需开户
+│  （看报告示例）   │
+│  ↓              │
+│  "解锁完整分析"  │
+│  按钮点击        │
+│  ↓              │
+│  输入资金账号     │ ← 格式验证
+│  20660xxxxx     │
+│  ↓              │
+│  导入交易截图    │
+│  ↓              │
+│  AI识别 → 用户确认│ ← 关键：用户确认数据
+│  ↓              │
+│  生成个性化报告  │
+│  ↓              │
+│  持续追踪改进    │
+└─────────────────┘
+```
+
+### 2.3 开户验证流程
+
+用户输入资金账号 → 前端格式校验（`20660`前缀 + 9位数字）→ 解锁功能
+
+**风控逻辑：**
+- 格式固定，普通人猜不到完整账号
+- 造假成本 >> 造假收益
+- 不调用券商接口（调用不了）
+
+---
+
+## 3. 产品架构
+
+### 3.1 系统架构图
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                         iOS App                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │  Demo    │  │ 资金账号 │  │ 交易截图 │  │ AI报告   │  │
+│  │  体验    │  │ 验证     │  │ 导入     │  │ 查看     │  │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘  │
+│       │              │              │              │         │
+│       └──────────────┴──────────────┴──────────────┘         │
+│                              │                               │
+│                              ▼                               │
+│                     ┌──────────────┐                        │
+│                     │   MiniMax    │                        │
+│                     │   API        │                        │
+│                     │  (AI分析)    │                        │
+│                     └──────────────┘                        │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 独立App，不依赖OpenClaw
+
+**原方案（废弃）：** App连接用户OpenClaw Gateway → AI通过用户Gateway走
+**新方案（采用）：** 独立App → AI由我们提供 → 用户零门槛
+
+**理由：**
+- 目标用户是散户，不会安装OpenClaw
+- 地推人员无法一个个教用户安装
+- AI质量我们控制
+- 用户零门槛使用
+
+### 3.3 双通道设计（未来可选）
+
+| 通道 | AI来源 | 费用 | 用户要求 |
+|------|--------|------|---------|
+| 默认通道 | MiniMax（我们提供） | 我们承担 | 零门槛 |
+| 高级通道 | 用户自己的API Key | 用户自付 | 需配置 |
+
+MVP版本只做默认通道，高级通道v2.0再考虑。
+
+---
+
+## 4. 开户验证机制
+
+### 4.1 验证方式
+
+**资金账号格式验证（前端正则）：**
+
+```swift
+// 格式：20660 + 9位数字
+let pattern = "^20660\\d{9}$"
+let isValid = fundsAccount.matches(regex: pattern)
+```
+
+### 4.2 验证流程
+
+```
+用户输入资金账号
+    ↓
+前端格式校验（正则）
+    ↓
+格式正确 → 解锁真实数据导入功能
+格式错误 → 提示"账号格式不正确"
+```
+
+### 4.3 资金账号格式说明
+
+- 前缀：`20660`（固定）
+- 后缀：9位数字
+- 示例：`206600001234`
+
+---
+
+## 5. 数据导入流程
+
+### 5.1 用户操作流程
+
+```
+用户上传券商截图（持仓/交割单）
+    ↓
+腾讯云OCR识别（调用API）
+    ↓
+展示识别结果（结构化数据列表）
+    ↓
+用户逐条确认/修改
+    ↓
+用户点击"确认录入"
+    ↓
+数据入库，进入分析队列
+```
+
+### 5.2 重复数据处理
+
+**去重规则：**
+- 同一股票 + 同一日期 + 同一价格 → 保留一条
+- 去重率 > 15% → 提示用户"检测到重复截图，请确认"
+
+### 5.3 数据质量保障
+
+**"AI预审 + 人工终审"模式：**
+- AI做90%的提取工作
+- 用户做10%的确认工作
+- 有错当场改，比全自动分析更可靠
+
+---
+
+## 6. AI报告生成
+
+### 6.1 分析框架
+
+详见[附录-交易行为分析框架](#11-附录-交易行为分析框架)
+
+**核心分析维度：**
+1. 交易概况（5项指标）
+2. 买卖时机分析
+3. 仓位管理分析
+4. 盈亏模式分析
+5. **行为偏差诊断**（核心！）
+6. 综合评分
+7. 核心问题总结（Top 3）
+8. 改进建议
+
+### 6.2 Prompt设计原则
+
+- **固定框架**：每次输出格式一致，用户可对比
+- **量化证据**：每个结论都有数字支撑
+- **行为偏差诊断**：给出「有/无」判断 + 具体证据
+- **可执行建议**：具体可操作，不是空话
+
+### 6.3 报告质量保障
+
+1. **范围收缩**：只做行为分析，不做荐股
+2. **免责声明**：每个报告开头声明"不构成投资建议"
+3. **用户确认**：数据先经用户确认再分析
+4. **冷启动测试**：上线前用脱敏真实数据测试
+
+---
+
+## 7. 技术架构
+
+### 7.1 技术栈
+
 | 组件 | 技术 |
 |------|------|
-| iOS App | SwiftUI + UIKit (AVFoundation) |
-| 桌面端 Gateway | Node.js + WebSocket |
-| 云端中继服务 | Node.js + Express + ws |
-| 网络协议 | HTTPS + WebSocket |
+| iOS App | SwiftUI + UIKit |
+| AI服务 | MiniMax API（调用方，我们出token） |
+| OCR服务 | 腾讯云OCR API |
+| 后端 | Node.js + Express（轻量） |
+| 数据库 | SQLite（本地）+ 云端备份 |
+| 架构模式 | 独立App，不依赖OpenClaw |
+
+### 7.2 关键架构红线
+
+**App绝对不可持有API Key**：
+- MiniMax Token → 放在后端，App不存
+- OCR API Key → 放在后端，App不存
+- 资金账号数据 → 本地SQLite，不传第三方
+
+### 7.3 限流设计
+
+每个用户：
+- 每分钟最多请求：10次
+- 每小时最多请求：100次
+- 超出排队，不直接拒绝
+
+### 7.4 会话隔离
+
+每个用户的对话：
+- 存在独立的context里
+- 并发请求不会串context
+- 每个用户有独立的会话历史
 
 ---
 
-## 2. 技术架构
+## 8. 开发优先级
 
-### 2.1 系统架构图
+### P0（必须做，MVP完成前）
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│                 │     │                 │     │                 │
-│   iOS App       │     │  Cloud Relay    │     │  Desktop        │
-│   (移动端)      │◄───►│  Server         │◄───►│  Gateway        │
-│                 │     │  (云端中继)      │     │  (桌面端)        │
-│                 │     │                 │     │                 │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-       │                        │                        │
-       │   QR Code / 配对码      │    WebSocket           │
-       │ ─────────────────────► │ ─────────────────────► │
-       │                        │                        │
-```
+| # | 功能 | 说明 |
+|---|------|------|
+| P0.1 | Demo体验 | 用户不登录也能看示例报告 |
+| P0.2 | 资金账号验证 | 格式校验，解锁真实功能 |
+| P0.3 | 截图导入+OCR | 用户上传 → AI识别 → 用户确认 |
+| P0.4 | AI报告生成 | 按框架生成行为分析报告 |
+| P0.5 | 用户确认流程 | 数据录入前必须用户确认 |
 
-### 2.2 目录结构
+### P1（应该做，提升体验）
 
-```
-OpenClawTrader/
-├── App/                          # App 入口
-├── Features/
-│   └── Profile/
-│       └── OpenClawConnectView.swift   # 配对页面
-├── Services/
-│   └── PairingService.swift            # 配对服务
-└── ...
+| # | 功能 | 说明 |
+|---|------|------|
+| P1.1 | 历史报告存档 | 用户可查看历次分析 |
+| P1.2 | 报告对比 | 两次报告关键指标对比 |
+| P1.3 | 推送提醒 | 每月/每季度自动提醒分析 |
+| P1.4 | 数据去重优化 | 多截图自动去重 |
 
-~/openclaw/
-├── relay-server/                 # 云端中继服务
-│   ├── src/
-│   │   ├── index.js              # 主入口
-│   │   ├── api/
-│   │   │   └── pair.js           # 配对 API
-│   │   ├── relay/
-│   │   │   ├── gateway.js        # Gateway 连接管理
-│   │   │   └── device.js         # 设备连接管理
-│   │   └── utils/
-│   │       └── codeGen.js        # 配对码生成
-│   └── relay-client/              # 桌面端中继客户端
-│       ├── index.js              # RelayClient 类
-│       └── cli.js                # CLI 命令
-└── clawred/                      # ClawRed 安装脚本
-    └── install.sh
-```
+### P2（锦上添花）
+
+| # | 功能 | 说明 |
+|---|------|------|
+| P2.1 | 同行对比 | 匿名化后 vs 同风格交易者 |
+| P2.2 | 改进跟踪 | 下次分析时回顾改进情况 |
+| P2.3 | 社交分享 | 报告分享（脱敏后） |
 
 ---
 
-## 3. 开发环境
+## 9. 构建与部署
 
-### 3.1 iOS 开发环境
-- **Xcode**: 15.0+
-- **iOS 版本**: iOS 17.0+
-- **Swift 版本**: 5.9+
-
-### 3.2 云端服务开发环境
-- **Node.js**: >= 18.0.0
-- **包管理**: npm
-
-### 3.3 本地服务启动
+### 9.1 iOS App 构建
 
 ```bash
-# 启动云端中继服务
-cd ~/openclaw/relay-server
-npm install
-npm start
-
-# 桌面端生成配对码
-cd ~/openclaw/relay-server
-npm run pair
-```
-
----
-
-## 4. 云端中继服务
-
-### 4.1 服务地址
-
-| 环境 | API 地址 | WebSocket 地址 |
-|------|----------|----------------|
-| 生产环境 | `http://150.158.119.114:3001/api` | `ws://150.158.119.114:3001` |
-
-### 4.2 API 接口
-
-#### 生成配对码
-```
-POST /api/pair/generate
-```
-
-**请求体**: (可选)
-```json
-{
-  "gatewayId": "gateway-xxx"
-}
-```
-
-**响应**:
-```json
-{
-  "code": "K8GC5V",
-  "expiresAt": "2026-03-28T12:05:00.000Z",
-  "serverUrl": "ws://150.158.119.114:3001",
-  "token": "device-xxx"
-}
-```
-
-#### 验证配对码
-```
-POST /api/pair/verify
-```
-
-**请求体**:
-```json
-{
-  "code": "K8GC5V"
-}
-```
-
-**响应**:
-```json
-{
-  "success": true,
-  "gatewayToken": "gateway-token-xxx",
-  "gatewayId": "gateway-xxx",
-  "error": null
-}
-```
-
-### 4.3 WebSocket 消息协议
-
-| 消息类型 | 方向 | 说明 |
-|----------|------|------|
-| `gateway` | 桌面端→服务端 | 注册 Gateway |
-| `device` | 移动端→服务端 | 注册设备 |
-| `message` | 双向 | 消息转发 |
-| `ping/pong` | 双向 | 心跳检测 |
-| `registered` | 服务端→客户端 | 注册确认 |
-| `device_connected` | 服务端→桌面端 | 设备连接通知 |
-| `device_disconnected` | 服务端→桌面端 | 设备断开通知 |
-
-### 4.4 配对码生成规则
-
-- 长度: 6 位
-- 字符集: 大写字母 + 数字（排除 0, O, I, L 等易混淆字符）
-- 有效期: 5 分钟
-- 格式: `XXXXXX` (如 `K8GC5V`)
-
----
-
-## 5. 移动端配对流程
-
-### 5.1 配对 URL 格式
-
-桌面端生成的配对 URL:
-```
-openclaw://pair?code=K8GC5V&server=ws://150.158.119.114:3001
-```
-
-### 5.2 配对流程图
-
-```
-┌──────────┐                    ┌──────────┐                    ┌──────────┐
-│  iOS App │                    │ Cloud    │                    │ Desktop  │
-│          │                    │ Relay    │                    │ Gateway  │
-└────┬─────┘                    └────┬─────┘                    └────┬─────┘
-     │                              │                              │
-     │  1. 扫描二维码               │                              │
-     │ ──────────────────────────► │                              │
-     │                              │                              │
-     │                              │  2. 桌面端注册               │
-     │                              │ ◄──────────────────────────── │
-     │                              │                              │
-     │  3. 输入配对码 K8GC5V         │                              │
-     │ ──────────────────────────► │                              │
-     │                              │                              │
-     │                              │  4. 验证配对码               │
-     │                              │ ◄──────────────────────────► │
-     │                              │                              │
-     │  5. 验证成功，返回 token      │                              │
-     │ ◄──────────────────────────── │                              │
-     │                              │                              │
-     │  6. 保存 token 到 Keychain   │                              │
-     │                              │                              │
-     │  7. 配对完成                 │                              │
-     │                              │                              │
-```
-
-### 5.3 核心代码
-
-#### PairingService.swift
-
-```swift
-@MainActor
-class PairingService: ObservableObject {
-    static let shared = PairingService()
-
-    private let relayAPI = "http://150.158.119.114:3001/api"
-    private let relayWS = "ws://150.158.119.114:3001"
-
-    /// 解析配对 URL
-    /// 格式: openclaw://pair?code=XXX&server=ws://...
-    func parsePairingURL(_ urlString: String) -> (code: String, server: String)? {
-        guard let components = URLComponents(string: urlString),
-              components.scheme == "openclaw",
-              components.host == "pair" else {
-            return nil
-        }
-        // ... 解析 queryItems
-    }
-
-    /// 验证配对码
-    func verifyPairingCode(_ code: String) async -> VerifyResponse? {
-        // POST /api/pair/verify
-    }
-
-    /// 执行配对流程
-    func pairWithURL(_ urlString: String) async -> Bool {
-        // 解析 URL → 验证配对码 → 保存 token
-    }
-}
-```
-
-#### OpenClawConnectView.swift
-
-```swift
-struct OpenClawConnectView: View {
-    @StateObject private var pairingService = PairingService.shared
-
-    var body: some View {
-        // 扫码入口
-        Button("扫码") {
-            showScanner = true
-        }
-
-        // 手动输入入口
-        Button("手动输入") {
-            showManualInput = true
-        }
-    }
-
-    // 处理扫描到的二维码
-    private func handleScannedCode(_ code: String) {
-        if let parsed = pairingService.parsePairingURL(code) {
-            verifyCode(parsed.code)
-        }
-    }
-
-    // 验证配对码
-    private func verifyCode(_ code: String) {
-        Task {
-            if let response = await pairingService.verifyPairingCode(code), response.success {
-                isPaired = true
-            }
-        }
-    }
-}
-```
-
----
-
-## 6. 核心模块说明
-
-### 6.1 PairingService
-
-**位置**: `Services/PairingService.swift`
-
-**职责**:
-- 调用云端 API 生成配对码
-- 解析配对 URL
-- 验证配对码
-- 管理配对状态
-- Keychain 存储 token
-
-**关键类型**:
-
-```swift
-struct GenerateResponse: Codable {
-    let code: String
-    let expiresAt: String
-    let serverUrl: String
-    let token: String
-}
-
-struct VerifyResponse: Codable {
-    let success: Bool
-    let gatewayToken: String?
-    let gatewayId: String?
-    let error: String?
-}
-```
-
-### 6.2 QRScannerViewController
-
-**位置**: `OpenClawConnectView.swift` (内嵌类)
-
-**职责**:
-- 摄像头 QR 码扫描
-- 扫描框 UI 定制
-- 扫描结果回调
-
-### 6.3 RelayClient (桌面端)
-
-**位置**: `~/openclaw/relay-server/relay-client/index.js`
-
-**职责**:
-- 连接云端 WebSocket
-- 注册 Gateway
-- 消息转发到本地 AI
-- 心跳维持连接
-
-### 6.4 PairingCLI (桌面端)
-
-**位置**: `~/openclaw/relay-server/relay-client/cli.js`
-
-**命令**:
-```bash
-npm run pair        # 生成配对码并显示二维码
-npm run connect     # 连接到云端中继服务
-npm run status      # 查看连接状态
-```
-
----
-
-## 7. 构建与部署
-
-### 7.1 iOS App 构建
-
-```bash
-cd OpenClawTrader/OpenClawTrader
-
-# 构建 Debug 版本
-xcodebuild -scheme OpenClawTrader -configuration Debug \
+# Debug版本
+xcodebuild -scheme MiaoguAI -configuration Debug \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 
-# 构建 Release 版本
-xcodebuild -scheme OpenClawTrader -configuration Release \
+# Release版本
+xcodebuild -scheme MiaoguAI -configuration Release \
   -destination 'generic/platform=iOS' build
 ```
 
-### 7.2 云端中继服务部署
+### 9.2 后端服务
 
 ```bash
-cd ~/openclaw/relay-server
-
-# 安装依赖
+cd backend
 npm install
-
-# 开发环境运行
-npm run dev
-
-# 生产环境运行
-npm start
-
-# 使用 PM2 后台运行
-pm2 start src/index.js --name openclaw-relay
+npm start  # 生产环境
+npm run dev  # 开发环境
 ```
 
-### 7.3 常见问题
+### 9.3 环境变量
 
-**Q: 配对码过期怎么办？**
-A: 桌面端重新运行 `npm run pair` 生成新的配对码。
+```bash
+# MiniMax API
+MINIMAX_API_KEY=your_key
 
-**Q: WebSocket 连接断开？**
-A: RelayClient 会自动重连，最多重试 10 次。
-
-**Q: iOS 扫描不到二维码？**
-A: 确保相机权限已授权，检查二维码是否在扫描框内。
-
----
-
-## 附录
-
-### A. 颜色系统
-
-| 名称 | 用途 |
-|------|------|
-| `accent` | 主题色/强调色 |
-| `background` | 背景色 |
-| `textPrimary` | 主要文字 |
-| `textSecondary` | 次要文字 |
-| `textTertiary` | 辅助文字 |
-
-### B. 间距系统
-
-| 名称 | 值 |
-|------|-----|
-| `xs` | 4pt |
-| `sm` | 8pt |
-| `md` | 16pt |
-| `lg` | 24pt |
-| `xl` | 32pt |
-
-### C. 相关文档
-
-- [项目结构](./OpenClawTrader/项目结构.md)
-- [设计规范](./OpenClawTrader_DesignSpec.md)
-- [产品需求](./OpenClawTrader_PRDT.md)
-- [代码开发规范](./CODING_GUIDELINES.md)
-- [提交规范](./COMMIT_GUIDELINES.md)
+# 腾讯云OCR
+TENCENT_CLOUD_SECRET_ID=your_id
+TENCENT_CLOUD_SECRET_KEY=your_key
+```
 
 ---
 
-*文档版本: v1.0*
+## 10. 核心模块说明
+
+### 10.1 模块列表
+
+| 模块 | 职责 | 文件 |
+|------|------|------|
+| AccountVerification | 资金账号格式验证 | `Services/AccountVerification.swift` |
+| OCRService | 腾讯云OCR调用 | `Services/OCRService.swift` |
+| TradeImportView | 截图导入+确认UI | `Features/TradeImport/TradeImportView.swift` |
+| AIReportService | AI报告生成调用 | `Services/AIReportService.swift` |
+| ReportView | 报告展示 | `Features/Report/ReportView.swift` |
+| LocalDatabase | 本地SQLite | `Services/DatabaseService.swift` |
+
+### 10.2 数据流向
+
+```
+截图上传
+    ↓
+OCR识别 → 结构化JSON
+    ↓
+用户确认 → 确认数据
+    ↓
+发送至后端 → MiniMax API
+    ↓
+AI生成报告JSON
+    ↓
+展示报告 → 用户查看
+```
+
+---
+
+## 11. 附录-交易行为分析框架
+
+详细文档：[./docs/交易行为分析框架.md](./docs/交易行为分析框架.md)
+
+**核心框架摘要：**
+
+### 报告8大章节（固定顺序，不可省略）
+
+1. **交易概况** - 5项核心指标
+2. **买卖时机分析** - 追涨杀跌/持股周期
+3. **仓位管理分析** - 集中度/止损率
+4. **盈亏模式分析** - 盈亏特征对比
+5. **行为偏差诊断** - 5项偏差逐项诊断（核心！）
+6. **综合评分** - 5维度打分
+7. **核心问题总结** - Top 3问题+量化证据
+8. **改进建议** - 3-5条具体可执行建议
+
+### 行为偏差5项（必须全部覆盖）
+
+1. 过度交易（操作频率是否异常）
+2. 损失厌恶（亏了是否死拿）
+3. 羊群效应（是否跟买热点）
+4. 锚定效应（是否执着成本价）
+5. 近期偏差（是否近期表现主导决策）
+
+---
+
+## 附录A. 合规与法律
+
+- 本产品不提供任何投资建议
+- 所有报告包含免责声明："本报告仅供个人复盘参考，不构成投资建议"
+- 用户数据仅用于分析，不用于任何其他目的
+- 数据存储符合相关法律法规
+
+## 附录B. App Store审核注意事项
+
+产品定位为"交易复盘工具"而非"投资建议工具"，上架时应：
+- 强调"行为分析"而非"投资分析"
+- 不出现"预测"、"推荐"、"买卖建议"等词汇
+- 隐私政策明确说明数据用途
+
+---
+
+*文档版本: v2.0*
 *创建日期: 2026-03-28*
-*最后更新: 2026-03-28*
+*最后更新: 2026-04-04*
+*更新内容: 产品方向确认，核心架构调整，独立App方案，AI分析框架添加*

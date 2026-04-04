@@ -16,17 +16,16 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.appColors) private var colors
-    @StateObject private var authService = AuthService.shared
     @State private var selectedTab = 0
+    @State private var isLoggedIn = true
 
     var body: some View {
         Group {
-            if authService.isLoggedIn {
+            if isLoggedIn {
                 mainContent
             } else {
                 LoginView(onLoginSuccess: {
-                    // AuthService.login() is called inside LoginView
-                    // AuthService.currentUser will be set, triggering isLoggedIn to become true
+                    isLoggedIn = true
                 })
             }
         }
@@ -38,7 +37,7 @@ struct ContentView: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             TabContent(selectedTab: selectedTab, onLogout: {
-                authService.logout()
+                isLoggedIn = false
             })
             customTabBar
         }
