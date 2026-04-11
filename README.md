@@ -1,5 +1,13 @@
-# OpenClawTrader
+# OpenClawTrader（⚠️ 已废弃）
 
+> ⚠️ **状态：本项目已废弃。请勿继续开发。**
+> 
+> 妙股AI的正确项目是 `/Users/zifanni/openclaw/MiaoguAI/`
+> 路径确认（2026-04-07）：`~/openclaw/MiaoguAI/docs/DEVELOPMENT.md`
+
+---
+
+> **历史说明（旧）**
 > iOS App + Cloud Relay Server，实现移动端与 OpenClaw 桌面端的配对连接与消息中继。
 
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Cyril0404%2FOpenClawTrader-blue)](https://github.com/Cyril0404/OpenClawTrader)

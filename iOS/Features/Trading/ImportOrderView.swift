@@ -23,6 +23,7 @@ struct ImportOrderView: View {
     @State private var shares = ""
     @State private var price = ""
     @State private var showSuccessAlert = false
+    @State private var successMessage = ""
 
     enum InputMethod: String, CaseIterable {
         case manual = "手动输入"
@@ -66,12 +67,12 @@ struct ImportOrderView: View {
                     .foregroundColor(colors.textSecondary)
                 }
             }
-            .alert("导入成功", isPresented: $showSuccessAlert) {
+            .alert("导入结果", isPresented: $showSuccessAlert) {
                 Button("确定") {
                     dismiss()
                 }
             } message: {
-                Text("委托单已添加到列表")
+                Text(successMessage)
             }
         }
     }
@@ -145,7 +146,7 @@ struct ImportOrderView: View {
                     .font(AppFonts.title3())
                     .foregroundColor(colors.textPrimary)
 
-                Text("上传委托截图，自动识别股票信息")
+                Text("目前只支持东莞证券截图识别，其他券商很可能出错")
                     .font(AppFonts.caption())
                     .foregroundColor(colors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -167,7 +168,7 @@ struct ImportOrderView: View {
         guard let sharesInt = Int(shares) else { return }
         let priceDouble = Double(price) ?? 0
 
-        service.importOrder(
+        let result = service.importOrder(
             symbol: symbol,
             name: name,
             type: orderType,
@@ -176,7 +177,12 @@ struct ImportOrderView: View {
             price: priceDouble
         )
 
-        // 显示导入成功提示
+        // 显示导入结果提示
+        if result.imported > 0 {
+            successMessage = "成功导入 \(result.imported) 个委托单"
+        } else {
+            successMessage = "该委托单已存在，无需重复录入"
+        }
         showSuccessAlert = true
     }
 }

@@ -29,7 +29,8 @@ struct UnifiedMeView: View {
     @State private var showPrivacyPolicy = false
     @State private var showFreeMembership = false
     @State private var showShareSheet = false
-    @State private var showingLoginSheet = false
+    @State private var isDeletingAccount = false
+    @Binding var showingLoginSheet: Bool
     let onLogout: () -> Void
 
     enum NotificationFilter: String, CaseIterable {
@@ -112,24 +113,32 @@ struct UnifiedMeView: View {
 
     /// 退出登录
     private func performLogout() {
-        authService.logout()
+        // 直接清除本地数据
+        StorageService.shared.clearAllAuthData()
+        authService.currentUser = nil
         StorageService.shared.disconnect()
         OpenClawService.shared.reset()
-        onLogout()
+        tradingService.reset()
     }
 
     /// 注销账号
     private func performDeleteAccount() {
-        authService.logout()
-        StorageService.shared.deleteAccount()
-        OpenClawService.shared.reset()
-        // 清除 Keychain 中的配对数据
-        PairingService.shared.deletePairingKey()
+        isDeletingAccount = true
+        Task {
+            await authService.logout()
+            StorageService.shared.deleteAccount()
+            OpenClawService.shared.reset()
+            PairingService.shared.deletePairingKey()
+            isDeletingAccount = false
+            onLogout()
+        }
     }
 
     /// 给App打分
     private func rateApp() {
-        if let url = URL(string: "https://apps.apple.com/app/idXXXXXXXXX?action=write-review") {
+        // TODO: 替换为真实的 App Store App ID
+        let appId = "XXXXXXXXXX" // 替换为实际的 App Store App ID
+        if let url = URL(string: "https://apps.apple.com/app/id\(appId)?action=write-review") {
             UIApplication.shared.open(url)
         }
     }

@@ -30,7 +30,12 @@ class OpenClawService: ObservableObject {
     private var _connectionTask: Task<Void, Never>?
 
     private init() {
-        // 如果有保存的配置，则自动连接
+        // 不要在init中直接调用异步操作
+        // 改为在App启动时显式调用或在view中触发
+    }
+
+    /// 初始化并尝试恢复连接（应在App启动时调用）
+    func initializeAndConnect() {
         if !StorageService.shared.apiBaseURL.isEmpty && StorageService.shared.isConnected {
             triggerConnect()
         }

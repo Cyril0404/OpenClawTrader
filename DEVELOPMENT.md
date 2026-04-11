@@ -145,25 +145,30 @@
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 独立App，不依赖OpenClaw
-
-**原方案（废弃）：** App连接用户OpenClaw Gateway → AI通过用户Gateway走
-**新方案（采用）：** 独立App → AI由我们提供 → 用户零门槛
-
-**理由：**
-- 目标用户是散户，不会安装OpenClaw
-- 地推人员无法一个个教用户安装
-- AI质量我们控制
-- 用户零门槛使用
-
-### 3.3 双通道设计（未来可选）
+### 3.2 双通道设计（已实现）
 
 | 通道 | AI来源 | 费用 | 用户要求 |
 |------|--------|------|---------|
 | 默认通道 | MiniMax（我们提供） | 我们承担 | 零门槛 |
-| 高级通道 | 用户自己的API Key | 用户自付 | 需配置 |
+| OpenClaw通道 | 用户自己的OpenClaw Gateway | 用户自付 | 需配置连接 |
 
-MVP版本只做默认通道，高级通道v2.0再考虑。
+**架构说明：**
+- 默认通道：用户零门槛使用，由我们提供AI服务
+- OpenClaw通道：用户可连接自己的OpenClaw Gateway，使用自己的模型，不消耗我们的API配额
+
+### 3.3 OpenClaw连接功能
+
+**功能入口：** 「我的」→「添加 OpenClaw」
+
+**连接方式：**
+1. 扫码配对 - 使用OpenClaw桌面端扫描二维码
+2. 手动配对码 - 输入6位配对码
+3. API地址配置 - 用户可自定义API地址
+
+**连接后功能：**
+- 使用用户自己的OpenClaw模型进行AI对话
+- 不消耗我们的API配额
+- 支持WebSocket实时通信
 
 ---
 
@@ -203,9 +208,11 @@ let isValid = fundsAccount.matches(regex: pattern)
 ### 5.1 用户操作流程
 
 ```
-用户上传券商截图（持仓/交割单）
+用户上传券商截图（委托单/交割单/持仓）
     ↓
-腾讯云OCR识别（调用API）
+MiniMax视觉理解API识别（端到端，图片→结构化JSON）
+    ↓
+AI自动判断截图类型（委托单/交割单/持仓）
     ↓
 展示识别结果（结构化数据列表）
     ↓
@@ -271,7 +278,7 @@ let isValid = fundsAccount.matches(regex: pattern)
 |------|------|
 | iOS App | SwiftUI + UIKit |
 | AI服务 | MiniMax API（调用方，我们出token） |
-| OCR服务 | 腾讯云OCR API |
+| OCR服务 | MiniMax 视觉理解 API（端到端识别） |
 | 后端 | Node.js + Express（轻量） |
 | 数据库 | SQLite（本地）+ 云端备份 |
 | 架构模式 | 独立App，不依赖OpenClaw |
@@ -280,7 +287,7 @@ let isValid = fundsAccount.matches(regex: pattern)
 
 **App绝对不可持有API Key**：
 - MiniMax Token → 放在后端，App不存
-- OCR API Key → 放在后端，App不存
+- MiniMax API Key → 放在后端，App不存
 - 资金账号数据 → 本地SQLite，不传第三方
 
 ### 7.3 限流设计
@@ -300,6 +307,11 @@ let isValid = fundsAccount.matches(regex: pattern)
 ---
 
 ## 8. 开发优先级
+
+> ⚠️ **功能状态说明（2026-04-07）**
+> - 技术分析（K线/MA/MACD/RSI等）：**代码已实现，UI已隐藏**，待API稳定后开放
+> - 舆情数据：**代码已实现，UI已隐藏**，待API对接后开放
+> - 其他核心功能：**已完整实现**
 
 ### P0（必须做，MVP完成前）
 
@@ -373,7 +385,7 @@ TENCENT_CLOUD_SECRET_KEY=your_key
 | 模块 | 职责 | 文件 |
 |------|------|------|
 | AccountVerification | 资金账号格式验证 | `Services/AccountVerification.swift` |
-| OCRService | 腾讯云OCR调用 | `Services/OCRService.swift` |
+| VisionRecognitionService | MiniMax视觉理解调用 | `Services/VisionRecognitionService.swift` |
 | TradeImportView | 截图导入+确认UI | `Features/TradeImport/TradeImportView.swift` |
 | AIReportService | AI报告生成调用 | `Services/AIReportService.swift` |
 | ReportView | 报告展示 | `Features/Report/ReportView.swift` |

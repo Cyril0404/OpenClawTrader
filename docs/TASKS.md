@@ -7,13 +7,13 @@
 
 ## 🔴 P0 — 核心流程断了（必须先修）
 
-| # | 问题 | 文件 | 说明 | 优先级 |
-|---|------|------|------|--------|
-| 1 | **登录是假的** | `ContentView.swift:20` | `isLoggedIn = true` 硬编码，跳过登录直接进主页 | P0 |
-| 2 | **「行情」Tab 没内容** | `ContentView.swift` case 1 | 指向 `TradingDashboardView`，但实际没有独立文件，编译能过是因为 `PortfolioView.swift` 里定义了同名视图 | P0 |
-| 3 | **持仓数据是假的** | `PortfolioView.swift` | 没有真实股票数据，都是 mock | P0 |
-| 4 | **没有真实数据 API** | `StockDataService.swift` | 所有方法都有 `TODO: 调用真实API` | P0 |
-| 5 | **订单导入是假的** | `ImportOrderView.swift` | 表单填完不知道发到哪里 | P0 |
+| # | 问题 | 文件 | 说明 | 优先级 | 状态 |
+|---|------|------|------|--------|------|
+| 1 | **登录是假的** | `ContentView.swift:20` | `isLoggedIn = true` 硬编码，跳过登录直接进主页 | P0 | ✅ 已修复 |
+| 2 | **「行情」Tab 没内容** | `ContentView.swift` case 1 | 指向 `TradingDashboardView`，但实际没有独立文件，编译能过是因为 `PortfolioView.swift` 里定义了同名视图 | P0 | ✅ 已接入API |
+| 3 | **持仓数据是假的** | `PortfolioView.swift` | 没有真实股票数据，都是 mock | P0 | ✅ 已接入API |
+| 4 | **没有真实数据 API** | `StockDataService.swift` | 所有方法都有 `TODO: 调用真实API` | P0 | ✅ 已接入 stock-website API |
+| 5 | **订单导入是假的** | `ImportOrderView.swift` | 表单填完不知道发到哪里 | P0 | ✅ 已添加成功确认弹窗 |
 
 ---
 
@@ -51,6 +51,8 @@
 | 助理事件 UI 刷新 | `8786064` | `onChange` 替代 `onReceive` |
 | SettingsView（API Key） | - | 已删除，App 用 Gateway 不需要 |
 | 编译验证 | `28321b7` | BUILD SUCCEEDED |
+| P0 修复 - 登录/股票数据/订单导入 | `3d76566` | ContentView观察AuthService + stock-website API接入 + 订单成功弹窗 |
+| P0 编译验证 (2026-04-03) | - | BUILD SUCCEEDED |
 
 ---
 

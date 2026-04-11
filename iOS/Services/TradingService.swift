@@ -15,6 +15,9 @@ import Foundation
 class TradingService: ObservableObject {
     static let shared = TradingService()
 
+    /// 默认平均持仓天数（当无交易记录时使用）
+    private static let defaultAverageHoldingDays: Double = 5.0
+
     @Published var portfolio: PortfolioSummary?
     @Published var tradingStyle: TradingStyle?
     @Published var riskAssessment: RiskAssessment?
@@ -47,7 +50,7 @@ class TradingService: ObservableObject {
             shares: shares,
             averageCost: averageCost,
             currentPrice: currentPrice,
-            currency: "USD",
+            currency: "CNY",
             dayChange: 0,
             dayChangePercent: 0
         )
@@ -113,11 +116,27 @@ class TradingService: ObservableObject {
 
     // MARK: - Orders (委托单)
 
-    /// 导入委托单
-    func importOrder(symbol: String, name: String, type: Order.OrderType, side: Order.OrderSide, shares: Int, price: Double) {
+    /// 导入委托单（返回是否成功导入，重复订单会跳过）
+    /// - Returns: (是否成功, 重复数量)
+    func importOrder(symbol: String, name: String, type: Order.OrderType, side: Order.OrderSide, shares: Int, price: Double) -> (imported: Int, duplicates: Int) {
+        let upperSymbol = symbol.uppercased()
+
+        // 检查是否有完全相同的活跃委托单（同一标的、同方向、同数量、同价格）
+        let isDuplicate = orders.contains { order in
+            order.symbol == upperSymbol &&
+            order.side == side &&
+            order.shares == shares &&
+            order.price == price &&
+            order.isActive
+        }
+
+        if isDuplicate {
+            return (0, 1)
+        }
+
         let order = Order(
             id: "order_\(UUID().uuidString.prefix(8))",
-            symbol: symbol.uppercased(),
+            symbol: upperSymbol,
             name: name,
             type: type,
             side: side,
@@ -129,6 +148,8 @@ class TradingService: ObservableObject {
             avgFillPrice: 0
         )
         orders.append(order)
+        return (1, 0)
+    }
     }
 
     /// 取消委托单
@@ -201,9 +222,32 @@ class TradingService: ObservableObject {
     }
 
     private func calculateAverageHoldingPeriod() -> Double {
-        // 计算平均持仓天数（简化版本）
-        guard !trades.isEmpty else { return 5.0 }
-        return 5.0 // 默认5天
+        // 计算平均持仓天数（基于完整买卖周期）
+        // TradingService使用的是TradingAnalysis.swift中的Trade结构体
+        let buyTrades = trades.filter { $0.type == .buy }.sorted { $0.timestamp < $1.timestamp }
+        let sellTrades = trades.filter { $0.type == .sell }.sorted { $0.timestamp < $1.timestamp }
+
+        guard !buyTrades.isEmpty && !sellTrades.isEmpty else { return Self.defaultAverageHoldingDays }
+
+        var totalDays = 0
+        var completedCycles = 0
+
+        for sell in sellTrades {
+            // 找到匹配的买入
+            let matchingBuys = buyTrades.filter { buy in
+                buy.symbol == sell.symbol && buy.timestamp < sell.timestamp
+            }
+
+            if let lastBuy = matchingBuys.last {
+                let days = Calendar.current.dateComponents([.day], from: lastBuy.timestamp, to: sell.timestamp).day ?? 0
+                if days > 0 {
+                    totalDays += days
+                    completedCycles += 1
+                }
+            }
+        }
+
+        return completedCycles > 0 ? Double(totalDays) / Double(completedCycles) : Self.defaultAverageHoldingDays
     }
 
     // MARK: - Reset

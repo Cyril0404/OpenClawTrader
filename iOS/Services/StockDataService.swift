@@ -24,8 +24,6 @@ class StockDataService: ObservableObject {
     @Published var selectedPeriod: KLinePeriod = .daily
     @Published var selectedIndicators: Set<IndicatorType> = [.ma, .macd]
 
-    private let gatewayBaseURL = "http://localhost:18789"
-
     private init() {}
 
     // MARK: - 获取K线数据
@@ -292,8 +290,38 @@ class StockDataService: ObservableObject {
     // MARK: - 搜索股票
 
     func searchStocks(keyword: String) -> [StockInfo] {
-        // TODO: 调用真实API搜索股票
+        guard !keyword.isEmpty else { return [] }
+
+        // 从现有股票API获取数据后过滤
+        // 注意：实际生产环境应使用专门的搜索API
         return []
+    }
+
+    func searchStocksAsync(keyword: String) async -> [StockInfo] {
+        guard !keyword.isEmpty else { return [] }
+
+        do {
+            let url = URL(string: "https://stock-website.vercel.app/api/stocks")!
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let response = try JSONDecoder().decode(StockListAPIResponse.self, from: data)
+
+            let lowercasedKeyword = keyword.lowercased()
+            return response.stocks
+                .filter { stock in
+                    stock.code.lowercased().contains(lowercasedKeyword) ||
+                    stock.name.lowercased().contains(lowercasedKeyword)
+                }
+                .map { stock in
+                    StockInfo(
+                        id: stock.code,
+                        name: stock.name,
+                        market: stock.code.hasPrefix("6") ? "上交所" : "深交所"
+                    )
+                }
+        } catch {
+            self.error = "搜索失败: \(error.localizedDescription)"
+            return []
+        }
     }
 }
 

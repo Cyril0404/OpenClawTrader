@@ -51,6 +51,7 @@ actor APIClient {
         request.httpMethod = method.rawValue
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30
 
         if let body = body {
             let encoder = JSONEncoder()

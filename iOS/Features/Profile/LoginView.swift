@@ -13,12 +13,16 @@ import SwiftUI
 
 struct LoginView: View {
     @Environment(\.appColors) private var colors
+    @StateObject private var authService = AuthService.shared
     @State private var phone = ""
     @State private var code = ""
     @State private var countdown = 0
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var rememberMe = true
+    @State private var isRegisterMode = false
+    @State private var password = ""
+    @State private var confirmPassword = ""
     let onLoginSuccess: () -> Void
 
     var body: some View {
@@ -36,6 +40,9 @@ struct LoginView: View {
 
                     // Login Button
                     loginButton
+
+                    // Toggle Mode
+                    toggleModeSection
                 }
                 .padding(.horizontal, AppSpacing.lg)
                 .padding(.top, AppSpacing.xl)
@@ -59,7 +66,7 @@ struct LoginView: View {
                 .font(.system(size: 80, weight: .light))
                 .foregroundColor(colors.accent)
 
-            Text("OpenClaw Trader")
+            Text(isRegisterMode ? "注册账号" : "登录")
                 .font(AppFonts.largeTitle())
                 .foregroundColor(colors.textPrimary)
 
@@ -98,28 +105,72 @@ struct LoginView: View {
                 }
             }
 
-            // Verification Code
-            VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                Text("验证码")
-                    .font(AppFonts.caption())
-                    .foregroundColor(colors.textSecondary)
+            if isRegisterMode {
+                // Password (for register mode)
+                VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                    Text("密码")
+                        .font(AppFonts.caption())
+                        .foregroundColor(colors.textSecondary)
 
-                HStack(spacing: AppSpacing.sm) {
-                    TextField("请输入验证码", text: $code)
+                    SecureField("请输入密码（8位含大小写和数字）", text: $password)
                         .font(AppFonts.body())
                         .foregroundColor(colors.textPrimary)
-                        .keyboardType(.numberPad)
                         .padding(AppSpacing.sm)
                         .background(colors.backgroundSecondary)
                         .cornerRadius(AppRadius.small)
+                }
 
-                    Button(action: sendCode) {
-                        Text(countdown > 0 ? "\(countdown)s" : "获取验证码")
-                            .font(AppFonts.caption())
-                            .foregroundColor(countdown > 0 ? colors.textTertiary : colors.accent)
-                            .padding(.horizontal, AppSpacing.sm)
+                // Confirm Password
+                VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                    Text("确认密码")
+                        .font(AppFonts.caption())
+                        .foregroundColor(colors.textSecondary)
+
+                    SecureField("请再次输入密码", text: $confirmPassword)
+                        .font(AppFonts.body())
+                        .foregroundColor(colors.textPrimary)
+                        .padding(AppSpacing.sm)
+                        .background(colors.backgroundSecondary)
+                        .cornerRadius(AppRadius.small)
+                }
+
+                // Verification Code
+                VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                    Text("验证码")
+                        .font(AppFonts.caption())
+                        .foregroundColor(colors.textSecondary)
+
+                    HStack(spacing: AppSpacing.sm) {
+                        TextField("请输入验证码", text: $code)
+                            .font(AppFonts.body())
+                            .foregroundColor(colors.textPrimary)
+                            .keyboardType(.numberPad)
+                            .padding(AppSpacing.sm)
+                            .background(colors.backgroundSecondary)
+                            .cornerRadius(AppRadius.small)
+
+                        Button(action: sendCode) {
+                            Text(countdown > 0 ? "\(countdown)s" : "获取验证码")
+                                .font(AppFonts.caption())
+                                .foregroundColor(countdown > 0 ? colors.textTertiary : colors.accent)
+                                .padding(.horizontal, AppSpacing.sm)
+                        }
+                        .disabled(countdown > 0)
                     }
-                    .disabled(countdown > 0)
+                }
+            } else {
+                // Password (for login mode)
+                VStack(alignment: .leading, spacing: AppSpacing.xs) {
+                    Text("密码")
+                        .font(AppFonts.caption())
+                        .foregroundColor(colors.textSecondary)
+
+                    SecureField("请输入密码", text: $password)
+                        .font(AppFonts.body())
+                        .foregroundColor(colors.textPrimary)
+                        .padding(AppSpacing.sm)
+                        .background(colors.backgroundSecondary)
+                        .cornerRadius(AppRadius.small)
                 }
             }
         }
@@ -143,14 +194,14 @@ struct LoginView: View {
     // MARK: - Login Button
 
     private var loginButton: some View {
-        Button(action: login) {
+        Button(action: isRegisterMode ? register : login) {
             HStack {
                 if isLoading {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: colors.background))
                         .scaleEffect(0.8)
                 } else {
-                    Text("登录")
+                    Text(isRegisterMode ? "注册" : "登录")
                         .font(AppFonts.body())
                         .fontWeight(.semibold)
                 }
@@ -164,13 +215,43 @@ struct LoginView: View {
         .disabled(!isFormValid || isLoading)
     }
 
+    // MARK: - Toggle Mode
+
+    private var toggleModeSection: some View {
+        Button(action: { isRegisterMode.toggle(); errorMessage = nil }) {
+            Text(isRegisterMode ? "已有账号？登录" : "没有账号？注册")
+                .font(AppFonts.caption())
+                .foregroundColor(colors.accent)
+        }
+    }
+
     // MARK: - Helpers
 
     private var isFormValid: Bool {
-        phone.count >= 11 && code.count == 6
+        if phone.count < 11 {
+            return false
+        }
+        if password.count < 8 {
+            return false
+        }
+        if isRegisterMode {
+            return code.count == 6 && password == confirmPassword
+        }
+        return true
     }
 
     private func sendCode() {
+        Task {
+            let success = await authService.sendRegisterCode(phone: phone)
+            if success {
+                startCountdown()
+            } else {
+                errorMessage = authService.error ?? "发送验证码失败"
+            }
+        }
+    }
+
+    private func startCountdown() {
         countdown = 60
         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
             countdown -= 1
@@ -181,14 +262,40 @@ struct LoginView: View {
     }
 
     private func login() {
-        isLoading = true
-        errorMessage = nil
+        Task {
+            isLoading = true
+            errorMessage = nil
 
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            let success = await authService.login(phone: phone, password: password)
+
             isLoading = false
-            // Login success - notify parent to show main app
-            onLoginSuccess()
+
+            if success {
+                onLoginSuccess()
+            } else {
+                errorMessage = authService.error ?? "登录失败"
+            }
+        }
+    }
+
+    private func register() {
+        Task {
+            isLoading = true
+            errorMessage = nil
+
+            let success = await authService.verifyAndRegister(
+                phone: phone,
+                code: code,
+                password: password
+            )
+
+            isLoading = false
+
+            if success {
+                onLoginSuccess()
+            } else {
+                errorMessage = authService.error ?? "注册失败"
+            }
         }
     }
 }

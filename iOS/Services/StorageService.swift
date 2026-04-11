@@ -20,6 +20,7 @@ class StorageService {
         static let apiBaseURL = "api_base_url"
         static let apiKey = "api_key"
         static let relayURL = "relay_url"
+        static let authToken = "auth_token"
         static let isConnected = "is_connected"
         static let selectedWorkspaceId = "selected_workspace_id"
         static let notificationsEnabled = "notifications_enabled"
@@ -58,6 +59,16 @@ class StorageService {
         }
         set {
             userDefaults.set(newValue, forKey: Keys.relayURL)
+        }
+    }
+
+    /// 妙股AI JWT认证令牌
+    var authToken: String {
+        get {
+            return userDefaults.string(forKey: Keys.authToken) ?? ""
+        }
+        set {
+            userDefaults.set(newValue, forKey: Keys.authToken)
         }
     }
 
@@ -135,14 +146,18 @@ class StorageService {
         relayURL = ""
         isConnected = false
         selectedWorkspaceId = nil
+        authToken = ""  // 清除认证令牌
     }
 
-    /// 注销账号 - 清除所有数据
+    /// 注销账号 - 清除认证相关数据
     func deleteAccount() {
-        // 清除所有 UserDefaults 数据
-        let domain = Bundle.main.bundleIdentifier!
-        userDefaults.removePersistentDomain(forName: domain)
-        userDefaults.synchronize()
+        // 只清除认证相关数据，保留用户设置
+        authToken = ""
+        clearUser()
+        watchlist = []
+        notificationsEnabled = true
+        priceAlertEnabled = true
+        tradeNotificationsEnabled = true
     }
 
     // MARK: - User
@@ -168,5 +183,11 @@ class StorageService {
     /// 清除用户信息
     func clearUser() {
         userDefaults.removeObject(forKey: Keys.currentUser)
+    }
+
+    /// 清除所有认证相关数据（调试用）
+    func clearAllAuthData() {
+        authToken = ""
+        clearUser()
     }
 }

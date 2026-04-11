@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "true",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n# OpenClawTrader Session Start Hook\n# 加载上次会话的股票数据缓存\n\necho 'OpenClawTrader: Checking for cached stock data...'\n\nCACHE_DIR='$HOME/openclaw/OpenClawTrader/.claude/memory'\nSESSION_FILE=\"$CACHE_DIR/sessions/$(date '+%Y-%m-%d')-session.md\"\n\nif [ -f \"$SESSION_FILE\" ]; then\n  echo \"OpenClawTrader: Found session file from $(date -r \"$SESSION_FILE\" '+%Y-%m-%d %H:%M')\"\nfi"
+          }
+        ],
+        "description": "Load cached stock data on session start"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "true",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n# OpenClawTrader Session End Hook\n# 保存当前会话状态和股票数据缓存\n\nCACHE_DIR='$HOME/openclaw/OpenClawTrader/.claude/memory'\nmkdir -p \"$CACHE_DIR/sessions\"\n\nSESSION_FILE=\"$CACHE_DIR/sessions/$(date '+%Y-%m-%d')-session.md\"\n\ncat > \"$SESSION_FILE\" << 'EOF'\n# Session: DATE_PLACEHOLDER\n\n## Current State\n[Auto-saved session state]\n\n## Last Updated\nTIME_PLACEHOLDER\nEOF\n\nsed -i \"s/DATE_PLACEHOLDER/$(date '+%Y-%m-%d')/g\" \"$SESSION_FILE\"\nsed -i \"s/TIME_PLACEHOLDER/$(date '+%H:%M:%S')/g\" \"$SESSION_FILE\"\n\necho \"OpenClawTrader: Session saved to $SESSION_FILE\""
+          }
+        ],
+        "description": "Save session state on stop"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"curl.*api\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n# Log API calls with sanitized output\n\nLOG_FILE='$HOME/openclaw/OpenClawTrader/.claude/memory/api-call.log'\nmkdir -p \"$(dirname \"$LOG_FILE\")\"\n\n# Extract and sanitize command for logging\necho \"[$(date '+%Y-%m-%d %H:%M:%S')] API Call attempted\" >> \"$LOG_FILE\""
+          }
+        ],
+        "description": "Log API calls for debugging"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"npm.*build|swift.*build|xcodebuild\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#!/bin/bash\n# Post-build check for errors\n\nBUILD_OUTPUT=$(cat /dev/stdin 2>/dev/null || echo '')\n\nif echo \"$BUILD_OUTPUT\" | grep -qi \"error:\"; then\n  echo \"⚠️  Build completed with errors - review before proceeding\"\nfi"
+          }
+        ],
+        "description": "Check build output for errors"
+      }
+    ]
+  }
+}

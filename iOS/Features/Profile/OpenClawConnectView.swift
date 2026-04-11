@@ -492,7 +492,6 @@ https://github.com/Cyril0404/ClawRed
                     isPaired = false
                 }
                 isVerifying = false
-                print("[DEBUG] isVerifying = false, isPaired = \(isPaired)")
             } else {
                 print("[DEBUG] verify failed: \(response.error ?? "unknown")")
                 errorMessage = response.error ?? "配对码无效"
